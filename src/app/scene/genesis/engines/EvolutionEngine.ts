@@ -5,50 +5,91 @@
  * ==========================================================
  */
 
+import type { GenesisState } from "../state/GenesisState";
+
 import { GenesisMode } from "../state";
 import { GenesisEra } from "../timeline";
-
-export interface EvolutionState {
-
-  age: number;
-
-  evolution: number;
-
-  energy: number;
-
-  matter: number;
-
-  life: number;
-
-  intelligence: number;
-
-  consciousness: number;
-
-  mode: GenesisMode;
-
-  era: GenesisEra;
-
-}
 
 export default class EvolutionEngine {
 
   update(
 
-    state: EvolutionState,
+    state: GenesisState,
 
     delta: number,
 
   ): void {
 
-    state.age += delta;
+    /**
+     * Complexity
+     */
 
-    state.evolution += delta * 0.05;
+    const complexity =
+
+      state.learning +
+
+      state.intelligence +
+
+      state.awareness +
+
+      state.life +
+
+      state.civilizations +
+
+      state.simulation +
+
+      state.teaching +
+
+      state.reality +
+
+      state.existence;
+
+    /**
+     * Living Clock
+     *
+     * Starts extremely fast.
+     * Gradually slows as Lélu matures.
+     */
+
+    const simulationSpeed =
+
+      60 /
+
+      Math.sqrt(
+
+        complexity + 1,
+
+      );
+
+    const dt =
+
+      delta *
+
+      simulationSpeed *
+
+      state.speed;
+
+    /**
+     * Time
+     */
+
+    state.age += dt;
+
+    state.evolution +=
+
+      dt * 0.05;
+
+    /**
+     * Evolution
+     */
 
     state.energy = Math.min(
 
       1,
 
-      state.energy + delta * 0.01,
+      state.energy +
+
+      dt * 0.01,
 
     );
 
@@ -56,7 +97,13 @@ export default class EvolutionEngine {
 
       1,
 
-      state.matter + state.energy * delta * 0.003,
+      state.matter +
+
+      state.energy *
+
+      dt *
+
+      0.003,
 
     );
 
@@ -64,7 +111,13 @@ export default class EvolutionEngine {
 
       1,
 
-      state.life + state.matter * delta * 0.001,
+      state.life +
+
+      state.matter *
+
+      dt *
+
+      0.001,
 
     );
 
@@ -74,21 +127,25 @@ export default class EvolutionEngine {
 
       state.intelligence +
 
-        state.life * delta * 0.0005,
+      state.life *
+
+      dt *
+
+      0.0005,
 
     );
 
-    state.consciousness = Math.min(
+    state.awareness = Math.min(
 
       1,
 
-      state.consciousness +
+      state.awareness +
 
-        state.intelligence *
+      state.intelligence *
 
-          delta *
+      dt *
 
-          0.0002,
+      0.0002,
 
     );
 
@@ -100,7 +157,7 @@ export default class EvolutionEngine {
 
   private updateEra(
 
-    state: EvolutionState,
+    state: GenesisState,
 
   ): void {
 
@@ -110,35 +167,51 @@ export default class EvolutionEngine {
 
       state.era = GenesisEra.VOID;
 
-    } else if (e < 20) {
+    }
+
+    else if (e < 20) {
 
       state.era = GenesisEra.QUANTUM;
 
-    } else if (e < 40) {
+    }
+
+    else if (e < 40) {
 
       state.era = GenesisEra.ENERGY;
 
-    } else if (e < 80) {
+    }
+
+    else if (e < 80) {
 
       state.era = GenesisEra.MATTER;
 
-    } else if (e < 120) {
+    }
+
+    else if (e < 120) {
 
       state.era = GenesisEra.STARS;
 
-    } else if (e < 180) {
+    }
+
+    else if (e < 180) {
 
       state.era = GenesisEra.GALAXIES;
 
-    } else if (e < 260) {
+    }
+
+    else if (e < 260) {
 
       state.era = GenesisEra.PLANETS;
 
-    } else if (e < 340) {
+    }
+
+    else if (e < 340) {
 
       state.era = GenesisEra.LIFE;
 
-    } else {
+    }
+
+    else {
 
       state.era = GenesisEra.CIVILIZATIONS;
 
@@ -148,49 +221,75 @@ export default class EvolutionEngine {
 
   private updateMode(
 
-    state: EvolutionState,
+    state: GenesisState,
 
   ): void {
 
-    if (state.consciousness > 0.95) {
+    if (
 
-      state.mode = GenesisMode.TRANSCENDING;
-
-    } else if (
-
-      state.consciousness > 0.75
+      state.awareness > 0.95
 
     ) {
 
-      state.mode = GenesisMode.EVOLVING;
+      state.mode =
 
-    } else if (
+        GenesisMode.TRANSCENDING;
+
+    }
+
+    else if (
+
+      state.awareness > 0.75
+
+    ) {
+
+      state.mode =
+
+        GenesisMode.EVOLVING;
+
+    }
+
+    else if (
 
       state.intelligence > 0.60
 
     ) {
 
-      state.mode = GenesisMode.CREATING;
+      state.mode =
 
-    } else if (
+        GenesisMode.CREATING;
+
+    }
+
+    else if (
 
       state.life > 0.40
 
     ) {
 
-      state.mode = GenesisMode.LEARNING;
+      state.mode =
 
-    } else if (
+        GenesisMode.LEARNING;
+
+    }
+
+    else if (
 
       state.energy > 0.15
 
     ) {
 
-      state.mode = GenesisMode.FORMING;
+      state.mode =
 
-    } else {
+        GenesisMode.FORMING;
 
-      state.mode = GenesisMode.CHAOS;
+    }
+
+    else {
+
+      state.mode =
+
+        GenesisMode.CHAOS;
 
     }
 

@@ -1,62 +1,19 @@
-/**
- * ==========================================================
- * LÉLU
- * AI CORE
- * ==========================================================
- */
-
-export type AIModule = {
-
-  id: string;
-
-  execute(
-    input: string,
-  ): Promise<string>;
-
-};
+import AIClient from "./AIClient";
+import AIRouter from "./AIRouter";
 
 export default class AICore {
 
-  private readonly modules =
-    new Map<string, AIModule>();
+  readonly router =
+    new AIRouter();
 
-  register(
-    module: AIModule,
-  ): void {
+  readonly client =
+    new AIClient();
 
-    this.modules.set(
-      module.id,
-      module,
-    );
-
-  }
-
-  get(
-    id: string,
-  ): AIModule | undefined {
-
-    return this.modules.get(id);
-
-  }
-
-  async execute(
-
-    id: string,
-
+  async process(
     input: string,
-
   ): Promise<string> {
 
-    const module =
-      this.modules.get(id);
-
-    if (!module) {
-
-      return `Module "${id}" not found.`;
-
-    }
-
-    return module.execute(
+    return await this.client.chat(
       input,
     );
 

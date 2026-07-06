@@ -2,6 +2,8 @@
  * ==========================================================
  * LÉLUVERSE
  * GENESIS RENDERER
+ *
+ * Renders every active Genesis system.
  * ==========================================================
  */
 
@@ -21,21 +23,7 @@ export default function GenesisRenderer() {
 
     <>
 
-      {/* Debug Sphere */}
-
-      <mesh>
-
-        <sphereGeometry args={[1, 32, 32]} />
-
-        <meshStandardMaterial
-          color="hotpink"
-          emissive="hotpink"
-          emissiveIntensity={0.5}
-        />
-
-      </mesh>
-
-      {/* Genesis Systems */}
+      {/* Foundation */}
 
       <ChaosSystem />
 
@@ -45,6 +33,8 @@ export default function GenesisRenderer() {
 
       <RealitySystem />
 
+      {/* Visual Systems */}
+
       <ParticleSystem />
 
       <LightningSystem />
@@ -52,6 +42,8 @@ export default function GenesisRenderer() {
       <NeuronSystem />
 
       <GalaxySystem />
+
+      {/* Core */}
 
       <CoreSystem />
 

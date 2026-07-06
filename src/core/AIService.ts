@@ -1,28 +1,28 @@
 /**
  * ==========================================================
  * LÉLU
- * AI MANAGER
+ * AI SERVICE
  * ==========================================================
  */
 
-import AIRuntime from "./AIRuntime";
+import AIBootstrap from "./AIBootstrap";
 
-export default class AIManager {
+export default class AIService {
 
-  readonly runtime =
-    new AIRuntime();
+  readonly bootstrap =
+    new AIBootstrap();
 
   async initialize(): Promise<void> {
 
-    await this.runtime.initialize();
+    await this.bootstrap.boot();
 
   }
 
-  async process(
+  async send(
     input: string,
   ): Promise<string> {
 
-    return await this.runtime.process(
+    return await this.bootstrap.process(
       input,
     );
 

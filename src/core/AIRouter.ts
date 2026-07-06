@@ -5,21 +5,13 @@
  * ==========================================================
  */
 
-export enum AIIntent {
-
-  CHAT = "chat",
-
-  ENGINEERING = "engineering",
-
-  MEMORY = "memory",
-
-  GENESIS = "genesis",
-
-  VOICE = "voice",
-
-  SEARCH = "search",
-
-}
+type AIIntent =
+  | "chat"
+  | "engineering"
+  | "memory"
+  | "genesis"
+  | "voice"
+  | "search";
 
 export default class AIRouter {
 
@@ -27,46 +19,34 @@ export default class AIRouter {
     input: string,
   ): AIIntent {
 
-    const text =
-      input.toLowerCase();
+    const text = input.toLowerCase();
 
     if (
-
       text.includes("wire") ||
-
       text.includes("circuit") ||
-
       text.includes("voltage") ||
-
       text.includes("engineering")
-
     ) {
-
-      return AIIntent.ENGINEERING;
-
+      return "engineering";
     }
 
-    if (
-
-      text.includes("remember")
-
-    ) {
-
-      return AIIntent.MEMORY;
-
+    if (text.includes("remember")) {
+      return "memory";
     }
 
-    if (
-
-      text.includes("genesis")
-
-    ) {
-
-      return AIIntent.GENESIS;
-
+    if (text.includes("genesis")) {
+      return "genesis";
     }
 
-    return AIIntent.CHAT;
+    if (text.includes("voice")) {
+      return "voice";
+    }
+
+    if (text.includes("search")) {
+      return "search";
+    }
+
+    return "chat";
 
   }
 

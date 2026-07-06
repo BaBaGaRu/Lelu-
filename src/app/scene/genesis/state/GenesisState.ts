@@ -5,6 +5,8 @@
  * ==========================================================
  */
 
+import { GenesisEra } from "../timeline";
+
 export const GenesisMode = {
 
   DORMANT: "DORMANT",
@@ -84,6 +86,8 @@ export interface GenesisState {
 
   mode: GenesisMode;
 
+  era: GenesisEra;
+
 }
 
 export const defaultGenesisState: GenesisState = {
@@ -133,5 +137,7 @@ export const defaultGenesisState: GenesisState = {
   paused: false,
 
   mode: GenesisMode.DORMANT,
+
+  era: GenesisEra.VOID,
 
 };
