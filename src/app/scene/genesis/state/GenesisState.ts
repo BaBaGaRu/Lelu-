@@ -97,6 +97,8 @@ export interface GenesisState {
 
   consciousness: number;
 
+  era?: string;
+
   dimension: 1 | 2 | 3 | 4 | 5;
 
   speed: number;
@@ -148,6 +150,8 @@ export const defaultGenesisState: GenesisState = {
   reality: 0,
 
   consciousness: 0,
+
+  era: "VOID",
 
   dimension: 1,
 

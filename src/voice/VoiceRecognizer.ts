@@ -13,13 +13,6 @@ type SpeechRecognitionConstructor = new () => {
   stop(): void;
 };
 
-declare global {
-  interface Window {
-    SpeechRecognition?: SpeechRecognitionConstructor;
-    webkitSpeechRecognition?: SpeechRecognitionConstructor;
-  }
-}
-
 export default class VoiceRecognizer {
 
   private recognition?: InstanceType<SpeechRecognitionConstructor>;

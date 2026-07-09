@@ -8,7 +8,7 @@
  */
 
 import { useFrame } from "@react-three/fiber";
-import { useGenesis } from "../systems/GenesisCore";
+import { useGenesis } from "../GenesisCore";
 
 import {
   Group,

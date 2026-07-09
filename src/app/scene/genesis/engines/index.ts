@@ -71,6 +71,12 @@ export { default as MemoryEngine } from "./MemoryEngine";
 
 export { default as MemoryEvolutionEngine } from "./MemoryEvolutionEngine";
 
+export { default as InterfaceEngine } from "./InterfaceEngine";
+
+export { default as TeachingEngine } from "./TeachingEngine";
+
+export { default as TimeEngine } from "./TimeEngine";
+
 export { default as MemoryIndex } from "./MemoryIndex";
 
 export { default as NebulaEngine } from "./NebulaEngine";

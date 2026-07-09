@@ -5,14 +5,9 @@
  * ==========================================================
  */
 
-import AIConfig from "../AIConfig";
-import type AIAdapter from "./AIAdapter";
+import AIAdapter from "../AIAdapter";
 
-export default class GeminiAdapter
-implements AIAdapter {
-
-  readonly config =
-    new AIConfig();
+export default class GeminiAdapter extends AIAdapter {
 
   async chat(
     prompt: string,

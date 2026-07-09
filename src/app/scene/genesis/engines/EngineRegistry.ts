@@ -22,18 +22,31 @@ export interface GenesisEngine {
 
 }
 
+interface LegacyEngineLike {
+  update(
+    state: GenesisState,
+    delta: number,
+  ): void;
+}
+
 export default class EngineRegistry {
 
   private readonly engines =
     new Map<string, GenesisEngine>();
 
   register(
-    engine: GenesisEngine,
+    engine: GenesisEngine | LegacyEngineLike,
   ): void {
+    const normalized: GenesisEngine = {
+      id: "legacy-engine",
+      priority: 0,
+      enabled: true,
+      ...engine,
+    };
 
     this.engines.set(
-      engine.id,
-      engine,
+      normalized.id,
+      normalized,
     );
 
   }

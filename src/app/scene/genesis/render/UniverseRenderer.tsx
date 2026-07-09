@@ -20,11 +20,7 @@ import { useGenesis } from "../GenesisCore";
 
 export default function UniverseRenderer() {
 
-  const genesis =
-    useGenesis();
-
-  const g =
-    genesis.current;
+  useGenesis();
 
   return (
 

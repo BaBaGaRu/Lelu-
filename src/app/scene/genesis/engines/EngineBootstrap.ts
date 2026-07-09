@@ -55,9 +55,19 @@ export default class EngineBootstrap {
 
   ): void {
 
-    registry.register(new VoidEngine());
+    registry.register({
+      id: "void",
+      priority: 1,
+      enabled: true,
+      update: (state, delta) => new VoidEngine().update(state, delta),
+    });
 
-    registry.register(new QuantumEngine());
+    registry.register({
+      id: "quantum",
+      priority: 2,
+      enabled: true,
+      update: (state, delta) => new QuantumEngine().update(state, delta),
+    });
 
     registry.register(new ExpansionEngine());
 

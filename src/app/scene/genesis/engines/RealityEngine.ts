@@ -11,7 +11,7 @@ export default class RealityEngine {
 
   update(
     state: GenesisState,
-    delta: number,
+    _delta: number,
   ): void {
 
     if (state.paused) return;
@@ -20,7 +20,7 @@ export default class RealityEngine {
       1,
       state.reality +
       state.awareness *
-      delta *
+      _delta *
       0.00015,
     );
 

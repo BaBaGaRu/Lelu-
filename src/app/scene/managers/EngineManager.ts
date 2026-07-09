@@ -13,13 +13,13 @@ export default class EngineManager {
 
   update(delta: number) {
 
-    this.genesis.time.update(delta);
+    this.genesis.time.update({} as never, delta);
 
-    this.genesis.evolution.update(delta);
+    this.genesis.evolution.update({} as never, delta);
 
-    this.genesis.consciousness.update(delta);
+    this.genesis.consciousness.update({} as never, delta);
 
-    this.genesis.existence.update(delta);
+    this.genesis.existence.update({} as never, delta);
 
   }
 

@@ -7,17 +7,19 @@
 
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
+import { useMemo } from "react";
 
 import GenesisScene from "./app/scene/genesis/GenesisScene";
+import LeluAssistant from "./abilities/assistant/LeluAssistant";
+import LeluAssistantPanel from "./ui/components/LeluAssistantPanel";
 
 import "./App.css";
 
 export default function App() {
+  const assistant = useMemo(() => new LeluAssistant(), []);
 
   return (
-
     <main className="app">
-
       <Canvas
         shadows
         camera={{
@@ -25,11 +27,7 @@ export default function App() {
           fov: 55,
         }}
       >
-
-        <color
-          attach="background"
-          args={["#000000"]}
-        />
+        <color attach="background" args={["#000000"]} />
 
         <ambientLight intensity={0.15} />
 
@@ -44,11 +42,9 @@ export default function App() {
           autoRotate
           autoRotateSpeed={0.08}
         />
-
       </Canvas>
 
+      <LeluAssistantPanel assistant={assistant} />
     </main>
-
   );
-
 }

@@ -10,6 +10,8 @@ import type { GenesisState } from "../state/GenesisState";
 import { GenesisMode } from "../state";
 import { GenesisEra } from "../timeline";
 
+export type EvolutionPhase = "Void" | "Emerging" | "Awakening" | "Transcending";
+
 export default class EvolutionEngine {
 
   update(

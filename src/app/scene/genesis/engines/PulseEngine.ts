@@ -11,7 +11,7 @@ export default class PulseEngine {
 
   update(
     state: GenesisState,
-    delta: number,
+    _delta: number,
   ): void {
 
     if (state.paused) return;

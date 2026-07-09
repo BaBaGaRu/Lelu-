@@ -5,7 +5,7 @@
  * ==========================================================
  */
 
-import type { GenesisState } from "../GenesisCore";
+import type { GenesisState } from "../state/GenesisState";
 
 export default class DimensionEngine {
 
