@@ -1,22 +1,22 @@
+/**
+ * ==========================================================
+ * LÉLU
+ * AI CORE
+ * ==========================================================
+ */
+
 import AIClient from "./AIClient";
 import AIRouter from "./AIRouter";
 
 export default class AICore {
+  private readonly router = new AIRouter();
+  private readonly client = new AIClient();
 
-  readonly router =
-    new AIRouter();
+  async process(input: string): Promise<string> {
+    const intent = this.router.route(input);
 
-  readonly client =
-    new AIClient();
+    console.log("[LÉLU]", intent);
 
-  async process(
-    input: string,
-  ): Promise<string> {
-
-    return await this.client.chat(
-      input,
-    );
-
+    return this.client.chat(input);
   }
-
 }

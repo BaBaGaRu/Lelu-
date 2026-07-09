@@ -1,7 +1,9 @@
 /**
  * ==========================================================
  * LÉLUVERSE
- * STATE EXPORTS
+ * GENESIS STATE
+ *
+ * Public exports for the Genesis state system.
  * ==========================================================
  */
 

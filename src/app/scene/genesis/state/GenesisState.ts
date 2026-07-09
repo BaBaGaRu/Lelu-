@@ -5,8 +5,6 @@
  * ==========================================================
  */
 
-import { GenesisEra } from "../timeline";
-
 export const GenesisMode = {
 
   DORMANT: "DORMANT",
@@ -37,6 +35,27 @@ export const GenesisMode = {
 
 export type GenesisMode =
   (typeof GenesisMode)[keyof typeof GenesisMode];
+
+export const GenesisVisualMode = {
+
+  GENESIS: "GENESIS",
+
+  NATURE: "NATURE",
+
+  COSMOS: "COSMOS",
+
+  DREAM: "DREAM",
+
+  ENGINEERING: "ENGINEERING",
+
+  MEDITATION: "MEDITATION",
+
+  SANDBOX: "SANDBOX",
+
+} as const;
+
+export type GenesisVisualMode =
+  (typeof GenesisVisualMode)[keyof typeof GenesisVisualMode];
 
 export interface GenesisState {
 
@@ -86,7 +105,7 @@ export interface GenesisState {
 
   mode: GenesisMode;
 
-  era: GenesisEra;
+  visualMode: GenesisVisualMode;
 
 }
 
@@ -138,6 +157,7 @@ export const defaultGenesisState: GenesisState = {
 
   mode: GenesisMode.DORMANT,
 
-  era: GenesisEra.VOID,
+  visualMode:
+    GenesisVisualMode.GENESIS,
 
 };

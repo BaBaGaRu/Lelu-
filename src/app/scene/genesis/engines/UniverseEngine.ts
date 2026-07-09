@@ -8,7 +8,7 @@
  * ==========================================================
  */
 
-import type { GenesisState } from "../GenesisCore";
+import type { GenesisState } from "../state";
 
 export default class UniverseEngine {
 
@@ -22,19 +22,16 @@ export default class UniverseEngine {
     const dt = delta * state.speed;
 
     // Time
-
     state.age += dt;
     state.evolution += dt;
 
     // Energy
-
     state.energy = Math.min(
       1,
       state.energy + dt * 0.01,
     );
 
     // Matter
-
     state.matter = Math.min(
       1,
       state.matter +
@@ -44,33 +41,27 @@ export default class UniverseEngine {
     );
 
     // Gravity
-
     state.gravity =
       state.energy *
       state.matter;
 
     // Light
-
     state.light =
       0.5 +
       Math.sin(state.age * 0.5) *
       0.5;
 
     // Life
-
     if (state.energy > 0.35 && state.matter > 0.25) {
-
       state.life = Math.min(
         1,
         state.life +
         dt *
         0.001,
       );
-
     }
 
     // Awareness
-
     state.awareness = Math.min(
       1,
       state.awareness +
@@ -80,7 +71,6 @@ export default class UniverseEngine {
     );
 
     // Intelligence
-
     state.intelligence = Math.min(
       1,
       state.intelligence +
@@ -90,7 +80,6 @@ export default class UniverseEngine {
     );
 
     // Curiosity
-
     state.curiosity = Math.min(
       1,
       state.curiosity +
@@ -99,7 +88,6 @@ export default class UniverseEngine {
     );
 
     // Stability
-
     state.chaos = Math.max(
       0,
       state.chaos -
@@ -115,28 +103,19 @@ export default class UniverseEngine {
     );
 
     // Civilizations
-
     if (state.intelligence > 0.5) {
-
       state.civilizations = Math.min(
         1,
         state.civilizations +
         dt *
         0.0001,
       );
-
     }
 
     // Teaching
-
-    state.teaching =
-
-      state.intelligence;
+    state.teaching = state.intelligence;
 
     // Simulation
-
     state.simulation += dt;
-
   }
-
 }

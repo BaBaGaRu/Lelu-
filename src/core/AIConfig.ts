@@ -5,6 +5,8 @@
  * ==========================================================
  */
 
+import type { AIProvider } from "./AIProviderRouter";
+
 export interface AIProviderConfig {
 
   name: string;
@@ -13,13 +15,22 @@ export interface AIProviderConfig {
 
   model: string;
 
-  apiKey?: string;
+  apiKey: string;
+
+  timeout: number;
+
+  priority: number;
+
+  streaming: boolean;
 
 }
 
 export default class AIConfig {
 
-  readonly providers = {
+  readonly providers: Record<
+    AIProvider,
+    AIProviderConfig
+  > = {
 
     groq: {
 
@@ -32,7 +43,13 @@ export default class AIConfig {
         "openai/gpt-oss-120b",
 
       apiKey:
-        import.meta.env.VITE_GROQ_API_KEY,
+        import.meta.env.VITE_GROQ_API_KEY ?? "",
+
+      timeout: 15000,
+
+      priority: 1,
+
+      streaming: true,
 
     },
 
@@ -47,7 +64,13 @@ export default class AIConfig {
         "gemini-2.5-pro",
 
       apiKey:
-        import.meta.env.VITE_GOOGLE_API_KEY,
+        import.meta.env.VITE_GOOGLE_API_KEY ?? "",
+
+      timeout: 20000,
+
+      priority: 2,
+
+      streaming: true,
 
     },
 
@@ -62,7 +85,13 @@ export default class AIConfig {
         "openai/gpt-5.5",
 
       apiKey:
-        import.meta.env.VITE_OPENROUTER_API_KEY,
+        import.meta.env.VITE_OPENROUTER_API_KEY ?? "",
+
+      timeout: 20000,
+
+      priority: 3,
+
+      streaming: true,
 
     },
 
@@ -77,7 +106,13 @@ export default class AIConfig {
         "llama-4-scout",
 
       apiKey:
-        import.meta.env.VITE_CEREBRAS_API_KEY,
+        import.meta.env.VITE_CEREBRAS_API_KEY ?? "",
+
+      timeout: 15000,
+
+      priority: 4,
+
+      streaming: true,
 
     },
 
@@ -92,7 +127,13 @@ export default class AIConfig {
         "mistral-large-latest",
 
       apiKey:
-        import.meta.env.VITE_MISTRAL_API_KEY,
+        import.meta.env.VITE_MISTRAL_API_KEY ?? "",
+
+      timeout: 20000,
+
+      priority: 5,
+
+      streaming: true,
 
     },
 
@@ -107,7 +148,13 @@ export default class AIConfig {
         "accounts/fireworks/models/llama-v3p1-70b-instruct",
 
       apiKey:
-        import.meta.env.VITE_FIREWORKS_API_KEY,
+        import.meta.env.VITE_FIREWORKS_API_KEY ?? "",
+
+      timeout: 15000,
+
+      priority: 6,
+
+      streaming: true,
 
     },
 

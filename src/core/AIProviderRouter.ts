@@ -5,97 +5,61 @@
  * ==========================================================
  */
 
-import {
-  AIProvider,
-  type AIProvider as AIProviderType,
-} from "./AIProvider";
+export type AIProvider =
+
+  | "groq"
+  | "google"
+  | "openrouter"
+  | "cerebras"
+  | "mistral"
+  | "fireworks";
 
 export default class AIProviderRouter {
 
+  private readonly providers: AIProvider[] = [
+
+    "groq",
+
+    "google",
+
+    "openrouter",
+
+    "cerebras",
+
+    "mistral",
+
+    "fireworks",
+
+  ];
+
   select(
-    input: string,
-  ): AIProviderType {
+    _input: string,
+  ): AIProvider {
 
-    const text =
-      input.toLowerCase();
+    return this.providers[0];
 
-    if (
+  }
 
-      text.includes("wire") ||
+  fallback(
+    current: AIProvider,
+  ): AIProvider {
 
-      text.includes("voltage") ||
+    const index =
+      this.providers.indexOf(current);
 
-      text.includes("nec") ||
+    return this.providers[
 
-      text.includes("engineering") ||
+      (index + 1) %
 
-      text.includes("circuit")
+      this.providers.length
 
-    ) {
+    ];
 
-      return AIProvider.CEREBRAS;
+  }
 
-    }
+  all(): AIProvider[] {
 
-    if (
-
-      text.includes("image") ||
-
-      text.includes("photo") ||
-
-      text.includes("vision") ||
-
-      text.includes("camera")
-
-    ) {
-
-      return AIProvider.GOOGLE;
-
-    }
-
-    if (
-
-      text.includes("fast") ||
-
-      text.includes("voice") ||
-
-      text.includes("conversation")
-
-    ) {
-
-      return AIProvider.GROQ;
-
-    }
-
-    if (
-
-      text.includes("reason") ||
-
-      text.includes("logic") ||
-
-      text.includes("analyze")
-
-    ) {
-
-      return AIProvider.MISTRAL;
-
-    }
-
-    if (
-
-      text.includes("creative") ||
-
-      text.includes("story") ||
-
-      text.includes("design")
-
-    ) {
-
-      return AIProvider.FIREWORKS;
-
-    }
-
-    return AIProvider.OPENROUTER;
+    return this.providers;
 
   }
 

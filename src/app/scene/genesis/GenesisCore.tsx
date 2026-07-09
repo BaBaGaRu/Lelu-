@@ -3,9 +3,8 @@
  * LÉLUVERSE
  * GENESIS CORE
  *
- * The living consciousness of Lélu.
- * Every engine, interface, renderer,
- * and simulation reads from this Core.
+ * Living consciousness shared across
+ * the entire Genesis simulation.
  * ==========================================================
  */
 
@@ -20,81 +19,32 @@ import {
   type ReactNode,
 } from "react";
 
-import { GenesisRenderer } from "./render";
+import {
+  type GenesisState,
+  defaultGenesisState,
+} from "./state";
 
-export interface GenesisState {
+import {
+  GenesisRenderer,
+} from "./render";
 
-  /**
-   * Time
-   */
-
-  age: number;
-
-  evolution: number;
-
-  speed: number;
-
-  paused: boolean;
-
-  /**
-   * Consciousness
-   */
-
-  chaos: number;
-
-  stability: number;
-
-  curiosity: number;
-
-  intelligence: number;
-
-  awareness: number;
-
-  /**
-   * Creation
-   */
-
-  energy: number;
-
-  matter: number;
-
-  gravity: number;
-
-  light: number;
-
-  life: number;
-
-  civilizations: number;
-
-  /**
-   * Learning
-   */
-
-  learning: number;
-
-  simulation: number;
-
-  teaching: number;
-
-  /**
-   * Rendering
-   */
-
-  dimension: 1 | 2 | 3 | 4 | 5;
-
-}
+export type GenesisContextType =
+  MutableRefObject<GenesisState>;
 
 const GenesisContext =
-  createContext<MutableRefObject<GenesisState> | null>(null);
+  createContext<GenesisContextType | null>(
+    null,
+  );
 
-export function useGenesis() {
+export function useGenesis(): GenesisContextType {
 
-  const context = useContext(GenesisContext);
+  const context =
+    useContext(GenesisContext);
 
   if (!context) {
 
     throw new Error(
-      "GenesisCore must wrap the scene.",
+      "useGenesis() must be used inside <GenesisCore />.",
     );
 
   }
@@ -115,69 +65,53 @@ export default function GenesisCore({
 
 }: GenesisCoreProps) {
 
-  const state = useRef<GenesisState>({
+  const state =
+    useRef<GenesisState>({
 
-    age: 0,
+      ...defaultGenesisState,
 
-    evolution: 0,
+      dimension: 3,
 
-    speed: 1,
+      curiosity: 1,
 
-    paused: false,
+      energy: 1,
 
-    chaos: 1,
-
-    stability: 0,
-
-    curiosity: 1,
-
-    intelligence: 0,
-
-    awareness: 0,
-
-    energy: 1,
-
-    matter: 0,
-
-    gravity: 0,
-
-    light: 0,
-
-    life: 0,
-
-    civilizations: 0,
-
-    learning: 0,
-
-    simulation: 0,
-
-    teaching: 0,
-
-    dimension: 3,
-
-  });
+    });
 
   useFrame((_, delta) => {
 
-    const s = state.current;
+    const s =
+      state.current;
 
     if (s.paused) return;
 
-    const dt = delta * s.speed;
+    const dt =
+      delta * s.speed;
+
+    /**
+     * ----------------------------------------------------------
+     * TIME
+     * ----------------------------------------------------------
+     */
 
     s.age += dt;
 
-    s.evolution += dt;
+    s.evolution +=
+      dt * 0.05;
 
     /**
-     * Consciousness
+     * ----------------------------------------------------------
+     * CONSCIOUSNESS
+     * ----------------------------------------------------------
      */
 
     s.chaos = Math.max(
 
       0.05,
 
-      s.chaos - dt * 0.001,
+      s.chaos -
+
+      dt * 0.001,
 
     );
 
@@ -185,7 +119,9 @@ export default function GenesisCore({
 
       1,
 
-      s.stability + dt * 0.0008,
+      s.stability +
+
+      dt * 0.0008,
 
     );
 
@@ -193,7 +129,9 @@ export default function GenesisCore({
 
       1,
 
-      s.intelligence + dt * 0.0005,
+      s.intelligence +
+
+      dt * 0.0005,
 
     );
 
@@ -201,7 +139,9 @@ export default function GenesisCore({
 
       1,
 
-      s.awareness + dt * 0.00035,
+      s.awareness +
+
+      dt * 0.00035,
 
     );
 
@@ -209,33 +149,56 @@ export default function GenesisCore({
 
       1,
 
-      s.learning + dt * 0.00025,
+      s.learning +
+
+      dt * 0.00025,
+
+    );
+
+    s.consciousness = Math.min(
+
+      1,
+
+      s.awareness * 0.6 +
+
+      s.intelligence * 0.4,
 
     );
 
     /**
-     * Energy Pulse
+     * ----------------------------------------------------------
+     * ENERGY
+     * ----------------------------------------------------------
      */
 
     s.energy =
 
       0.5 +
 
-      Math.sin(s.age * 2.5) * 0.5;
+      Math.sin(
+
+        s.age * 2.5,
+
+      ) *
+
+      0.5;
 
   });
 
-  const value = useMemo(
+  const value =
+    useMemo(
 
-    () => state,
+      () => state,
 
-    [],
+      [],
 
-  );
+    );
 
   return (
 
-    <GenesisContext.Provider value={value}>
+    <GenesisContext.Provider
+      value={value}
+    >
 
       <GenesisRenderer />
 
