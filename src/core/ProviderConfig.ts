@@ -13,9 +13,18 @@ export interface ProviderConfig {
 
   newsApiKey: string;
 
+  groqApiKey: string;
+
 }
 
-const env = (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env ?? {};
+const env = (
+  import.meta as ImportMeta & {
+    env?: Record<
+      string,
+      string | undefined
+    >;
+  }
+).env ?? {};
 
 const config: ProviderConfig = {
 
@@ -32,6 +41,11 @@ const config: ProviderConfig = {
   newsApiKey:
 
     env.VITE_NEWS_API_KEY ??
+    "",
+
+  groqApiKey:
+
+    env.VITE_GROQ_API_KEY ??
     "",
 
 };
@@ -62,6 +76,14 @@ export function validateProviderConfig(): void {
 
     missing.push(
       "VITE_NEWS_API_KEY",
+    );
+
+  }
+
+  if (!config.groqApiKey) {
+
+    missing.push(
+      "VITE_GROQ_API_KEY",
     );
 
   }

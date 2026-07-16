@@ -6,13 +6,13 @@
  */
 
 import Planner
-  from "../core/Planner";
+  from "./Planner";
 
 import ProviderQueue
-  from "../core/ProviderQueue";
+  from "./ProviderQueue";
 
-import ProviderRegistry
-  from "../core/ProviderRegistry";
+import registerProviders
+  from "./RegisterProvider";
 
 import type Provider
   from "../providers/Provider";
@@ -29,12 +29,8 @@ export default class ResearchCoordinator {
   private readonly queue =
     new ProviderQueue();
 
-  constructor(
-
-    private readonly registry:
-      ProviderRegistry,
-
-  ) {}
+  private readonly registry =
+    registerProviders();
 
   async search(
     query: string,

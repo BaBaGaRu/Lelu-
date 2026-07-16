@@ -33,10 +33,65 @@ export default class AIProviderRouter {
   ];
 
   select(
-    _input: string,
+    input: string,
   ): AIProvider {
 
-    return this.providers[0];
+    const text =
+      input.toLowerCase();
+
+    if (
+
+      text.includes("gemini") ||
+
+      text.includes("google")
+
+    ) {
+
+      return "google";
+
+    }
+
+    if (
+
+      text.includes("openrouter")
+
+    ) {
+
+      return "openrouter";
+
+    }
+
+    if (
+
+      text.includes("cerebras")
+
+    ) {
+
+      return "cerebras";
+
+    }
+
+    if (
+
+      text.includes("mistral")
+
+    ) {
+
+      return "mistral";
+
+    }
+
+    if (
+
+      text.includes("fireworks")
+
+    ) {
+
+      return "fireworks";
+
+    }
+
+    return "groq";
 
   }
 
@@ -45,7 +100,9 @@ export default class AIProviderRouter {
   ): AIProvider {
 
     const index =
-      this.providers.indexOf(current);
+      this.providers.indexOf(
+        current,
+      );
 
     return this.providers[
 
@@ -59,7 +116,11 @@ export default class AIProviderRouter {
 
   all(): AIProvider[] {
 
-    return this.providers;
+    return [
+
+      ...this.providers,
+
+    ];
 
   }
 

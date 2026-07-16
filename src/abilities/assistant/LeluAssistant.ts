@@ -17,7 +17,7 @@ export default class LeluAssistant {
     activeMode: "chat",
   };
 
-  async respond(message: string): Promise<{ text: string; source: "openai" | "local" }> {
+  async respond(message: string): Promise<{ text: string; source: "ai" | "local" }> {
     const snapshot = this.memory.snapshot();
     const reply = await this.chat.answer(message, snapshot);
 
@@ -25,7 +25,7 @@ export default class LeluAssistant {
     return reply;
   }
 
-  async respondEngineering(message: string): Promise<{ text: string; source: "openai" | "local" }> {
+  async respondEngineering(message: string): Promise<{ text: string; source: "ai" | "local" }> {
     const reply = await this.engineer.answer(message);
     this.memory.recordExchange(message, reply.text);
     return reply;

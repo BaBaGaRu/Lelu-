@@ -5,20 +5,75 @@
  * ==========================================================
  */
 
-import AICore from "./AICore";
-import AIRouter from "./AIRouter";
+import AICore
+  from "./AICore";
+
+import AIRouter
+  from "./AIRouter";
+
+import ExecutionLogger
+  from "./ExecutionLogger";
+
+import registerProviders
+  from "./RegisterProviders";
+
+import registerAIProviders
+  from "./RegisterAIProviders";
 
 export default class AIRuntime {
 
-  readonly core =
-    new AICore();
+  readonly core:
+    AICore;
 
-  readonly router =
-    new AIRouter();
+  readonly router:
+    AIRouter;
+
+  private readonly logger =
+    new ExecutionLogger();
+
+  private initialized =
+    false;
+
+  constructor() {
+
+    const knowledgeRegistry =
+      registerProviders();
+
+    const aiRegistry =
+      registerAIProviders();
+
+    this.core =
+      new AICore(
+        knowledgeRegistry,
+      );
+
+    this.router =
+      new AIRouter(
+        knowledgeRegistry,
+        aiRegistry,
+      );
+
+  }
 
   async initialize(): Promise<void> {
 
-    // Reserved for future startup.
+    if (this.initialized) {
+
+      return;
+
+    }
+
+    this.logger.info(
+      "Runtime",
+      "Initializing",
+    );
+
+    this.initialized = true;
+
+    this.logger.info(
+      "Runtime",
+      "Ready",
+    );
 
   }
 
@@ -26,9 +81,39 @@ export default class AIRuntime {
     input: string,
   ): Promise<string> {
 
-    return await this.core.process(
-      input,
+    if (!this.initialized) {
+
+      await this.initialize();
+
+    }
+
+    this.logger.info(
+      "Runtime",
+      "Routing Request",
     );
+
+    const reply =
+      await this.router.process(
+        input,
+      );
+
+    this.logger.info(
+      "Runtime",
+      "Request Complete",
+    );
+
+    return reply;
+
+  }
+
+  async shutdown(): Promise<void> {
+
+    this.logger.info(
+      "Runtime",
+      "Shutdown",
+    );
+
+    this.initialized = false;
 
   }
 

@@ -5,11 +5,12 @@
  * ==========================================================
  */
 
-import AIBootstrap from "./AIBootstrap";
+import AIBootstrap
+  from "./AIBootstrap";
 
 export default class AIService {
 
-  readonly bootstrap =
+  private readonly bootstrap =
     new AIBootstrap();
 
   async initialize(): Promise<void> {
@@ -19,11 +20,11 @@ export default class AIService {
   }
 
   async send(
-    input: string,
+    prompt: string,
   ): Promise<string> {
 
     return await this.bootstrap.process(
-      input,
+      prompt,
     );
 
   }

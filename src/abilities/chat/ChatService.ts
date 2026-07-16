@@ -1,95 +1,138 @@
-import { createOpenAIClient, OPENAI_MODEL } from "../providers/OpenAIConfig";
-import type { MemorySnapshot } from "../memory/MemoryService";
+/**
+ * ==========================================================
+ * LÉLU
+ * CHAT SERVICE
+ * ==========================================================
+ */
+
+import ConversationCoordinator
+  from "../../core/ConversationCoordinator";
+
+import type {
+  MemorySnapshot,
+} from "../memory/MemoryService";
 
 export interface ChatMessage {
+
   id: string;
-  role: "user" | "assistant";
+
+  role:
+    | "user"
+    | "assistant";
+
   text: string;
-  source: "openai" | "local";
+
+  source:
+    | "ai"
+    | "local";
+
 }
 
 export interface AssistantReply {
+
   text: string;
-  source: "openai" | "local";
+
+  source:
+    | "ai"
+    | "local";
+
 }
 
 export default class ChatService {
-  private readonly client = createOpenAIClient();
 
-  async answer(message: string, memory?: MemorySnapshot): Promise<AssistantReply> {
-    const normalized = message.trim();
+  private readonly conversation =
+    new ConversationCoordinator();
 
-    if (!normalized) {
+  constructor() {
+
+    this.conversation
+      .initialize()
+      .catch(console.error);
+
+  }
+
+  async answer(
+
+    message: string,
+
+    _memory?: MemorySnapshot,
+
+  ): Promise<AssistantReply> {
+
+    const input =
+      message.trim();
+
+    if (!input) {
+
       return {
-        text: "I’m ready when you are.",
-        source: "local",
+
+        text:
+          "I'm ready whenever you are.",
+
+        source:
+          "local",
+
       };
+
     }
 
-    if (this.client) {
-      try {
-        const completion = await this.client.chat.completions.create({
-          model: OPENAI_MODEL,
-          messages: [
-            {
-              role: "system",
-              content:
-                "You are Lélu, a calm and thoughtful AI companion for a creative app.",
-            },
-            {
-              role: "user",
-              content: this.buildPrompt(normalized, memory),
-            },
-          ],
-        });
+    try {
 
-        const response = completion.choices[0]?.message?.content?.trim();
+      const reply =
+        await this.conversation.respond(
+          input,
+        );
 
-        if (response) {
-          return {
-            text: response,
-            source: "openai",
-          };
-        }
-      }
-      catch (error) {
-        console.warn("OpenAI request failed, falling back to local reply.", error);
-      }
+      return {
+
+        text:
+          reply,
+
+        source:
+          "ai",
+
+      };
+
     }
 
-    return {
-      text: this.fallbackResponse(normalized),
-      source: "local",
-    };
+    catch (
+
+      error,
+
+    ) {
+
+      console.error(
+
+        "LÉLU Chat Error",
+
+        error,
+
+      );
+
+      return {
+
+        text:
+          this.fallbackResponse(
+            input,
+          ),
+
+        source:
+          "local",
+
+      };
+
+    }
+
   }
 
-  private buildPrompt(message: string, memory?: MemorySnapshot): string {
-    const memoryContext = memory?.shortTerm?.slice(-4).map((entry) => entry.text).join(" | ");
+  private fallbackResponse(
 
-    return [
-      `User message: ${message}`,
-      memoryContext ? `Recent memory: ${memoryContext}` : "",
-      "Respond briefly and warmly.",
-    ]
-      .filter(Boolean)
-      .join("\n");
+    message: string,
+
+  ): string {
+
+    return `I couldn't reach an AI provider.\n\nYou said:\n${message}`;
+
   }
 
-  private fallbackResponse(message: string): string {
-    const lowered = message.toLowerCase();
-
-    if (lowered.includes("hello") || lowered.includes("hi")) {
-      return "Hello there. I’m Lélu, and I’m ready to help you think, build, and explore.";
-    }
-
-    if (lowered.includes("remember")) {
-      return "I’ll keep that in memory for the next exchange.";
-    }
-
-    if (lowered.includes("help")) {
-      return "I can help with conversation, engineering ideas, and short-term memory.";
-    }
-
-    return `You said: ${message}. I’m using the local fallback response for now.`;
-  }
 }

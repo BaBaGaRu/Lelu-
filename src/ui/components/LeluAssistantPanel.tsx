@@ -5,7 +5,7 @@ interface MessageItem {
   id: string;
   role: "user" | "assistant";
   text: string;
-  source: "openai" | "local";
+  source: "ai" | "local";
 }
 
 interface LeluAssistantPanelProps {

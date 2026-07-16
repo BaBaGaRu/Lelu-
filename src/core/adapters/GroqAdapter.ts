@@ -68,14 +68,49 @@ creative and engineering focused.`,
 
     if (!response.ok) {
 
+      const errorText =
+        await response.text();
+
+      console.error(
+
+        "Groq Error",
+
+        {
+
+          status:
+            response.status,
+
+          endpoint:
+            cfg.endpoint,
+
+          model:
+            cfg.model,
+
+          body:
+            errorText,
+
+        },
+
+      );
+
       throw new Error(
-        "Groq request failed.",
+
+        `Groq ${response.status}: ${errorText}`,
+
       );
 
     }
 
     const json =
       await response.json();
+
+    console.log(
+
+      "Groq Success",
+
+      json,
+
+    );
 
     return (
 

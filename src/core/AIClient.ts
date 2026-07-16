@@ -12,21 +12,23 @@ import GeminiAdapter from "./adapters/GeminiAdapter";
 
 export default class AIClient {
 
-  readonly router =
+  private readonly router =
     new AIProviderRouter();
 
-  readonly groq =
+  private readonly groq =
     new GroqAdapter();
 
-  readonly gemini =
+  private readonly gemini =
     new GeminiAdapter();
 
   async chat(
-    input: string,
+    prompt: string,
   ): Promise<string> {
 
     let provider =
-      this.router.select(input);
+      this.router.select(
+        prompt,
+      );
 
     const attempted =
       new Set<string>();
@@ -37,7 +39,9 @@ export default class AIClient {
 
     ) {
 
-      attempted.add(provider);
+      attempted.add(
+        provider,
+      );
 
       try {
 
@@ -46,13 +50,13 @@ export default class AIClient {
           case "groq":
 
             return await this.groq.chat(
-              input,
+              prompt,
             );
 
           case "google":
 
             return await this.gemini.chat(
-              input,
+              prompt,
             );
 
           default:

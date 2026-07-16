@@ -7,16 +7,48 @@
 
 import AIClient from "./AIClient";
 import AIRouter from "./AIRouter";
+import ProviderRegistry from "./ProviderRegistry";
 
 export default class AICore {
-  private readonly router = new AIRouter();
-  private readonly client = new AIClient();
 
-  async process(input: string): Promise<string> {
-    const intent = this.router.route(input);
+  private readonly router: AIRouter;
 
-    console.log("[LÉLU]", intent);
+  private readonly client: AIClient;
 
-    return this.client.chat(input);
+  constructor(
+    providers: ProviderRegistry,
+  ) {
+
+    this.router =
+      new AIRouter(
+        providers,
+      );
+
+    this.client =
+      new AIClient();
+
   }
+
+  async process(
+    input: string,
+  ): Promise<string> {
+
+    const intent =
+      this.router.route(
+        input,
+      );
+
+    console.log(
+      "[LÉLU]",
+      intent,
+    );
+
+    return await this.client.chat(
+    
+    
+    b   nput,
+    );
+
+  }
+
 }
