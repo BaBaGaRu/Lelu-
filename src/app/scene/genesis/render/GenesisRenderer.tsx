@@ -76,7 +76,7 @@ import CosmicFusionSystem
 
 
 import CosmicFusionVisualizer
-  from "./CosmicFusionVisualizer";
+  from "../systems/CosmicFusionVisualizer";
 
 
 
@@ -86,7 +86,7 @@ import CosmicFusionVisualizer
 
 
 import ElectromagneticSystem
-  from "../systems/ElectromagneticSystem";
+  from "./ElectromagneticSystem";
 
 
 import ElectromagneticVisualizer
@@ -94,7 +94,7 @@ import ElectromagneticVisualizer
 
 
 import GenesisResonanceSystem
-  from "../systems/GenesisResonanceSystem";
+  from "./GenesisResonanceSystem";
 
 
 import GenesisResonanceVisualizer
@@ -133,10 +133,6 @@ import PlanetaryEventSystem
 
 import EcosystemSystem
   from "./EcosystemSystem";
-
-
-import EcosystemEcosystem
-  from "./EcosystemEcosystem";
 
 
 
@@ -326,7 +322,6 @@ export default function GenesisRenderer(){
 
       <EcosystemSystem />
 
-      <EcosystemEcosystem />
 
 
 
