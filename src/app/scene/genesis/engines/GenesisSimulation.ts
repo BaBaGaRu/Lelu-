@@ -1,16 +1,16 @@
 /**
  * ==========================================================
  * LÉLUVERSE
- * UNIVERSE ENGINE
+ * GENESIS SIMULATION
  *
- * Master simulation engine.
- * Every Genesis subsystem evolves through here.
+ * Core simulation engine.
+ * Evolves the living Genesis state each frame.
  * ==========================================================
  */
 
 import type { GenesisState } from "../state";
 
-export default class UniverseEngine {
+export default class GenesisSimulation {
 
   update(
     state: GenesisState,
@@ -52,7 +52,10 @@ export default class UniverseEngine {
       0.5;
 
     // Life
-    if (state.energy > 0.35 && state.matter > 0.25) {
+    if (
+      state.energy > 0.35 &&
+      state.matter > 0.25
+    ) {
       state.life = Math.min(
         1,
         state.life +
@@ -87,7 +90,7 @@ export default class UniverseEngine {
       0.0002,
     );
 
-    // Stability
+    // Chaos / Stability
     state.chaos = Math.max(
       0,
       state.chaos -
@@ -113,9 +116,10 @@ export default class UniverseEngine {
     }
 
     // Teaching
-    state.teaching = state.intelligence;
+    state.teaching =
+      state.intelligence;
 
-    // Simulation
+    // Simulation Time
     state.simulation += dt;
   }
 }

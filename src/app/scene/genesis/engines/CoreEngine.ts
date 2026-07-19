@@ -7,7 +7,7 @@
 
 import type { GenesisState } from "../state/GenesisState";
 
-import UniverseEngine from "./UniverseEngine";
+import GenesisSimulation from "./GenesisSimulation";
 import EvolutionEngine from "./EvolutionEngine";
 import ConsciousnessEngine from "./ConsciousnessEngine";
 import CivilizationEngine from "./CivilizationEngine";
@@ -18,8 +18,8 @@ import RealityEngine from "./RealityEngine";
 
 export default class CoreEngine {
 
-  private readonly universe =
-    new UniverseEngine();
+  private readonly simulation =
+    new GenesisSimulation();
 
   private readonly evolution =
     new EvolutionEngine();
@@ -49,7 +49,7 @@ export default class CoreEngine {
 
     if (state.paused) return;
 
-    this.universe.update(
+    this.simulation.update(
       state,
       delta,
     );

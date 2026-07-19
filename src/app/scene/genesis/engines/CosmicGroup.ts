@@ -7,7 +7,7 @@
 
 import EngineGroup from "./EngineGroup";
 
-import UniverseEngine from "./UniverseEngine";
+import GenesisSimulation from "./GenesisSimulation";
 import GravityEngine from "./GravityEngine";
 import MatterEngine from "./MatterEngine";
 import LightEngine from "./LightEngine";
@@ -23,7 +23,7 @@ export default function CosmicGroup() {
 
     [
 
-      new UniverseEngine(),
+      new GenesisSimulation(),
 
       new GravityEngine(),
 

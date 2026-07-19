@@ -7,7 +7,7 @@
 
 import EngineGroup from "./EngineGroup";
 
-import UniverseEngine from "./UniverseEngine";
+import GenesisSimulation from "./GenesisSimulation";
 import TimelineEngine from "./TimelineEngine";
 import SimulationEngine from "./SimulationEngine";
 
@@ -19,7 +19,7 @@ export default function UniverseGroup() {
 
     [
 
-      new UniverseEngine(),
+      new GenesisSimulation(),
 
       new TimelineEngine(),
 

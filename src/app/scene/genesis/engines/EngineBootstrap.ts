@@ -7,7 +7,7 @@
 
 import EngineRegistry from "./EngineRegistry";
 
-import UniverseEngine from "./UniverseEngine";
+import GenesisSimulation from "./GenesisSimulation";
 import EvolutionEngine from "./EvolutionEngine";
 import ConsciousnessEngine from "./ConsciousnessEngine";
 import CuriosityEngine from "./CuriosityEngine";
@@ -77,7 +77,7 @@ export default class EngineBootstrap {
 
     registry.register(new BalanceEngine());
 
-    registry.register(new UniverseEngine());
+    registry.register(new GenesisSimulation());
 
     registry.register(new EvolutionEngine());
 

@@ -103,7 +103,7 @@ export { default as TechnologyEngine } from "./TechnologyEngine";
 
 export { default as TimelineEngine } from "./TimelineEngine";
 
-export { default as UniverseEngine } from "./UniverseEngine";
+export { default as GenesisSimulation } from "./GenesisSimulation";
 
 export { default as VoidEngine } from "./VoidEngine";
 
