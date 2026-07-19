@@ -11,6 +11,11 @@ import AIRuntime
 import ExecutionLogger
   from "./ExecutionLogger";
 
+import type {
+  AIRequest,
+  AIResponse,
+} from "../providers/AIProvider";
+
 export default class AIManager {
 
   private readonly runtime =
@@ -47,8 +52,8 @@ export default class AIManager {
   }
 
   async process(
-    input: string,
-  ): Promise<string> {
+    request: AIRequest,
+  ): Promise<AIResponse> {
 
     if (!this.initialized) {
 
@@ -63,7 +68,7 @@ export default class AIManager {
 
     const response =
       await this.runtime.process(
-        input,
+        request,
       );
 
     this.logger.info(

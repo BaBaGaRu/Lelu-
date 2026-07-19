@@ -1,40 +1,235 @@
-import type Provider from "../providers/Provider";
-import type { KnowledgeResult } from "../providers/Provider";
+/**
+ * ==========================================================
+ * LÉLU
+ * KNOWLEDGE ROUTER
+ * ==========================================================
+ */
 
-export interface KnowledgeProvider extends Provider {
-  canHandle?(query: string): boolean;
-}
+import Planner
+  from "./Planner";
 
-export class KnowledgeRouter {
-  private providers: KnowledgeProvider[] = [];
+import ProviderQueue
+  from "./ProviderQueue";
 
-  register(provider: KnowledgeProvider): void {
-    this.providers.push(provider);
-  }
+import type Provider
+  from "../providers/Provider";
 
-  unregister(name: string): void {
-    this.providers = this.providers.filter(
-      provider => provider.name !== name,
+import type {
+  KnowledgeResult,
+} from "../providers/Provider";
+
+export default class KnowledgeRouter {
+
+  private readonly planner =
+    new Planner();
+
+  private readonly queue =
+    new ProviderQueue();
+
+  private readonly providers:
+    Provider[] = [];
+
+  /**
+   * Register a provider.
+   */
+  public register(
+
+    provider:
+      Provider,
+
+  ): void {
+
+    this.providers.push(
+      provider,
     );
+
   }
 
-  getProviders(): string[] {
-    return this.providers.map(provider => provider.name);
-  }
+  /**
+   * Remove a provider.
+   */
+  public unregister(
 
-  async search(query: string): Promise<KnowledgeResult[]> {
-    const matches = this.providers.filter(provider =>
-      provider.canHandle?.(query) ?? provider.canSearch(query),
-    );
+    name:
+      string,
 
-    if (matches.length === 0) {
-      return [];
+  ): void {
+
+    const index =
+      this.providers.findIndex(
+
+        provider =>
+
+          provider.name ===
+          name,
+
+      );
+
+    if (
+
+      index >= 0
+
+    ) {
+
+      this.providers.splice(
+
+        index,
+
+        1,
+
+      );
+
     }
 
-    const responses = await Promise.all(
-      matches.map(provider => provider.search(query)),
+  }
+
+  /**
+   * Registered providers.
+   */
+  public getProviders():
+    readonly Provider[] {
+
+    return this.providers;
+
+  }
+
+  /**
+   * Route a search request.
+   */
+  public async search(
+
+    query:
+      string,
+
+  ): Promise<
+    KnowledgeResult[]
+  > {
+
+    const plan =
+      this.planner.plan(
+
+        query,
+
+        this.providers,
+
+      );
+
+    const collected:
+      KnowledgeResult[] = [];
+
+    for (
+
+      const provider of
+      plan
+
+    ) {
+
+      try {
+
+        const results =
+          await this.queue.enqueue(
+
+            provider,
+
+            query,
+
+          );
+
+        collected.push(
+          ...results,
+        );
+
+      }
+
+      catch {
+
+        /**
+         * Continue with the
+         * next provider.
+         */
+
+      }
+
+    }
+
+    return this.rank(
+      collected,
     );
 
-    return responses.flat().sort((a, b) => b.confidence - a.confidence);
   }
+
+  /**
+   * Rank and deduplicate.
+   */
+  private rank(
+
+    results:
+      KnowledgeResult[],
+
+  ): KnowledgeResult[] {
+
+    const unique =
+      new Map<
+        string,
+        KnowledgeResult
+      >();
+
+    for (
+
+      const result of
+      results
+
+    ) {
+
+      const key =
+
+        result.url ??
+
+        result.id;
+
+      const existing =
+        unique.get(
+          key,
+        );
+
+      if (
+
+        existing ===
+        undefined ||
+
+        result.confidence >
+          existing.confidence
+
+      ) {
+
+        unique.set(
+          key,
+          result,
+        );
+
+      }
+
+    }
+
+    return Array
+
+      .from(
+        unique.values(),
+      )
+
+      .sort(
+
+        (
+          left,
+          right,
+        ) =>
+
+          right.confidence -
+
+          left.confidence,
+
+      );
+
+  }
+
 }

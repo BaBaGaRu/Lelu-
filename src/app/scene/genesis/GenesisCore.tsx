@@ -3,48 +3,128 @@
  * LÉLUVERSE
  * GENESIS CORE
  *
- * Living consciousness shared across
- * the entire Genesis simulation.
+ * The living heart of Lélu.
+ * Every Genesis system registers here.
  * ==========================================================
  */
-
-import { useFrame } from "@react-three/fiber";
 
 import {
   createContext,
   useContext,
   useMemo,
-  useRef,
-  type MutableRefObject,
+  useState,
   type ReactNode,
 } from "react";
 
-import {
-  type GenesisState,
-  defaultGenesisState,
-} from "./state";
+export type GenesisMode =
+  | "chat"
+  | "engineering"
+  | "creative"
+  | "research";
 
-import {
-  GenesisRenderer,
-} from "./render";
+export interface GenesisMessage {
 
-export type GenesisContextType =
-  MutableRefObject<GenesisState>;
+  id: string;
+
+  role:
+    | "user"
+    | "assistant";
+
+  text: string;
+
+  timestamp: number;
+
+  source:
+    | "ai"
+    | "local";
+
+  provider?: string;
+
+  confidence?: number;
+
+}
+
+export interface GenesisNotification {
+
+  id: string;
+
+  title: string;
+
+  description?: string;
+
+  created: number;
+
+}
+
+export interface GenesisState {
+
+  initialized: boolean;
+
+  thinking: boolean;
+
+  speaking: boolean;
+
+  listening: boolean;
+
+  online: boolean;
+
+  mode: GenesisMode;
+
+  messages: GenesisMessage[];
+
+  notifications: GenesisNotification[];
+
+}
+
+export interface GenesisContextValue {
+
+  state: GenesisState;
+
+  setMode(
+    mode: GenesisMode,
+  ): void;
+
+  addMessage(
+    message: GenesisMessage,
+  ): void;
+
+  clearConversation(): void;
+
+  setThinking(
+    value: boolean,
+  ): void;
+
+  setSpeaking(
+    value: boolean,
+  ): void;
+
+  setListening(
+    value: boolean,
+  ): void;
+
+  notify(
+    title: string,
+    description?: string,
+  ): void;
+
+}
 
 const GenesisContext =
-  createContext<GenesisContextType | null>(
+  createContext<GenesisContextValue | null>(
     null,
   );
 
-export function useGenesis(): GenesisContextType {
+export function useGenesis() {
 
   const context =
-    useContext(GenesisContext);
+    useContext(
+      GenesisContext,
+    );
 
   if (!context) {
 
     throw new Error(
-      "useGenesis() must be used inside <GenesisCore />.",
+      "useGenesis must be used inside GenesisCore.",
     );
 
   }
@@ -65,132 +145,149 @@ export default function GenesisCore({
 
 }: GenesisCoreProps) {
 
-  const state =
-    useRef<GenesisState>({
+  const [state, setState] =
+    useState<GenesisState>({
 
-      ...defaultGenesisState,
+      initialized: true,
 
-      dimension: 3,
+      thinking: false,
 
-      curiosity: 1,
+      speaking: false,
 
-      energy: 1,
+      listening: false,
+
+      online: true,
+
+      mode: "chat",
+
+      messages: [],
+
+      notifications: [],
 
     });
 
-  useFrame((_, delta) => {
-
-    const s =
-      state.current;
-
-    if (s.paused) return;
-
-    const dt =
-      delta * s.speed;
-
-    /**
-     * ----------------------------------------------------------
-     * TIME
-     * ----------------------------------------------------------
-     */
-
-    s.age += dt;
-
-    s.evolution +=
-      dt * 0.05;
-
-    /**
-     * ----------------------------------------------------------
-     * CONSCIOUSNESS
-     * ----------------------------------------------------------
-     */
-
-    s.chaos = Math.max(
-
-      0.05,
-
-      s.chaos -
-
-      dt * 0.001,
-
-    );
-
-    s.stability = Math.min(
-
-      1,
-
-      s.stability +
-
-      dt * 0.0008,
-
-    );
-
-    s.intelligence = Math.min(
-
-      1,
-
-      s.intelligence +
-
-      dt * 0.0005,
-
-    );
-
-    s.awareness = Math.min(
-
-      1,
-
-      s.awareness +
-
-      dt * 0.00035,
-
-    );
-
-    s.learning = Math.min(
-
-      1,
-
-      s.learning +
-
-      dt * 0.00025,
-
-    );
-
-    s.consciousness = Math.min(
-
-      1,
-
-      s.awareness * 0.6 +
-
-      s.intelligence * 0.4,
-
-    );
-
-    /**
-     * ----------------------------------------------------------
-     * ENERGY
-     * ----------------------------------------------------------
-     */
-
-    s.energy =
-
-      0.5 +
-
-      Math.sin(
-
-        s.age * 2.5,
-
-      ) *
-
-      0.5;
-
-  });
-
   const value =
-    useMemo(
+    useMemo<GenesisContextValue>(
 
-      () => state,
+      () => ({
 
-      [],
+        state,
+
+        setMode(mode) {
+
+          setState(current => ({
+
+            ...current,
+
+            mode,
+
+          }));
+
+        },
+
+        addMessage(message) {
+
+          setState(current => ({
+
+            ...current,
+
+            messages: [
+
+              ...current.messages,
+
+              message,
+
+            ],
+
+          }));
+
+        },
+
+        clearConversation() {
+
+          setState(current => ({
+
+            ...current,
+
+            messages: [],
+
+          }));
+
+        },
+
+        setThinking(value) {
+
+          setState(current => ({
+
+            ...current,
+
+            thinking: value,
+
+          }));
+
+        },
+
+        setSpeaking(value) {
+
+          setState(current => ({
+
+            ...current,
+
+            speaking: value,
+
+          }));
+
+        },
+
+        setListening(value) {
+
+          setState(current => ({
+
+            ...current,
+
+            listening: value,
+
+          }));
+
+        },
+
+        notify(
+
+          title,
+
+          description,
+
+        ) {
+
+          setState(current => ({
+
+            ...current,
+
+            notifications: [
+
+              ...current.notifications,
+
+              {
+
+                id: crypto.randomUUID(),
+
+                title,
+
+                description,
+
+                created: Date.now(),
+
+              },
+
+            ],
+
+          }));
+
+        },
+
+      }),
+
+      [state],
 
     );
 
@@ -199,8 +296,6 @@ export default function GenesisCore({
     <GenesisContext.Provider
       value={value}
     >
-
-      <GenesisRenderer />
 
       {children}
 

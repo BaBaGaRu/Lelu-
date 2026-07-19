@@ -7,22 +7,24 @@
 
 export type AIProvider =
 
+  | "openrouter"
   | "groq"
   | "google"
-  | "openrouter"
   | "cerebras"
   | "mistral"
   | "fireworks";
 
+
 export default class AIProviderRouter {
 
+
   private readonly providers: AIProvider[] = [
+
+    "openrouter",
 
     "groq",
 
     "google",
-
-    "openrouter",
 
     "cerebras",
 
@@ -32,12 +34,17 @@ export default class AIProviderRouter {
 
   ];
 
+
+
   select(
     input: string,
   ): AIProvider {
 
+
     const text =
       input.toLowerCase();
+
+
 
     if (
 
@@ -51,6 +58,20 @@ export default class AIProviderRouter {
 
     }
 
+
+
+    if (
+
+      text.includes("groq")
+
+    ) {
+
+      return "groq";
+
+    }
+
+
+
     if (
 
       text.includes("openrouter")
@@ -60,6 +81,8 @@ export default class AIProviderRouter {
       return "openrouter";
 
     }
+
+
 
     if (
 
@@ -71,6 +94,8 @@ export default class AIProviderRouter {
 
     }
 
+
+
     if (
 
       text.includes("mistral")
@@ -80,6 +105,8 @@ export default class AIProviderRouter {
       return "mistral";
 
     }
+
+
 
     if (
 
@@ -91,18 +118,26 @@ export default class AIProviderRouter {
 
     }
 
-    return "groq";
+
+
+    // Default Lélu brain
+
+    return "openrouter";
 
   }
+
+
 
   fallback(
     current: AIProvider,
   ): AIProvider {
 
+
     const index =
       this.providers.indexOf(
         current,
       );
+
 
     return this.providers[
 
@@ -113,6 +148,8 @@ export default class AIProviderRouter {
     ];
 
   }
+
+
 
   all(): AIProvider[] {
 

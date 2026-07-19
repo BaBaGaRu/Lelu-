@@ -5,50 +5,160 @@
  * ==========================================================
  */
 
-import AIClient from "./AIClient";
-import AIRouter from "./AIRouter";
-import ProviderRegistry from "./ProviderRegistry";
+import ProviderRegistry
+  from "./ProviderRegistry";
+
+import AIProviderRegistry
+  from "./AIProviderRegistry";
+
+import ExecutionLogger
+  from "./ExecutionLogger";
+
 
 export default class AICore {
 
-  private readonly router: AIRouter;
 
-  private readonly client: AIClient;
+  private readonly logger =
+    new ExecutionLogger();
+
+
+  private initialized =
+    false;
+
+
 
   constructor(
-    providers: ProviderRegistry,
-  ) {
 
-    this.router =
-      new AIRouter(
-        providers,
-      );
+    private readonly knowledgeProviders:
+      ProviderRegistry,
 
-    this.client =
-      new AIClient();
+
+    private readonly aiProviders:
+      AIProviderRegistry,
+
+  ) {}
+
+
+
+  /**
+   * ==========================================================
+   * Initialize core systems
+   * ==========================================================
+   */
+  public async initialize():
+    Promise<void> {
+
+
+    if (
+      this.initialized
+    ) {
+
+      return;
+
+    }
+
+
+    this.logger.info(
+      "AICore",
+      "Initializing",
+    );
+
+
+
+    await this.aiProviders.initialize();
+
+
+
+    this.initialized =
+      true;
+
+
+
+    this.logger.info(
+      "AICore",
+      "Ready",
+    );
 
   }
 
-  async process(
-    input: string,
-  ): Promise<string> {
 
-    const intent =
-      this.router.route(
-        input,
-      );
 
-    console.log(
-      "[LÉLU]",
-      intent,
-    );
+  /**
+   * ==========================================================
+   * Ready status
+   * ==========================================================
+   */
+  public isReady():
+    boolean {
 
-    return await this.client.chat(
-    
-    
-    b   nput,
-    );
+    return this.initialized;
 
   }
+
+
+
+  /**
+   * ==========================================================
+   * Knowledge providers
+   * ==========================================================
+   */
+  public getKnowledgeProviders():
+    ProviderRegistry {
+
+    return this.knowledgeProviders;
+
+  }
+
+
+
+  /**
+   * ==========================================================
+   * AI providers
+   * ==========================================================
+   */
+  public getAIProviders():
+    AIProviderRegistry {
+
+    return this.aiProviders;
+
+  }
+
+
+
+  /**
+   * ==========================================================
+   * Shutdown
+   * ==========================================================
+   */
+  public async shutdown():
+    Promise<void> {
+
+
+    if (
+      !this.initialized
+    ) {
+
+      return;
+
+    }
+
+
+    this.logger.info(
+      "AICore",
+      "Shutdown",
+    );
+
+
+
+    await this.aiProviders.shutdown();
+
+
+
+    this.initialized =
+      false;
+
+
+  }
+
 
 }

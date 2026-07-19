@@ -11,6 +11,11 @@ import AIManager
 import ExecutionLogger
   from "./ExecutionLogger";
 
+import type {
+  AIRequest,
+  AIResponse,
+} from "../providers/AIProvider";
+
 export default class AIBootstrap {
 
   private readonly manager =
@@ -47,8 +52,8 @@ export default class AIBootstrap {
   }
 
   async process(
-    input: string,
-  ): Promise<string> {
+    request: AIRequest,
+  ): Promise<AIResponse> {
 
     if (!this.initialized) {
 
@@ -61,9 +66,9 @@ export default class AIBootstrap {
       "Processing Request",
     );
 
-    const reply =
+    const response =
       await this.manager.process(
-        input,
+        request,
       );
 
     this.logger.info(
@@ -71,7 +76,7 @@ export default class AIBootstrap {
       "Request Complete",
     );
 
-    return reply;
+    return response;
 
   }
 

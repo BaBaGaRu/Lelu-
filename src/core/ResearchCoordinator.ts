@@ -11,11 +11,8 @@ import Planner
 import ProviderQueue
   from "./ProviderQueue";
 
-import registerProviders
-  from "./RegisterProvider";
-
-import type Provider
-  from "../providers/Provider";
+import ProviderRegistry
+  from "./ProviderRegistry";
 
 import type {
   KnowledgeResult,
@@ -29,10 +26,17 @@ export default class ResearchCoordinator {
   private readonly queue =
     new ProviderQueue();
 
-  private readonly registry =
-    registerProviders();
+  constructor(
 
-  async search(
+    private readonly registry:
+      ProviderRegistry,
+
+  ) {}
+
+  /**
+   * Search every planned provider.
+   */
+  public async search(
     query: string,
   ): Promise<KnowledgeResult[]> {
 
@@ -45,50 +49,118 @@ export default class ResearchCoordinator {
 
       );
 
-    const results =
-      await Promise.all(
+    const collected:
+      KnowledgeResult[] = [];
 
-        providers.map(
+    for (
 
-          (provider: Provider) =>
+      const provider of
+      providers
 
-            this.queue.enqueue(
+    ) {
 
-              provider,
+      try {
 
-              query,
+        const results =
+          await this.queue.enqueue(
 
-            ),
+            provider,
 
-        ),
+            query,
 
-      );
+          );
 
-    return results
+        collected.push(
+          ...results,
+        );
 
-      .flat()
+      }
+
+      catch {
+
+        /**
+         * Ignore failed providers
+         * and continue searching.
+         */
+
+      }
+
+    }
+
+    return this.clean(
+      collected,
+    );
+
+  }
+
+  /**
+   * Remove duplicates
+   * and rank results.
+   */
+  private clean(
+    results:
+      KnowledgeResult[],
+  ): KnowledgeResult[] {
+
+    const unique =
+      new Map<
+        string,
+        KnowledgeResult
+      >();
+
+    for (
+
+      const result of
+      results
+
+    ) {
+
+      const key =
+
+        result.url ??
+
+        result.id;
+
+      const existing =
+        unique.get(
+          key,
+        );
+
+      if (
+
+        existing ===
+        undefined ||
+
+        result.confidence >
+          existing.confidence
+
+      ) {
+
+        unique.set(
+          key,
+          result,
+        );
+
+      }
+
+    }
+
+    return Array
+
+      .from(
+        unique.values(),
+      )
 
       .sort(
 
-        (a, b) =>
+        (
+          left,
+          right,
+        ) =>
 
-          b.confidence -
-          a.confidence,
+          right.confidence -
 
-      )
-
-      .filter(
-
-        (result, index, array) =>
-
-          array.findIndex(
-
-            item =>
-
-              (item.url ?? item.id) ===
-              (result.url ?? result.id),
-
-          ) === index,
+          left.confidence,
 
       );
 

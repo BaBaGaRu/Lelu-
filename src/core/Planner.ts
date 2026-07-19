@@ -10,60 +10,117 @@ import type Provider
 
 export default class Planner {
 
-  plan(
+  /**
+   * Build an execution plan.
+   */
+  public plan(
 
     query: string,
 
     providers:
-      Provider[],
+      readonly Provider[],
 
   ): Provider[] {
 
-    const text =
-      query.toLowerCase();
+    const normalized =
+      query
+        .trim()
+        .toLowerCase();
 
-    const matches =
-      providers.filter(
+    return providers
+
+      .filter(
 
         provider =>
 
           provider.enabled &&
 
           provider.canSearch(
-            text,
+            normalized,
+          ),
+
+      )
+
+      .sort(
+
+        (
+          left,
+          right,
+        ) =>
+
+          this.score(
+            right,
+            normalized,
+          ) -
+
+          this.score(
+            left,
+            normalized,
           ),
 
       );
 
-    if (
-      matches.length === 0
+  }
+
+  /**
+   * Score a provider.
+   */
+  private score(
+
+    provider:
+      Provider,
+
+    query:
+      string,
+
+  ): number {
+
+    let score =
+      provider.priority;
+
+    for (
+
+      const capability of
+      provider.capabilities
+
     ) {
 
-      return providers
+      if (
 
-        .filter(
-          provider =>
-            provider.enabled,
+        query.includes(
+
+          capability.toLowerCase(),
+
         )
 
-        .sort(
-          (a, b) =>
-            b.priority -
-            a.priority,
-        )
+      ) {
 
-        .slice(0, 3);
+        score += 100;
+
+      }
 
     }
 
-    return matches.sort(
+    if (
 
-      (a, b) =>
+      !provider.requiresApiKey
 
-        b.priority -
-        a.priority,
+    ) {
 
-    );
+      score += 25;
+
+    }
+
+    score += Math.max(
+
+      0,
+
+      1000 -
+      provider.timeout,
+
+    ) / 100;
+
+    return score;
 
   }
 

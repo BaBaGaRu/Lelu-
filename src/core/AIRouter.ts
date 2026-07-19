@@ -5,194 +5,111 @@
  * ==========================================================
  */
 
-import ProviderRegistry
-  from "./ProviderRegistry";
-
-import ResearchCoordinator
-  from "./ResearchCoordinator";
-
 import type {
-  KnowledgeResult,
-} from "../providers/Provider";
+  AIResponse,
+} from "../providers/AIProvider";
 
-import AIProviderRegistry
-  from "./tools/AIProviderRegistry";
+import type RouterContext
+  from "./router/RouterContext";
 
-export type AIIntent =
-  | "chat"
-  | "engineering"
-  | "memory"
-  | "genesis"
-  | "voice"
-  | "search";
+import BrainResolver
+  from "./router/BrainResolver";
+
+import ResearchResolver
+  from "./router/ResearchResolver";
+
+import ProviderResolver
+  from "./router/ProviderResolver";
+
+import ResponseBuilder
+  from "./router/ResponseBuilder";
 
 export default class AIRouter {
 
-  private readonly research =
-    new ResearchCoordinator();
-
   constructor(
 
-    private readonly knowledgeProviders:
-      ProviderRegistry,
+    private readonly brain:
+      BrainResolver,
 
-    private readonly aiProviders:
-      AIProviderRegistry,
+    private readonly research:
+      ResearchResolver,
+
+    private readonly providers:
+      ProviderResolver,
+
+    private readonly responses =
+      new ResponseBuilder(),
 
   ) {}
 
-  async process(
-    input: string,
-  ): Promise<string> {
+  /**
+   * Route an AI request.
+   */
+  public async route(
+    context:
+      RouterContext,
+  ): Promise<AIResponse> {
 
-    const intent =
-      this.detectIntent(
-        input,
+    const brain =
+      await this.brain.execute(
+        context,
       );
 
     if (
-      intent === "search"
+
+      brain.handled &&
+
+      brain.response
+
     ) {
 
-      const results =
-        await this.research.search(
-          input,
-        );
-
-      if (
-        results.length === 0
-      ) {
-
-        return "No results found.";
-
-      }
-
-      return results
-
-        .map(
-
-          (
-            result: KnowledgeResult,
-          ) =>
-
-`${result.title}
-
-${result.content}
-
-${result.url ?? ""}`,
-
-        )
-
-        .join("\n\n");
+      return brain.response;
 
     }
 
-    const providers =
-      this.aiProviders.all();
+    const research =
+      await this.research.execute(
+        context,
+      );
+
+    if (
+
+      research.handled
+
+    ) {
+
+      return this.responses.fromResearch(
+
+        research.results,
+
+        context.started,
+
+      );
+
+    }
 
     const provider =
-      providers.find(
-
-        provider =>
-
-          provider.enabled &&
-
-          provider.canHandle(
-            input,
-          ),
-
+      await this.providers.execute(
+        context,
       );
 
-    if (!provider) {
+    if (
 
-      return `No AI provider found.
+      provider.handled &&
 
-Registered Providers:
-${providers.length > 0
+      provider.response
 
-  ? providers
+    ) {
 
-      .map(
-        provider =>
-          provider.name,
-      )
-
-      .join(", ")
-
-  : "None"}`;
+      return provider.response;
 
     }
 
-    return await provider.generate(
-      input,
+    return this.responses.offline(
+
+      context.started,
+
     );
-
-  }
-
-  private detectIntent(
-    input: string,
-  ): AIIntent {
-
-    const text =
-      input.toLowerCase();
-
-    if (
-
-      text.includes("wire") ||
-
-      text.includes("circuit") ||
-
-      text.includes("voltage") ||
-
-      text.includes("engineering")
-
-    ) {
-
-      return "engineering";
-
-    }
-
-    if (
-      text.includes(
-        "remember",
-      )
-    ) {
-
-      return "memory";
-
-    }
-
-    if (
-      text.includes(
-        "genesis",
-      )
-    ) {
-
-      return "genesis";
-
-    }
-
-    if (
-      text.includes(
-        "voice",
-      )
-    ) {
-
-      return "voice";
-
-    }
-
-    if (
-      text.includes(
-        "search",
-      )
-    ) {
-
-      return "search";
-
-    }
-
-    return "chat";
 
   }
 

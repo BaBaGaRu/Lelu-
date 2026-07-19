@@ -23,6 +23,8 @@ export interface AIProviderConfig {
 
   streaming: boolean;
 
+  headers?: Record<string, string>;
+
 }
 
 export default class AIConfig {
@@ -82,6 +84,7 @@ export default class AIConfig {
         "https://openrouter.ai/api/v1/chat/completions",
 
       model:
+        import.meta.env.VITE_OPENROUTER_MODEL ??
         "openai/gpt-5.5",
 
       apiKey:
@@ -92,6 +95,16 @@ export default class AIConfig {
       priority: 3,
 
       streaming: true,
+
+      headers: {
+
+        "HTTP-Referer":
+          window.location.origin,
+
+        "X-Title":
+          "LÉLU",
+
+      },
 
     },
 

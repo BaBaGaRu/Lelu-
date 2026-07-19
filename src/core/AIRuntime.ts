@@ -20,100 +20,186 @@ import registerProviders
 import registerAIProviders
   from "./RegisterAIProviders";
 
+import Brain
+  from "../brain/Brain";
+
+import BrainResolver
+  from "./router/BrainResolver";
+
+import ResearchResolver
+  from "./router/ResearchResolver";
+
+import ProviderResolver
+  from "./router/ProviderResolver";
+
+import type {
+  AIRequest,
+  AIResponse,
+} from "../providers/AIProvider";
+
+import type RouterContext
+  from "./router/RouterContext";
+
 export default class AIRuntime {
 
-  readonly core:
+  public readonly core:
     AICore;
 
-  readonly router:
+  public readonly router:
     AIRouter;
+
+  public readonly brain:
+    Brain;
 
   private readonly logger =
     new ExecutionLogger();
+
+  private readonly knowledge =
+    registerProviders();
+
+  private readonly providers =
+    registerAIProviders();
 
   private initialized =
     false;
 
   constructor() {
 
-    const knowledgeRegistry =
-      registerProviders();
-
-    const aiRegistry =
-      registerAIProviders();
+    this.brain =
+      new Brain();
 
     this.core =
       new AICore(
-        knowledgeRegistry,
+
+        this.knowledge,
+
+        this.providers,
+
       );
 
     this.router =
       new AIRouter(
-        knowledgeRegistry,
-        aiRegistry,
+
+        new BrainResolver(),
+
+        new ResearchResolver(),
+
+        new ProviderResolver(),
+
       );
 
   }
 
-  async initialize(): Promise<void> {
+  public isReady():
+    boolean {
 
-    if (this.initialized) {
+    return this.initialized;
+
+  }
+
+  public async initialize():
+    Promise<void> {
+
+    if (
+      this.initialized
+    ) {
 
       return;
 
     }
 
     this.logger.info(
-      "Runtime",
+
+      "AIRuntime",
+
       "Initializing",
+
     );
 
-    this.initialized = true;
+    await this.core.initialize();
+
+    this.initialized =
+      true;
 
     this.logger.info(
-      "Runtime",
+
+      "AIRuntime",
+
       "Ready",
+
     );
 
   }
 
-  async process(
-    input: string,
-  ): Promise<string> {
+  public async process(
 
-    if (!this.initialized) {
+    request:
+      AIRequest,
+
+  ):
+    Promise<AIResponse> {
+
+    if (
+      !this.initialized
+    ) {
 
       await this.initialize();
 
     }
 
-    this.logger.info(
-      "Runtime",
-      "Routing Request",
+    const context:
+      RouterContext = {
+
+      request,
+
+      started:
+        Date.now(),
+
+      brain:
+        this.brain,
+
+      knowledgeProviders:
+        this.knowledge,
+
+      aiProviders:
+        this.providers,
+
+      logger:
+        this.logger,
+
+    };
+
+    return this.router.route(
+
+      context,
+
     );
-
-    const reply =
-      await this.router.process(
-        input,
-      );
-
-    this.logger.info(
-      "Runtime",
-      "Request Complete",
-    );
-
-    return reply;
 
   }
 
-  async shutdown(): Promise<void> {
+  public async shutdown():
+    Promise<void> {
+
+    if (
+      !this.initialized
+    ) {
+
+      return;
+
+    }
+
+    await this.core.shutdown();
+
+    this.initialized =
+      false;
 
     this.logger.info(
-      "Runtime",
-      "Shutdown",
-    );
 
-    this.initialized = false;
+      "AIRuntime",
+
+      "Shutdown",
+
+    );
 
   }
 

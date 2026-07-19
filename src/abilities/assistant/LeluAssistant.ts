@@ -1,37 +1,195 @@
-import ChatService from "../chat/ChatService";
-import EngineerService from "../engineer/EngineerService";
-import MemoryService from "../memory/MemoryService";
-import BrowserVoiceService from "../voice/BrowserVoiceService";
+/**
+ * ==========================================================
+ * LÉLU
+ * ASSISTANT CORE
+ * ==========================================================
+ */
+
+import AIService
+  from "../../core/AIService";
+
+import EngineerService
+  from "../engineer/EngineerService";
+
+import MemoryService
+  from "../memory/MemoryService";
+
+import BrowserVoiceService
+  from "../voice/BrowserVoiceService";
+
 
 export interface AssistantConversationState {
-  activeMode: "chat" | "engineering";
+
+  activeMode:
+    "chat" |
+    "engineering";
+
 }
 
+
+
+export interface AssistantReply {
+
+  text:
+    string;
+
+  source:
+    "ai" |
+    "local";
+
+}
+
+
+
 export default class LeluAssistant {
-  readonly chat = new ChatService();
-  readonly engineer = new EngineerService();
-  readonly memory = new MemoryService();
-  readonly voice = new BrowserVoiceService();
 
-  state: AssistantConversationState = {
-    activeMode: "chat",
-  };
 
-  async respond(message: string): Promise<{ text: string; source: "ai" | "local" }> {
-    const snapshot = this.memory.snapshot();
-    const reply = await this.chat.answer(message, snapshot);
+  readonly chat:
+    AIService;
 
-    this.memory.recordExchange(message, reply.text);
-    return reply;
+
+  readonly engineer:
+    EngineerService;
+
+
+  readonly memory:
+    MemoryService;
+
+
+  readonly voice:
+    BrowserVoiceService;
+
+
+
+  state:
+    AssistantConversationState = {
+
+      activeMode:
+        "chat",
+
+    };
+
+
+
+  constructor() {
+
+    this.chat =
+      new AIService();
+
+
+    this.engineer =
+      new EngineerService();
+
+
+    this.memory =
+      new MemoryService();
+
+
+    this.voice =
+      new BrowserVoiceService();
+
   }
 
-  async respondEngineering(message: string): Promise<{ text: string; source: "ai" | "local" }> {
-    const reply = await this.engineer.answer(message);
-    this.memory.recordExchange(message, reply.text);
-    return reply;
+
+
+
+
+  async initialize():
+    Promise<void> {
+
+    await this.chat.initialize();
+
   }
 
-  setMode(mode: AssistantConversationState["activeMode"]): void {
-    this.state.activeMode = mode;
+
+
+
+
+  async respond(
+    message:
+      string,
+  ):
+    Promise<AssistantReply> {
+
+
+    const reply =
+      await this.chat.chat(
+        message,
+      );
+
+
+    this.memory.recordExchange(
+
+      message,
+
+      reply.text,
+
+    );
+
+
+    return {
+
+      text:
+        reply.text,
+
+      source:
+        "ai",
+
+    };
+
   }
+
+
+
+
+
+  async respondEngineering(
+    message:
+      string,
+  ):
+    Promise<AssistantReply> {
+
+
+    const reply =
+      await this.engineer.answer(
+        message,
+      );
+
+
+    this.memory.recordExchange(
+
+      message,
+
+      reply.text,
+
+    );
+
+
+    return {
+
+      text:
+        reply.text,
+
+      source:
+        reply.source,
+
+    };
+
+  }
+
+
+
+
+
+  setMode(
+    mode:
+      AssistantConversationState["activeMode"],
+  ):
+    void {
+
+    this.state.activeMode =
+      mode;
+
+  }
+
 }

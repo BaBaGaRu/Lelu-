@@ -1,16 +1,18 @@
 /**
  * ==========================================================
  * LÉLU
- * AI ADAPTER
- *
- * Base contract for every AI provider.
+ * CORE ENTRY
  * ==========================================================
  */
 
-export default interface AIAdapter {
+import AIRuntime
+  from "./AIRuntime";
 
-  chat(
-    prompt: string,
-  ): Promise<string>;
+
+export default function createLeluRuntime():
+
+  AIRuntime {
+
+  return new AIRuntime();
 
 }
