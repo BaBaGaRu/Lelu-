@@ -2,6 +2,8 @@
  * ==========================================================
  * LÉLU
  * BRAIN
+ *
+ * Memory + Reflection + Cognition Core
  * ==========================================================
  */
 
@@ -11,77 +13,264 @@ import PatternMemory
 import LearningEngine
   from "./LearningEngine";
 
+import MemoryEngine
+  from "./MemoryEngine";
+
 import OfflineComposer
   from "./OfflineComposer";
 
 import ConfidenceEngine
   from "./ConfidenceEngine";
 
+import ReflectionEngine
+  from "./ReflectionEngine";
+
+import ConversationEngine
+  from "./ConversationEngine";
+
+import CognitionRuntime
+  from "./CognitionRuntime";
+
+import CognitiveCore
+  from "../core/cognition/CognitiveCore";
+
 import type ResponsePattern
   from "./ResponsePattern";
+
+import type {
+  Reflection,
+} from "./ReflectionEngine";
+
+
+
 
 
 export default class Brain {
 
 
-  private readonly memory =
-    new PatternMemory();
-
-
-  private readonly learning =
-    new LearningEngine(
-      this.memory,
-    );
-
-
-  private readonly composer =
-    new OfflineComposer(
-      this.memory,
-    );
-
-
-  private readonly confidence =
-    new ConfidenceEngine();
+  private readonly memory:
+    PatternMemory;
 
 
 
-  /**
-   * Initialize memory.
-   */
-  public async initialize():
-    Promise<void> {
+  private readonly learning:
+    LearningEngine;
 
-    await this.memory.initialize();
+
+
+  private readonly memoryEngine:
+    MemoryEngine;
+
+
+
+  private readonly composer:
+    OfflineComposer;
+
+
+
+  private readonly confidence:
+    ConfidenceEngine;
+
+
+
+  private readonly reflection:
+    ReflectionEngine;
+
+
+
+  private readonly conversation:
+    ConversationEngine;
+
+
+
+  private readonly cognition:
+    CognitiveCore;
+
+
+
+  private readonly cognitionRuntime:
+    CognitionRuntime;
+
+
+
+
+
+  constructor() {
+
+
+    this.memory =
+
+      new PatternMemory();
+
+
+
+    this.learning =
+
+      new LearningEngine(
+
+        this.memory,
+
+      );
+
+
+
+    this.memoryEngine =
+
+      new MemoryEngine(
+
+        this.learning,
+
+        this.memory,
+
+      );
+
+
+
+    this.composer =
+
+      new OfflineComposer(
+
+        this.memory,
+
+      );
+
+
+
+    this.confidence =
+
+      new ConfidenceEngine();
+
+
+
+    this.reflection =
+
+      new ReflectionEngine(
+
+        this.memory,
+
+      );
+
+
+
+    this.cognition =
+
+      new CognitiveCore();
+
+
+
+    this.cognitionRuntime =
+
+      new CognitionRuntime(
+
+        this.cognition,
+
+      );
+
+
+
+    this.conversation =
+
+      new ConversationEngine(
+
+        this,
+
+      );
 
   }
 
 
 
+
+
   /**
-   * Learn from an interaction.
+   * ==========================================================
+   * Initialize
+   * ==========================================================
+   */
+  public async initialize():
+
+    Promise<void> {
+
+
+    await this.memory.initialize();
+
+
+
+    this.cognition.initialize();
+
+  }
+
+
+
+
+
+  /**
+   * ==========================================================
+   * Learn
+   * ==========================================================
    */
   public async learn(
 
     prompt:
       string,
 
+
     response:
       string,
+
 
     intent =
       "general",
 
+
     keywords:
       string[] = [],
 
+
     context:
-      Record<
-        string,
-        unknown
-      > = {},
+      Record<string, unknown> = {},
 
   ):
     Promise<ResponsePattern> {
+
+
+    const memories =
+
+      await this.memoryEngine.learn(
+
+        prompt,
+
+        response,
+
+      );
+
+
+
+
+
+    this.cognitionRuntime.observe(
+
+      `${prompt}\n${response}`,
+
+    );
+
+
+
+
+
+    if (
+
+      memories.length > 0
+
+    ) {
+
+
+      return memories[0];
+
+    }
+
+
+
 
 
     return await this.learning.learn(
@@ -102,8 +291,12 @@ export default class Brain {
 
 
 
+
+
   /**
-   * Recall matching patterns.
+   * ==========================================================
+   * Recall
+   * ==========================================================
    */
   public async recall(
 
@@ -114,7 +307,7 @@ export default class Brain {
     Promise<ResponsePattern[]> {
 
 
-    return await this.memory.search(
+    return await this.memoryEngine.recall(
 
       prompt,
 
@@ -124,27 +317,60 @@ export default class Brain {
 
 
 
+
+
   /**
-   * Compose an offline response.
+   * ==========================================================
+   * Recall all
+   * ==========================================================
    */
-  public compose(
+  public async recallAll():
+
+    Promise<ResponsePattern[]> {
+
+
+    await this.memory.initialize();
+
+
+
+    return this.memory.getAll();
+
+  }
+
+
+
+
+
+  /**
+   * ==========================================================
+   * Compose
+   * ==========================================================
+   */
+  public async compose(
 
     prompt:
       string,
 
   ):
-    string {
+    Promise<string> {
 
-    return this.composer.compose(
+
+    return await this.composer.compose(
+
       prompt,
+
     );
 
   }
 
 
 
+
+
   /**
-   * Determine the best pattern.
+   * ==========================================================
+   * Best memory
+   * ==========================================================
    */
   public async best(
 
@@ -156,98 +382,183 @@ export default class Brain {
 
 
     const patterns =
+
       await this.memory.search(
+
         prompt,
+
       );
+
 
 
     return this.confidence.best(
+
       patterns,
+
     );
 
   }
 
 
 
+
+
   /**
-   * Determine confidence.
+   * ==========================================================
+   * Knows
+   * ==========================================================
    */
-  public async confidenceOf(
+  public async knows(
 
     prompt:
       string,
 
   ):
-    Promise<number> {
+    Promise<boolean> {
 
 
-    const pattern =
-      await this.best(
+    const memories =
+
+      await this.memory.search(
+
         prompt,
+
       );
 
 
-    if (
-      pattern === undefined
-    ) {
 
-      return 0;
-
-    }
-
-
-    return this.confidence.calculate(
-      pattern,
-    );
+    return memories.length > 0;
 
   }
 
 
 
+
+
   /**
-   * Whether memory contains
-   * information about a prompt.
+   * ==========================================================
+   * Reflection
+   * ==========================================================
    */
-  public knows(
+  public async reflect():
+
+    Promise<Reflection> {
+
+
+    return await this.reflection.reflect();
+
+  }
+
+
+
+
+
+  /**
+   * ==========================================================
+   * Conversation
+   * ==========================================================
+   */
+  public getConversation():
+
+    ConversationEngine {
+
+
+    return this.conversation;
+
+  }
+
+
+
+
+
+  /**
+   * ==========================================================
+   * Cognition runtime
+   * ==========================================================
+   */
+  public getCognitionRuntime():
+
+    CognitionRuntime {
+
+
+    return this.cognitionRuntime;
+
+  }
+
+
+
+
+
+  /**
+   * ==========================================================
+   * Cognition state
+   * ==========================================================
+   */
+  public cognitiveState():
+
+  {
+
+    nodes:
+      unknown[];
+
+
+    connections:
+      unknown[];
+
+
+    agents:
+      unknown[];
+
+
+    workspaces:
+      unknown[];
+
+  } {
+
+
+    return this.cognition.state();
+
+  }
+
+
+
+
+
+  /**
+   * ==========================================================
+   * Suggestions
+   * ==========================================================
+   */
+  public async suggestions(
 
     prompt:
       string,
 
   ):
-    boolean {
+    Promise<string[]> {
 
-    return this.composer.hasKnowledge(
+
+    return await this.composer.suggestions(
+
       prompt,
+
     );
 
   }
 
 
 
-  /**
-   * Suggested responses.
-   */
-  public suggestions(
-
-    prompt:
-      string,
-
-  ):
-    string[] {
-
-    return this.composer.suggestions(
-      prompt,
-    );
-
-  }
-
 
 
   /**
-   * Forget everything.
+   * ==========================================================
+   * Reset
+   * ==========================================================
    */
   public async reset():
+
     Promise<void> {
+
 
     await this.memory.clear();
 

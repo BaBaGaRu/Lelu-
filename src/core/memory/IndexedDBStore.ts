@@ -5,352 +5,826 @@
  * ==========================================================
  */
 
-import type MemoryStore from "./MemoryStore";
+import type MemoryStore
+  from "./MemoryStore";
+
 import type {
   MemoryRecord,
   MemorySpace,
 } from "./MemoryStore";
 
+
 export default class IndexedDBStore
   implements MemoryStore {
 
+
   private db?: IDBDatabase;
 
-  async initialize(): Promise<void> {
 
-    if (this.db) return;
+  private readonly databaseName =
+    "lelu-memory";
 
-    await new Promise<void>((resolve, reject) => {
 
-      const request =
-        indexedDB.open(
-          "lelu-memory",
-          1,
-        );
+  private readonly databaseVersion =
+    1;
 
-      request.onupgradeneeded = () => {
 
-        const db =
-          request.result;
+  private readonly objectStore =
+    "memories";
 
-        if (
-          !db.objectStoreNames.contains(
-            "memories",
-          )
-        ) {
 
-          db.createObjectStore(
-            "memories",
-            {
-              keyPath: "id",
-            },
+
+
+
+  /**
+   * ==========================================================
+   * Initialize database
+   * ==========================================================
+   */
+  async initialize():
+    Promise<void> {
+
+
+    if (
+      this.db
+    ) {
+
+      return;
+
+    }
+
+
+
+    await new Promise<void>(
+
+      (
+
+        resolve,
+
+        reject,
+
+      ) => {
+
+
+        const request =
+          indexedDB.open(
+
+            this.databaseName,
+
+            this.databaseVersion,
+
           );
 
-        }
 
-      };
 
-      request.onsuccess = () => {
+        request.onupgradeneeded =
+          () => {
 
-        this.db =
-          request.result;
 
-        resolve();
+            const database =
+              request.result;
 
-      };
 
-      request.onerror = () =>
-        reject(request.error);
 
-    });
+            if (
 
-  }
+              !database.objectStoreNames.contains(
 
-  async save(
-    memory: MemoryRecord,
-  ): Promise<void> {
+                this.objectStore,
 
-    await this.initialize();
+              )
 
-    return new Promise(
-      (resolve, reject) => {
+            ) {
 
-        const tx =
-          this.db!.transaction(
-            "memories",
-            "readwrite",
-          );
 
-        tx.objectStore(
-          "memories",
-        ).put(memory);
+              database.createObjectStore(
 
-        tx.oncomplete = () =>
-          resolve();
+                this.objectStore,
 
-        tx.onerror = () =>
-          reject(tx.error);
+                {
+
+                  keyPath:
+                    "id",
+
+                },
+
+              );
+
+            }
+
+          };
+
+
+
+        request.onsuccess =
+          () => {
+
+
+            this.db =
+              request.result;
+
+
+
+            this.db.onversionchange =
+              () => {
+
+
+                this.db?.close();
+
+
+                this.db =
+                  undefined;
+
+
+              };
+
+
+
+            resolve();
+
+          };
+
+
+
+        request.onerror =
+          () => {
+
+
+            reject(
+
+              request.error,
+
+            );
+
+          };
 
       },
+
     );
 
   }
+
+
+
+
+
+  private async getDatabase():
+    Promise<IDBDatabase> {
+
+
+    await this.initialize();
+
+
+    if (
+      !this.db
+    ) {
+
+      throw new Error(
+
+        "IndexedDB unavailable",
+
+      );
+
+    }
+
+
+    return this.db;
+
+  }
+
+
+
+
+
+  /**
+   * ==========================================================
+   * Save memory
+   * ==========================================================
+   */
+  async save(
+
+    memory:
+      MemoryRecord,
+
+  ):
+    Promise<void> {
+
+
+    const database =
+      await this.getDatabase();
+
+
+
+    await new Promise<void>(
+
+      (
+
+        resolve,
+
+        reject,
+
+      ) => {
+
+
+        const transaction =
+          database.transaction(
+
+            this.objectStore,
+
+            "readwrite",
+
+          );
+
+
+
+        transaction
+          .objectStore(
+
+            this.objectStore,
+
+          )
+          .put(
+
+            structuredClone(memory),
+
+          );
+
+
+
+        transaction.oncomplete =
+          () =>
+            resolve();
+
+
+
+        transaction.onerror =
+          () =>
+            reject(
+
+              transaction.error,
+
+            );
+
+      },
+
+    );
+
+  }
+
+
+
+
 
   async update(
-    memory: MemoryRecord,
-  ): Promise<void> {
 
-    return this.save(memory);
+    memory:
+      MemoryRecord,
+
+  ):
+    Promise<void> {
+
+
+    await this.save(
+
+      memory,
+
+    );
 
   }
 
+
+
+
+
+  /**
+   * ==========================================================
+   * Delete
+   * ==========================================================
+   */
   async delete(
-    id: string,
-  ): Promise<void> {
 
-    await this.initialize();
+    id:
+      string,
 
-    return new Promise(
-      (resolve, reject) => {
+  ):
+    Promise<void> {
 
-        const tx =
-          this.db!.transaction(
-            "memories",
-            "readwrite",
-          );
 
-        tx.objectStore(
-          "memories",
-        ).delete(id);
+    const database =
+      await this.getDatabase();
 
-        tx.oncomplete = () =>
-          resolve();
 
-        tx.onerror = () =>
-          reject(tx.error);
 
-      },
+    const transaction =
+      database.transaction(
+
+        this.objectStore,
+
+        "readwrite",
+
+      );
+
+
+
+    transaction
+      .objectStore(
+
+        this.objectStore,
+
+      )
+      .delete(
+
+        id,
+
+      );
+
+
+
+    await this.wait(
+
+      transaction,
+
     );
 
   }
 
-  async clear(): Promise<void> {
 
-    await this.initialize();
 
-    return new Promise(
-      (resolve, reject) => {
 
-        const tx =
-          this.db!.transaction(
-            "memories",
-            "readwrite",
-          );
 
-        tx.objectStore(
-          "memories",
-        ).clear();
+  async clear():
+    Promise<void> {
 
-        tx.oncomplete = () =>
-          resolve();
 
-        tx.onerror = () =>
-          reject(tx.error);
+    const database =
+      await this.getDatabase();
 
-      },
+
+
+    const transaction =
+      database.transaction(
+
+        this.objectStore,
+
+        "readwrite",
+
+      );
+
+
+
+    transaction
+      .objectStore(
+
+        this.objectStore,
+
+      )
+      .clear();
+
+
+
+    await this.wait(
+
+      transaction,
+
     );
 
   }
 
+
+
+
+
+  /**
+   * ==========================================================
+   * Get one
+   * ==========================================================
+   */
   async get(
-    id: string,
-  ): Promise<MemoryRecord | null> {
 
-    await this.initialize();
+    id:
+      string,
+
+  ):
+    Promise<MemoryRecord | null> {
+
+
+    const database =
+      await this.getDatabase();
+
+
 
     return new Promise(
-      (resolve, reject) => {
+
+      (
+
+        resolve,
+
+        reject,
+
+      ) => {
+
 
         const request =
-          this.db!
+          database
+
             .transaction(
-              "memories",
+
+              this.objectStore,
+
             )
+
             .objectStore(
-              "memories",
+
+              this.objectStore,
+
             )
-            .get(id);
 
-        request.onsuccess = () =>
-          resolve(
-            request.result ??
-            null,
-          );
+            .get(
 
-        request.onerror = () =>
-          reject(
-            request.error,
-          );
+              id,
+
+            );
+
+
+
+        request.onsuccess =
+          () => {
+
+
+            resolve(
+
+              request.result ?? null,
+
+            );
+
+          };
+
+
+
+        request.onerror =
+          () => {
+
+
+            reject(
+
+              request.error,
+
+            );
+
+          };
 
       },
+
     );
 
   }
 
-  async all(
-    space?: MemorySpace,
-  ): Promise<MemoryRecord[]> {
 
-    await this.initialize();
+
+
+
+  /**
+   * ==========================================================
+   * Get all
+   * ==========================================================
+   */
+  async all(
+
+    space?:
+      MemorySpace,
+
+  ):
+    Promise<MemoryRecord[]> {
+
+
+    const database =
+      await this.getDatabase();
+
+
 
     return new Promise(
-      (resolve, reject) => {
+
+      (
+
+        resolve,
+
+        reject,
+
+      ) => {
+
 
         const request =
-          this.db!
+          database
+
             .transaction(
-              "memories",
+
+              this.objectStore,
+
             )
+
             .objectStore(
-              "memories",
+
+              this.objectStore,
+
             )
+
             .getAll();
 
-        request.onsuccess = () => {
 
-          const memories =
-            request.result as MemoryRecord[];
 
-          resolve(
+        request.onsuccess =
+          () => {
 
-            space
 
-              ? memories.filter(
-                  memory =>
-                    memory.space ===
-                    space,
-                )
+            const records =
+              request.result as MemoryRecord[];
 
-              : memories,
 
-          );
 
-        };
+            resolve(
 
-        request.onerror = () =>
-          reject(
-            request.error,
-          );
+              space
+
+                ? records.filter(
+
+                    memory =>
+                      memory.space === space,
+
+                  )
+
+                : records,
+
+            );
+
+          };
+
+
+
+        request.onerror =
+          () => {
+
+
+            reject(
+
+              request.error,
+
+            );
+
+          };
 
       },
+
     );
 
   }
 
+
+
+
+
+  /**
+   * ==========================================================
+   * Search
+   * ==========================================================
+   */
   async search(
-    query: string,
-    space?: MemorySpace,
-  ): Promise<MemoryRecord[]> {
+
+    query:
+      string,
+
+
+    space?:
+      MemorySpace,
+
+  ):
+    Promise<MemoryRecord[]> {
+
+
+    const memories =
+      await this.all(
+
+        space,
+
+      );
+
+
 
     const text =
       query.toLowerCase();
 
-    const memories =
-      await this.all(space);
+
 
     return memories
 
-      .map(memory => {
+      .map(
 
-        let score = 0;
+        memory => {
 
-        if (
-          memory.title
-            .toLowerCase()
-            .includes(text)
-        ) {
 
-          score += 10;
+          let score =
+            0;
 
-        }
 
-        if (
-          memory.content
-            .toLowerCase()
-            .includes(text)
-        ) {
 
-          score += 8;
+          const searchable =
 
-        }
+            [
 
-        for (const tag of memory.tags) {
+              memory.title,
+
+              memory.content,
+
+              ...memory.tags,
+
+              JSON.stringify(
+
+                memory.metadata ?? {},
+
+              ),
+
+            ]
+
+            .join(" ")
+
+            .toLowerCase();
+
+
 
           if (
-            tag
-              .toLowerCase()
-              .includes(text)
+
+            searchable.includes(text)
+
           ) {
 
-            score += 5;
+            score += 10;
 
           }
 
-        }
 
-        score +=
-          memory.importance;
 
-        return {
+          if (
 
-          score,
+            memory.metadata?.category
 
-          memory,
+          ) {
 
-        };
+            score += 2;
 
-      })
+          }
+
+
+
+          score +=
+            memory.importance;
+
+
+
+          return {
+
+            memory,
+
+            score,
+
+          };
+
+        },
+
+      )
 
       .filter(
+
         item =>
           item.score > 0,
+
       )
 
       .sort(
-        (a, b) =>
+
+        (
+
+          a,
+
+          b,
+
+        ) =>
+
           b.score -
+
           a.score,
+
       )
 
-      .slice(0, 10)
+      .slice(
+
+        0,
+
+        20,
+
+      )
 
       .map(
+
         item =>
           item.memory,
+
       );
 
   }
 
+
+
+
+
   async recent(
+
     limit = 20,
-    space?: MemorySpace,
-  ): Promise<MemoryRecord[]> {
+
+
+    space?:
+      MemorySpace,
+
+  ):
+    Promise<MemoryRecord[]> {
+
 
     const memories =
-      await this.all(space);
+      await this.all(
+
+        space,
+
+      );
+
+
 
     return memories
 
       .sort(
-        (a, b) =>
+
+        (
+
+          a,
+
+          b,
+
+        ) =>
+
           b.updated -
+
           a.updated,
+
       )
 
       .slice(
+
         0,
+
         limit,
+
       );
+
+  }
+
+
+
+
+
+  private wait(
+
+    transaction:
+      IDBTransaction,
+
+  ):
+    Promise<void> {
+
+
+    return new Promise(
+
+      (
+
+        resolve,
+
+        reject,
+
+      ) => {
+
+
+        transaction.oncomplete =
+          () =>
+            resolve();
+
+
+
+        transaction.onerror =
+          () =>
+            reject(
+
+              transaction.error,
+
+            );
+
+      },
+
+    );
 
   }
 

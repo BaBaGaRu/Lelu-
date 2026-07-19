@@ -32,9 +32,8 @@ export default class PatternMemory {
 
 
 
-  /**
-   * Load persistent memories.
-   */
+
+
   public async initialize():
     Promise<void> {
 
@@ -48,59 +47,84 @@ export default class PatternMemory {
     }
 
 
+
     const memories =
       await this.store.all(
+
         "user",
+
       );
 
 
+
     for (
+
       const memory of memories
+
     ) {
 
 
-      const pattern:
-        ResponsePattern = {
+      const metadata =
+        memory.metadata ?? {};
 
+
+
+      const pattern:
+        ResponsePattern =
+      {
 
         id:
           memory.id,
 
 
+        category:
+
+          metadata.category ??
+
+          "general",
+
+
         prompt:
-          typeof memory.metadata?.prompt === "string"
 
-            ? memory.metadata.prompt
+          metadata.prompt ??
 
-            : memory.title,
+          memory.title,
 
 
         response:
+
           memory.content,
 
 
         intent:
-          typeof memory.metadata?.intent === "string"
 
-            ? memory.metadata.intent
+          metadata.intent ??
 
-            : "memory",
+          "general",
 
 
         keywords:
-          memory.tags,
+
+          memory.tags ?? [],
 
 
         context:
-          typeof memory.metadata?.context === "object"
 
-            ? memory.metadata.context as Record<string, unknown>
+          metadata.context ??
 
-            : {},
+          {},
+
+
+        importance:
+
+          memory.importance ?? 0.3,
 
 
         confidence:
-          memory.importance,
+
+          metadata.confidence ??
+
+          0.5,
 
 
         successfulUses:
@@ -118,8 +142,8 @@ export default class PatternMemory {
         updatedAt:
           memory.updated,
 
-
       };
+
 
 
       this.patterns.set(
@@ -133,6 +157,7 @@ export default class PatternMemory {
     }
 
 
+
     this.initialized =
       true;
 
@@ -142,17 +167,17 @@ export default class PatternMemory {
 
 
 
-  /**
-   * Add memory and persist.
-   */
   public async add(
+
     pattern:
       ResponsePattern,
+
   ):
     Promise<void> {
 
 
     await this.initialize();
+
 
 
     this.patterns.set(
@@ -166,7 +191,8 @@ export default class PatternMemory {
 
 
     const memory:
-      MemoryRecord = {
+      MemoryRecord =
+    {
 
 
       id:
@@ -190,7 +216,7 @@ export default class PatternMemory {
 
 
       importance:
-        pattern.confidence,
+        pattern.importance,
 
 
       created:
@@ -204,6 +230,10 @@ export default class PatternMemory {
       metadata:
       {
 
+        category:
+          pattern.category,
+
+
         prompt:
           pattern.prompt,
 
@@ -215,6 +245,10 @@ export default class PatternMemory {
         context:
           pattern.context,
 
+
+        confidence:
+          pattern.confidence,
+
       },
 
     };
@@ -222,7 +256,9 @@ export default class PatternMemory {
 
 
     await this.store.save(
+
       memory,
+
     );
 
   }
@@ -232,14 +268,39 @@ export default class PatternMemory {
 
 
   public get(
+
     id:
       string,
+
   ):
     ResponsePattern | undefined {
 
 
     return this.patterns.get(
+
       id,
+
+    );
+
+  }
+
+
+
+
+
+  public async update(
+
+    pattern:
+      ResponsePattern,
+
+  ):
+    Promise<void> {
+
+
+    await this.add(
+
+      pattern,
+
     );
 
   }
@@ -249,21 +310,30 @@ export default class PatternMemory {
 
 
   public async remove(
+
     id:
       string,
+
   ):
     Promise<boolean> {
 
 
     const removed =
+
       this.patterns.delete(
+
         id,
+
       );
 
 
+
     await this.store.delete(
+
       id,
+
     );
+
 
 
     return removed;
@@ -279,6 +349,7 @@ export default class PatternMemory {
 
 
     this.patterns.clear();
+
 
 
     await this.store.clear();
@@ -305,13 +376,11 @@ export default class PatternMemory {
 
 
 
-  /**
-   * Search memory.
-   * Loads persistent memory first.
-   */
   public async search(
+
     prompt:
       string,
+
   ):
     Promise<ResponsePattern[]> {
 
@@ -321,47 +390,173 @@ export default class PatternMemory {
 
 
     const query =
-      prompt.toLowerCase();
+
+      prompt
+
+        .toLowerCase()
+
+        .replace(
+
+          /[^a-z0-9\s]/g,
+
+          "",
+
+        );
+
+
+
+    const words =
+
+      query
+
+        .split(/\s+/)
+
+        .filter(
+
+          word =>
+
+            word.length > 2,
+
+        );
+
+
 
 
 
     return this.getAll()
 
+      .map(
+
+        pattern => {
+
+
+          let score = 0;
+
+
+
+          const searchable =
+
+            (
+
+              pattern.prompt +
+
+              " " +
+
+              pattern.response +
+
+              " " +
+
+              pattern.keywords.join(" ")
+
+            )
+
+            .toLowerCase();
+
+
+
+
+
+          for (
+
+            const word of words
+
+          ) {
+
+
+            if (
+
+              searchable.includes(word)
+
+            ) {
+
+              score += 5;
+
+            }
+
+          }
+
+
+
+
+
+          if (
+
+            searchable.includes(query)
+
+          ) {
+
+            score += 20;
+
+          }
+
+
+
+
+
+          if (
+
+            pattern.category === "conversation"
+
+          ) {
+
+            score -= 2;
+
+          }
+
+
+
+
+
+          score +=
+
+            pattern.confidence;
+
+
+
+          return {
+
+            pattern,
+
+            score,
+
+          };
+
+        },
+
+      )
+
       .filter(
 
-        pattern =>
+        item =>
 
-          pattern.prompt
-            .toLowerCase()
-            .includes(query)
+          item.score >= 5,
 
+      )
 
-          ||
+      .sort(
 
+        (
 
-          pattern.response
-            .toLowerCase()
-            .includes(query)
+          a,
 
+          b,
 
-          ||
+        ) =>
 
+          b.score -
 
-          pattern.keywords.some(
+          a.score,
 
-            keyword =>
+      )
 
-              query.includes(
+      .map(
 
-                keyword.toLowerCase(),
+        item =>
 
-              ),
-
-          ),
+          item.pattern,
 
       );
 
   }
-
 
 }

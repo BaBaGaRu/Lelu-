@@ -3,197 +3,113 @@
  * LÉLUVERSE
  * REALITY SYSTEM
  *
- * Transitions Genesis from chaos into structure.
+ * Evolution layer.
+ *
+ * Uses current Genesis state safely.
  * ==========================================================
  */
 
-import { useFrame } from "@react-three/fiber";
 
-import { useGenesis } from "../GenesisCore";
+import {
+  useFrame,
+} from "@react-three/fiber";
+
+
+import {
+  useRef,
+} from "react";
+
+
+import {
+  useGenesis,
+} from "../GenesisCore";
+
+
+
+
 
 export default function RealitySystem() {
 
-  const genesis = useGenesis();
+
+  const {
+
+    state,
+
+  } = useGenesis();
+
+
+
+
+
+  const evolution =
+
+    useRef(0);
+
+
+
+
 
   useFrame((_, delta) => {
 
-    const g = genesis.current;
 
-    if (g.paused) return;
+    const active =
 
-    /**
-     * Evolution
-     */
+      state.thinking ||
 
-    g.evolution +=
+      state.actions.length > 0 ||
 
-      delta *
+      state.cognition !== null;
 
-      (0.02 + g.intelligence * 0.08);
 
-    /**
-     * Awareness
-     */
 
-    g.awareness = Math.min(
 
-      1,
 
-      g.awareness +
+    if (active) {
 
-      delta *
 
-      0.0005 *
+      evolution.current =
 
-      (1 + g.curiosity),
+        Math.min(
 
-    );
+          1,
 
-    /**
-     * Stability
-     */
+          evolution.current +
 
-    g.stability = Math.min(
+          delta *
 
-      1,
+          0.02
 
-      g.stability +
+        );
 
-      delta *
-
-      0.0008 *
-
-      (1 + g.awareness),
-
-    );
-
-    /**
-     * Chaos naturally settles
-     */
-
-    g.chaos = Math.max(
-
-      0,
-
-      g.chaos -
-
-      delta *
-
-      0.00035 *
-
-      g.stability,
-
-    );
-
-    /**
-     * Intelligence grows
-     */
-
-    g.intelligence = Math.min(
-
-      1,
-
-      g.intelligence +
-
-      delta *
-
-      0.0004 *
-
-      (1 + g.awareness),
-
-    );
-
-    /**
-     * Curiosity never disappears
-     */
-
-    g.curiosity = Math.max(
-
-      0.2,
-
-      g.curiosity +
-
-      Math.sin(g.age * 0.3) *
-
-      delta *
-
-      0.0002,
-
-    );
-
-    /**
-     * Reality fields
-     */
-
-    g.gravity =
-
-      0.25 +
-
-      g.matter *
-
-      0.75;
-
-    g.light =
-
-      0.3 +
-
-      g.energy *
-
-      0.7;
-
-    /**
-     * Life begins
-     */
-
-    if (
-
-      g.matter > 0.45 &&
-
-      g.energy > 0.55
-
-    ) {
-
-      g.life = Math.min(
-
-        1,
-
-        g.life +
-
-        delta *
-
-        0.0003,
-
-      );
 
     }
 
-    /**
-     * Civilizations
-     */
+    else {
 
-    if (
 
-      g.life > 0.6 &&
+      evolution.current =
 
-      g.intelligence > 0.5
+        Math.max(
 
-    ) {
+          0,
 
-      g.civilizations = Math.min(
+          evolution.current -
 
-        1,
+          delta *
 
-        g.civilizations +
+          0.002
 
-        delta *
+        );
 
-        0.00015,
-
-      );
 
     }
+
 
   });
+
+
+
+
 
   return null;
 

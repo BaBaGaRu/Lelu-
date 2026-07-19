@@ -2,35 +2,97 @@
  * ==========================================================
  * LÉLUVERSE
  * GALAXY SYSTEM
+ *
+ * Living cosmic spectrum.
+ *
+ * Features:
+ * - rotation
+ * - shimmer
+ * - color evolution
+ * - cosmic light cycles
  * ==========================================================
  */
 
-import { Group, MeshBasicMaterial, Color } from "three";
 
-import { useFrame } from "@react-three/fiber";
+import {
+  Group,
+  MeshBasicMaterial,
+  Color,
+} from "three";
 
-import { useMemo, useRef } from "react";
 
-import { useGenesis } from "../GenesisCore";
+import {
+  useFrame,
+} from "@react-three/fiber";
+
+
+import {
+  useMemo,
+  useRef,
+} from "react";
+
+
+import {
+  useGenesis,
+} from "../GenesisCore";
+
+
+
+
 
 export default function GalaxySystem() {
 
+
+  const {
+
+    state,
+
+  } = useGenesis();
+
+
+
+
+
   const galaxy =
+
     useRef<Group>(null);
 
+
+
+
+
   const material =
+
     useRef<MeshBasicMaterial>(null);
 
-  const genesis =
-    useGenesis();
+
+
+
 
   const color =
+
     useMemo(
+
       () => new Color(),
+
       [],
+
     );
 
+
+
+
+
+  const clock =
+
+    useRef(0);
+
+
+
+
+
   useFrame((_, delta) => {
+
 
     if (
 
@@ -38,22 +100,44 @@ export default function GalaxySystem() {
 
       !material.current
 
-    ) return;
+    ) {
 
-    const g =
-      genesis.current;
+      return;
 
-    /**
-     * Rotation
+    }
+
+
+
+
+
+    clock.current += delta;
+
+
+
+
+
+    /*
+     * Cosmic rotation
      */
+
 
     galaxy.current.rotation.y +=
 
       delta *
 
-      0.08 *
+      (
 
-      (1 + g.energy);
+        0.08 +
+
+        state.actions.length *
+
+        0.002
+
+      );
+
+
+
+
 
     galaxy.current.rotation.x +=
 
@@ -61,90 +145,163 @@ export default function GalaxySystem() {
 
       0.015;
 
-    /**
-     * Living Spectrum
+
+
+
+
+    /*
+     * Living spectrum
+     *
+     * Simulates:
+     * dawn → day → dusk → night
      */
 
-    const hue =
+
+    const cycle =
 
       (
 
-        g.age * 0.015 +
+        clock.current *
 
-        g.energy * 0.15 +
-
-        g.awareness * 0.25
+        0.015
 
       ) % 1;
 
-    const saturation =
 
-      0.75 +
 
-      g.awareness * 0.25;
 
-    const lightness =
+
+    const activity =
+
+      state.thinking
+
+        ?
+
+        0.15
+
+        :
+
+        0;
+
+
+
+
+
+    color.setHSL(
+
+      (
+
+        cycle +
+
+        activity
+
+      ) % 1,
+
+
+      0.75,
+
 
       0.45 +
 
       Math.sin(
 
-        g.age * 3,
-
-      ) * 0.08;
-
-    color.setHSL(
-
-      hue,
-
-      saturation,
-
-      lightness,
-
-    );
-
-    material.current.color.copy(
-      color,
-    );
-
-    /**
-     * Cosmic Pulse
-     */
-
-    material.current.opacity =
-
-      0.10 +
-
-      Math.sin(
-
-        g.age * 5,
+        clock.current * 0.5
 
       ) *
 
-      0.05 +
+      0.08,
 
-      g.energy *
+    );
 
-      0.12;
+
+
+
+
+    material.current.color.copy(
+
+      color,
+
+    );
+
+
+
+
+
+    /*
+     * Cosmic breathing
+     */
+
+
+    material.current.opacity =
+
+      0.10
+
+      +
+
+      Math.sin(
+
+        clock.current * 2
+
+      )
+
+      *
+
+      0.05
+
+      +
+
+      (
+
+        state.thinking
+
+          ?
+
+          0.12
+
+          :
+
+          0
+
+      );
+
 
   });
 
+
+
+
+
   return (
 
-    <group ref={galaxy}>
+    <group
+
+      ref={galaxy}
+
+    >
+
+
+      {/* Main Galaxy Ring */}
+
 
       <mesh>
+
 
         <torusGeometry
 
           args={[
+
             4,
+
             0.03,
+
             32,
+
             600,
+
           ]}
 
         />
+
 
         <meshBasicMaterial
 
@@ -158,20 +315,47 @@ export default function GalaxySystem() {
 
         />
 
+
       </mesh>
 
-      <mesh rotation={[0,0,1.57]}>
+
+
+
+
+      {/* Outer Cosmic Ring */}
+
+
+      <mesh
+
+        rotation={[
+
+          0,
+
+          0,
+
+          1.57,
+
+        ]}
+
+      >
+
 
         <torusGeometry
 
           args={[
+
             4.3,
+
             0.015,
+
             16,
+
             400,
+
           ]}
 
         />
+
 
         <meshBasicMaterial
 
@@ -183,20 +367,47 @@ export default function GalaxySystem() {
 
         />
 
+
       </mesh>
 
-      <mesh rotation={[1.57,0,0]}>
+
+
+
+
+      {/* Inner Light Ring */}
+
+
+      <mesh
+
+        rotation={[
+
+          1.57,
+
+          0,
+
+          0,
+
+        ]}
+
+      >
+
 
         <torusGeometry
 
           args={[
+
             3.7,
+
             0.015,
+
             16,
+
             400,
+
           ]}
 
         />
+
 
         <meshBasicMaterial
 
@@ -208,7 +419,9 @@ export default function GalaxySystem() {
 
         />
 
+
       </mesh>
+
 
     </group>
 

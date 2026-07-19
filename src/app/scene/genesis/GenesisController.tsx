@@ -2,29 +2,151 @@
  * ==========================================================
  * LÉLUVERSE
  * GENESIS CONTROLLER
+ *
+ * Master Genesis composition layer.
+ *
+ * Connects:
+ * - time
+ * - AI bridge
+ * - renderer
+ * - interface
+ * - playground
+ * - navigator
+ * - workspace
  * ==========================================================
  */
 
-import GenesisCore from "./GenesisCore";
-import GenesisTime from "./GenesisTime";
-import GenesisInterface from "./GenesisInterface";
-import GenesisPlayground from "./GenesisPlayground";
+
+import {
+  useMemo,
+} from "react";
+
+
+import GenesisCore
+  from "./GenesisCore";
+
+
+import GenesisTime
+  from "./GenesisTime";
+
+
+import GenesisBridge
+  from "./GenesisBridge";
+
+
+import GenesisRenderer
+  from "./render/GenesisRenderer";
+
+
+import GenesisInterface
+  from "./GenesisInterface";
+
+
+import GenesisPlayground
+  from "./GenesisPlayground";
+
+
+import GenesisWorkspace
+  from "./GenesisWorkspace";
+
+
+import GenesisNavigator
+  from "./GenesisNavigator";
+
+
+
+
 
 export default function GenesisController() {
 
+
+  const navigator =
+
+    useMemo(
+
+      () =>
+
+        new GenesisNavigator(),
+
+      [],
+
+    );
+
+
+
+
+
   return (
 
-    <>
+    <GenesisCore>
+
+
+      {/* ==========================================
+          TIME ENGINE
+      ========================================== */}
 
       <GenesisTime />
 
-      <GenesisCore />
+
+
+
+
+      {/* ==========================================
+          AI → GENESIS
+      ========================================== */}
+
+      <GenesisBridge />
+
+
+
+
+
+      {/* ==========================================
+          LIVING WORLD
+      ========================================== */}
+
+      <GenesisRenderer />
+
+
+
+
+
+      {/* ==========================================
+          WORKSPACES
+      ========================================== */}
+
+      <GenesisWorkspace
+
+        navigator={navigator}
+
+      />
+
+
+
+
+
+      {/* ==========================================
+          ACTION CONTROL
+      ========================================== */}
+
+      <GenesisPlayground
+
+        navigator={navigator}
+
+      />
+
+
+
+
+
+      {/* ==========================================
+          HUD
+      ========================================== */}
 
       <GenesisInterface />
 
-      <GenesisPlayground />
 
-    </>
+    </GenesisCore>
 
   );
 

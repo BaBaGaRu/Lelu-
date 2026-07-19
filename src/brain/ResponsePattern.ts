@@ -5,67 +5,136 @@
  * ==========================================================
  */
 
+
+export type MemoryCategory =
+
+  | "identity"
+
+  | "preference"
+
+  | "goal"
+
+  | "skill"
+
+  | "project"
+
+  | "relationship"
+
+  | "experience"
+
+  | "conversation"
+
+  | "general";
+
+
+
+
 export default interface ResponsePattern {
+
 
   /**
    * Unique identifier.
    */
-  id: string;
+  id:
+    string;
+
+
+
+  /**
+   * Memory category.
+   */
+  category:
+    MemoryCategory;
+
+
 
   /**
    * Original user message.
    */
-  prompt: string;
+  prompt:
+    string;
+
+
 
   /**
-   * LÉLU's response.
+   * Stored information.
    */
-  response: string;
+  response:
+    string;
+
+
 
   /**
    * High-level intent.
    */
-  intent: string;
+  intent:
+    string;
+
+
 
   /**
-   * Important words extracted
-   * from the prompt.
+   * Important words.
    */
-  keywords: string[];
+  keywords:
+    string[];
+
+
 
   /**
-   * Additional information.
+   * Additional memory metadata.
    */
-  context: Record<
-    string,
-    unknown
-  >;
+  context:
+    Record<
+      string,
+      unknown
+    >;
+
+
+
+  /**
+   * Importance of memory.
+   */
+  importance:
+    number;
+
+
 
   /**
    * Confidence score.
-   * Range:
-   * 0.0 - 1.0
    */
-  confidence: number;
+  confidence:
+    number;
+
+
 
   /**
-   * Number of successful uses.
+   * Number of successful retrievals.
    */
-  successfulUses: number;
+  successfulUses:
+    number;
+
+
 
   /**
-   * Number of failed uses.
+   * Number of failed retrievals.
    */
-  failedUses: number;
+  failedUses:
+    number;
+
+
 
   /**
    * Creation timestamp.
    */
-  createdAt: number;
+  createdAt:
+    number;
+
+
 
   /**
    * Last update timestamp.
    */
-  updatedAt: number;
+  updatedAt:
+    number;
 
 }

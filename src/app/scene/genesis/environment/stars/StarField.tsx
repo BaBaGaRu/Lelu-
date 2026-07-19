@@ -1,116 +1,65 @@
 /**
  * ==========================================================
  * LÉLUVERSE
- * STAR FIELD
+ * STAR FIELD TEST
  *
- * Master controller for every
- * living star system.
+ * Minimal visibility test.
+ *
+ * Used to verify:
+ * - Canvas
+ * - Camera
+ * - Genesis renderer path
  * ==========================================================
  */
 
-import RegularStars from "./RegularStars";
-import TravelerStars from "./TravelerStars";
-import RetrogradeStars from "./RetrogradeStars";
-import WanderStars from "./WanderStars";
-import ClusterStars from "./ClusterStars";
-import OrbitStars from "./OrbitStars";
-import PulseStars from "./PulseStars";
-import PortalStars from "./PortalStars";
-import CodeStars from "./CodeStars";
 
 export default function StarField() {
+
 
   return (
 
     <group>
 
-      {/* ======================================
-          Foundation Stars
-      ====================================== */}
 
-      <RegularStars />
+      <mesh
 
-      {/* ======================================
-          High Speed Travelers
-      ====================================== */}
+        position={[
 
-      <TravelerStars />
+          0,
 
-      {/* ======================================
-          Retrograde Motion
-      ====================================== */}
+          0,
 
-      <RetrogradeStars />
+          0,
 
-      {/* ======================================
-          Wandering Intelligence
-      ====================================== */}
+        ]}
 
-      <WanderStars />
+      >
 
-      {/* ======================================
-          Living Clusters
-      ====================================== */}
 
-      <ClusterStars />
+        <sphereGeometry
 
-      {/* ======================================
-          Orbital Systems
-      ====================================== */}
+          args={[
 
-      <OrbitStars />
+            0.08,
 
-      {/* ======================================
-          Pulse Network
-      ====================================== */}
+            16,
 
-      <PulseStars />
+            16,
 
-      {/* ======================================
-          Portal Universe
-      ====================================== */}
+          ]}
 
-      <PortalStars />
+        />
 
-      {/* ======================================
-          Flowing Cosmic Code
-      ====================================== */}
 
-      <CodeStars />
+        <meshBasicMaterial
 
-      {/*
-      =====================================================
+          color="white"
 
-      Future Systems
+        />
 
-      <GalaxyStars />
 
-      <ConstellationStars />
+      </mesh>
 
-      <DeepSpaceStars />
-
-      <RollerCoasterStars />
-
-      <DanceStars />
-
-      <PodStars />
-
-      <ParadeStars />
-
-      <CrystalStars />
-
-      <BloomStars />
-
-      <WarpStars />
-
-      <MemoryStars />
-
-      <TransitStars />
-
-      <ZodiacStars />
-
-      =====================================================
-      */}
 
     </group>
 

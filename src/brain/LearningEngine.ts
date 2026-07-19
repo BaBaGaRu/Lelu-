@@ -8,11 +8,29 @@
 import PatternMemory
   from "./PatternMemory";
 
+import MemoryExtractor
+  from "./MemoryExtractor";
+
+import MemoryOrganizer
+  from "./MemoryOrganizer";
+
 import type ResponsePattern
   from "./ResponsePattern";
 
 
 export default class LearningEngine {
+
+
+  private readonly extractor =
+    new MemoryExtractor();
+
+
+
+  private readonly organizer =
+    new MemoryOrganizer();
+
+
+
 
 
   constructor(
@@ -24,116 +42,364 @@ export default class LearningEngine {
 
 
 
+
+
+  /**
+   * ==========================================================
+   * Learn from interaction
+   * ==========================================================
+   */
   public async learn(
 
     prompt:
       string,
 
+
     response:
       string,
+
 
     intent =
       "general",
 
+
     keywords:
       string[] = [],
 
+
     context:
-      Record<
-        string,
-        unknown
-      > = {},
+      Record<string, unknown> = {},
 
   ):
     Promise<ResponsePattern> {
 
 
-    const pattern:
-      ResponsePattern = {
+    const extracted =
+
+      this.extractor.extract(
+
+        prompt,
+
+        response,
+
+      );
+
+
+
+    const organized =
+
+      this.organizer.organize(
+
+        extracted,
+
+      );
+
+
+
+    const now =
+      Date.now();
+
+
+
+    let primary:
+      ResponsePattern | undefined;
+
+
+
+
+
+    for (
+
+      const memory of organized
+
+    ) {
+
+
+      const pattern:
+
+        ResponsePattern =
+
+      {
+
+
+        id:
+
+          crypto.randomUUID(),
+
+
+
+        category:
+
+          memory.category,
+
+
+
+        prompt,
+
+
+
+        response:
+
+          memory.content,
+
+
+
+        intent,
+
+
+
+        keywords:
+
+          memory.keywords.length > 0
+
+            ? memory.keywords
+
+            : keywords,
+
+
+
+        context:
+        {
+
+          ...context,
+
+
+          memoryCategory:
+
+            memory.category,
+
+
+          merged:
+
+            memory.merged,
+
+        },
+
+
+
+        importance:
+
+          memory.importance,
+
+
+
+        confidence:
+
+          1,
+
+
+
+        successfulUses:
+
+          1,
+
+
+
+        failedUses:
+
+          0,
+
+
+
+        createdAt:
+
+          now,
+
+
+
+        updatedAt:
+
+          now,
+
+      };
+
+
+
+
+
+      await this.memory.add(
+
+        pattern,
+
+      );
+
+
+
+
+
+      if (
+
+        !primary
+
+      ) {
+
+
+        primary =
+          pattern;
+
+      }
+
+    }
+
+
+
+
+
+    if (
+
+      primary
+
+    ) {
+
+
+      return primary;
+
+    }
+
+
+
+
+
+    const fallback:
+
+      ResponsePattern =
+
+    {
 
 
       id:
+
         crypto.randomUUID(),
+
+
+
+      category:
+
+        "conversation",
+
 
 
       prompt,
 
 
+
       response,
+
 
 
       intent,
 
 
+
       keywords,
+
 
 
       context,
 
 
+
+      importance:
+
+        0.3,
+
+
+
       confidence:
-        1,
+
+        0.5,
+
 
 
       successfulUses:
+
         1,
 
 
+
       failedUses:
+
         0,
 
 
+
       createdAt:
-        Date.now(),
+
+        now,
+
 
 
       updatedAt:
-        Date.now(),
 
+        now,
 
     };
 
 
 
+
+
     await this.memory.add(
-      pattern,
+
+      fallback,
+
     );
 
 
 
-    return pattern;
+
+
+    return fallback;
 
   }
 
 
 
-  public reinforce(
+
+
+  /**
+   * ==========================================================
+   * Reinforce memory
+   * ==========================================================
+   */
+  public async reinforce(
+
     id:
       string,
+
   ):
-    void {
+    Promise<void> {
 
 
     const pattern =
+
       this.memory.get(
+
         id,
+
       );
 
 
+
     if (
-      pattern ===
-      undefined
+
+      !pattern
+
     ) {
+
 
       return;
 
     }
+
+
 
 
 
     pattern.successfulUses++;
 
 
+
     pattern.confidence =
 
       pattern.successfulUses /
@@ -151,29 +417,53 @@ export default class LearningEngine {
 
 
     pattern.updatedAt =
+
       Date.now();
+
+
+
+    await this.memory.update(
+
+      pattern,
+
+    );
 
   }
 
 
 
-  public weaken(
+
+
+  /**
+   * ==========================================================
+   * Weaken memory
+   * ==========================================================
+   */
+  public async weaken(
+
     id:
       string,
+
   ):
-    void {
+    Promise<void> {
 
 
     const pattern =
+
       this.memory.get(
+
         id,
+
       );
 
 
+
     if (
-      pattern ===
-      undefined
+
+      !pattern
+
     ) {
+
 
       return;
 
@@ -181,7 +471,10 @@ export default class LearningEngine {
 
 
 
+
+
     pattern.failedUses++;
+
 
 
     pattern.confidence =
@@ -201,7 +494,16 @@ export default class LearningEngine {
 
 
     pattern.updatedAt =
+
       Date.now();
+
+
+
+    await this.memory.update(
+
+      pattern,
+
+    );
 
   }
 

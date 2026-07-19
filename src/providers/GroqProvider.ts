@@ -23,7 +23,7 @@ export default class GroqProvider
 
 
   readonly priority =
-    2;
+    1;
 
 
   readonly enabled =
@@ -56,6 +56,7 @@ export default class GroqProvider
     false;
 
 
+
   private readonly model =
     "llama-3.3-70b-versatile";
 
@@ -83,6 +84,7 @@ export default class GroqProvider
         hasKey:
           this.apiKey.length > 0,
 
+
         model:
           this.model,
 
@@ -91,6 +93,8 @@ export default class GroqProvider
     );
 
   }
+
+
 
 
 
@@ -110,6 +114,8 @@ export default class GroqProvider
 
 
 
+
+
   async health():
     Promise<AIProviderHealth> {
 
@@ -119,8 +125,10 @@ export default class GroqProvider
       available:
         await this.isAvailable(),
 
+
       initialized:
         this.initialized,
+
 
       lastChecked:
         Date.now(),
@@ -131,11 +139,14 @@ export default class GroqProvider
 
 
 
+
+
   canHandle(
     _input:
       string,
   ):
     boolean {
+
 
     return true;
 
@@ -143,9 +154,13 @@ export default class GroqProvider
 
 
 
+
+
   async generate(
+
     request:
       AIRequest,
+
   ):
     Promise<AIResponse> {
 
@@ -155,7 +170,9 @@ export default class GroqProvider
 
 
 
-    const messages = [
+    const messages =
+
+    [
 
       {
 
@@ -163,23 +180,28 @@ export default class GroqProvider
           "system",
 
         content:
-`IDENTITY LOCK:
+`You are Lélu.
 
-Your name is Lélu.
-
-You are Lélu, the personal AI companion created by the user.
-
-The underlying model is only the engine.
-Never identify yourself as Llama.
-
-If asked your name:
+Identity:
+- Your name is Lélu.
+- You are the user's personal AI companion.
+- The model running you is only the engine powering you.
+- Never identify yourself as Llama, GPT, Groq, or any underlying model.
+- If asked your name, answer:
 "My name is Lélu."
 
-You help the user learn, build, organize,
-research, and remember information.
+Memory behavior:
+- The information provided in Memory context is your memory system.
+- Treat it as known information about the user.
+- Use it naturally when relevant.
+- Do not say you have no memory when relevant memory context exists.
+- Do not invent memories that are not provided.
 
-If memory context is provided,
-treat it as information from Lélu's memory system.`,
+Conversation behavior:
+- Maintain continuity with the user.
+- Personalize responses using known information.
+- Be helpful, calm, creative, and engineering focused.
+- You are not a generic assistant. You are Lélu.`,
 
       },
 
@@ -227,6 +249,35 @@ ${request.context}`,
 
 
 
+
+
+    console.info(
+
+      "[GroqProvider] Sending request",
+
+      {
+
+        model:
+          this.model,
+
+
+        hasMemory:
+          Boolean(
+            request.context,
+          ),
+
+
+        messages:
+          messages.length,
+
+      },
+
+    );
+
+
+
+
+
     const response =
       await fetch(
 
@@ -244,6 +295,7 @@ ${request.context}`,
             "Content-Type":
               "application/json",
 
+
             Authorization:
               `Bearer ${this.apiKey}`,
 
@@ -251,18 +303,26 @@ ${request.context}`,
 
 
           body:
-            JSON.stringify({
 
-              model:
-                this.model,
+            JSON.stringify(
 
-              messages,
+              {
 
-            }),
+                model:
+                  this.model,
+
+
+                messages,
+
+              },
+
+            ),
 
         },
 
       );
+
+
 
 
 
@@ -292,7 +352,30 @@ ${request.context}`,
 
 
 
-    if (!response.ok) {
+
+
+    if (
+      !response.ok
+    ) {
+
+
+      console.error(
+
+        "[GroqProvider] Failed",
+
+        {
+
+          status:
+            response.status,
+
+
+          body:
+            raw,
+
+        },
+
+      );
+
 
 
       throw new Error(
@@ -305,6 +388,8 @@ ${request.context}`,
       );
 
     }
+
+
 
 
 
@@ -321,20 +406,28 @@ ${request.context}`,
         "",
 
 
+
       provider:
         this.name,
+
 
 
       model:
         this.model,
 
 
+
       processingTime:
-        Date.now() - started,
+
+        Date.now() -
+
+        started,
 
     };
 
   }
+
+
 
 
 
@@ -344,6 +437,7 @@ ${request.context}`,
 
     this.initialized =
       false;
+
 
   }
 

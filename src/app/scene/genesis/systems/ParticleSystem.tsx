@@ -2,20 +2,100 @@
  * ==========================================================
  * LÉLUVERSE
  * PARTICLE SYSTEM
+ *
+ * Living particle field.
+ *
+ * Reacts to:
+ * - cognition
+ * - thoughts
+ * - actions
+ * - conversation
  * ==========================================================
  */
 
-import { Sparkles } from "@react-three/drei";
 
-import { useGenesis } from "../GenesisCore";
+import {
+  Sparkles,
+} from "@react-three/drei";
+
+
+import {
+  useGenesis,
+} from "../GenesisCore";
+
+
+
+
 
 export default function ParticleSystem() {
 
-  const g = useGenesis().current;
+
+  const {
+
+    state,
+
+  } = useGenesis();
+
+
+
+
+
+  const cognitionLevel =
+
+    state.cognition
+
+      ?
+
+      (
+
+        state.cognition.agents.length
+
+        +
+
+        state.cognition.workspaces.length
+
+        +
+
+        state.cognition.nodes.length
+
+      )
+
+      :
+
+      0;
+
+
+
+
+
+  const activity =
+
+    state.thinking
+
+      ?
+
+      1
+
+      :
+
+      state.actions.length > 0
+
+        ?
+
+        0.7
+
+        :
+
+        0.3;
+
+
+
+
 
   return (
 
     <Sparkles
+
 
       count={
 
@@ -23,31 +103,35 @@ export default function ParticleSystem() {
 
           2500 +
 
-          g.energy *
+          cognitionLevel * 100 +
 
-          4000,
+          activity * 500
 
         )
 
       }
 
+
       scale={40}
+
 
       size={
 
         3 +
 
-        g.chaos * 2
+        activity * 2
 
       }
+
 
       speed={
 
         0.5 +
 
-        g.energy * 2
+        activity
 
       }
+
 
     />
 

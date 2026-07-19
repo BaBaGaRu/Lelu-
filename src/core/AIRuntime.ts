@@ -40,35 +40,61 @@ import type {
 import type RouterContext
   from "./router/RouterContext";
 
+
+
+
+
 export default class AIRuntime {
+
 
   public readonly core:
     AICore;
 
+
+
   public readonly router:
     AIRouter;
+
+
 
   public readonly brain:
     Brain;
 
+
+
   private readonly logger =
     new ExecutionLogger();
+
+
 
   private readonly knowledge =
     registerProviders();
 
+
+
   private readonly providers =
     registerAIProviders();
+
+
 
   private initialized =
     false;
 
+
+
+
+
   constructor() {
 
+
     this.brain =
+
       new Brain();
 
+
+
     this.core =
+
       new AICore(
 
         this.knowledge,
@@ -77,7 +103,10 @@ export default class AIRuntime {
 
       );
 
+
+
     this.router =
+
       new AIRouter(
 
         new BrainResolver(),
@@ -90,23 +119,52 @@ export default class AIRuntime {
 
   }
 
+
+
+
+
+  /**
+   * ==========================================================
+   * Ready status
+   * ==========================================================
+   */
   public isReady():
+
     boolean {
+
 
     return this.initialized;
 
   }
 
+
+
+
+
+  /**
+   * ==========================================================
+   * Initialize runtime
+   * ==========================================================
+   */
   public async initialize():
+
     Promise<void> {
 
+
     if (
+
       this.initialized
+
     ) {
+
 
       return;
 
     }
+
+
+
+
 
     this.logger.info(
 
@@ -116,10 +174,27 @@ export default class AIRuntime {
 
     );
 
+
+
+
+
     await this.core.initialize();
 
+
+
+    await this.brain.initialize();
+
+
+
+
+
     this.initialized =
+
       true;
+
+
+
+
 
     this.logger.info(
 
@@ -131,6 +206,15 @@ export default class AIRuntime {
 
   }
 
+
+
+
+
+  /**
+   * ==========================================================
+   * Process request
+   * ==========================================================
+   */
   public async process(
 
     request:
@@ -139,37 +223,68 @@ export default class AIRuntime {
   ):
     Promise<AIResponse> {
 
+
     if (
+
       !this.initialized
+
     ) {
+
 
       await this.initialize();
 
     }
 
+
+
+
+
     const context:
-      RouterContext = {
+
+      RouterContext =
+
+    {
+
 
       request,
 
+
+
       started:
+
         Date.now(),
 
+
+
       brain:
+
         this.brain,
 
+
+
       knowledgeProviders:
+
         this.knowledge,
 
+
+
       aiProviders:
+
         this.providers,
 
+
+
       logger:
+
         this.logger,
 
     };
 
-    return this.router.route(
+
+
+
+
+    return await this.router.route(
 
       context,
 
@@ -177,21 +292,69 @@ export default class AIRuntime {
 
   }
 
+
+
+
+
+  /**
+   * ==========================================================
+   * Cognition Runtime Access
+   *
+   * Exposes live learning state
+   * to Genesis and UI layers
+   * ==========================================================
+   */
+  public cognition():
+
+    ReturnType<Brain["getCognitionRuntime"]> {
+
+
+    return this.brain.getCognitionRuntime();
+
+  }
+
+
+
+
+
+  /**
+   * ==========================================================
+   * Shutdown
+   * ==========================================================
+   */
   public async shutdown():
+
     Promise<void> {
 
+
     if (
+
       !this.initialized
+
     ) {
+
 
       return;
 
     }
 
+
+
+
+
     await this.core.shutdown();
 
+
+
+
+
     this.initialized =
+
       false;
+
+
+
+
 
     this.logger.info(
 

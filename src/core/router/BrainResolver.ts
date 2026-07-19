@@ -16,65 +16,162 @@ import type {
   BrainResult,
 } from "./RouterResults";
 
+
 export default class BrainResolver {
+
 
   /**
    * Attempt to answer directly
-   * from the Brain.
+   * from memory.
    */
   public async execute(
+
     context:
       RouterContext,
-  ): Promise<BrainResult> {
+
+  ):
+    Promise<BrainResult> {
+
+
 
     const prompt =
+
       context.request.prompt;
+
+
+
+
+
+    const memories =
+
+      await context.brain.recall(
+
+        prompt,
+
+      );
+
+
+
+
 
     if (
 
-      !context.brain.knows(
-        prompt,
-      )
+      memories.length === 0
 
     ) {
+
 
       return {
 
         handled:
+
           false,
 
       };
 
     }
 
+
+
+
+
+    const best =
+
+      memories[0];
+
+
+
+
+
+    if (
+
+      best.confidence < 0.5
+
+    ) {
+
+
+      return {
+
+        handled:
+
+          false,
+
+      };
+
+    }
+
+
+
+
+
+    const text =
+
+      await context.brain.compose(
+
+        prompt,
+
+      );
+
+
+
+
+
     const response:
-      AIResponse = {
 
-      text:
+      AIResponse =
 
-        context.brain.compose(
-          prompt,
-        ),
+    {
+
+
+      text,
+
+
 
       provider:
+
         "brain",
 
+
+
       model:
+
         "memory",
+
+
 
       processingTime:
 
         Date.now() -
+
         context.started,
 
-      metadata: {
+
+
+      metadata:
+
+      {
 
         source:
+
           "Brain",
+
+
+        category:
+
+          best.category,
+
+
+        confidence:
+
+          best.confidence,
 
       },
 
     };
+
+
+
+
 
     context.logger.info(
 
@@ -90,10 +187,17 @@ export default class BrainResolver {
 
     );
 
+
+
+
+
     return {
 
+
       handled:
+
         true,
+
 
       response,
 

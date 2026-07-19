@@ -3,102 +3,251 @@
  * LÉLUVERSE
  * CORE LAYER
  *
- * Living Core V1
+ * Living Genesis core visual layer.
  * ==========================================================
  */
 
-import { useFrame } from "@react-three/fiber";
-import { useGenesis } from "../GenesisCore";
 
 import {
-  Group,
-  Mesh,
-} from "three";
+  useFrame,
+} from "@react-three/fiber";
+
 
 import {
   useRef,
 } from "react";
 
-export default function CoreLayer() {
 
-  const genesis = useGenesis();
+import {
+  Group,
+} from "three";
 
-  const root = useRef<Group>(null);
-  const shell = useRef<Mesh>(null);
-  const plasma = useRef<Mesh>(null);
-  const core = useRef<Mesh>(null);
 
-  useFrame((_, delta) => {
+import {
+  useGenesis,
+} from "../GenesisCore";
 
-    if (
-      !root.current ||
-      !shell.current ||
-      !plasma.current ||
-      !core.current
-    ) return;
 
-    const g = genesis.current;
-    const t = g.age;
 
-    root.current.rotation.y += delta * 0.05;
-    root.current.rotation.x += delta * 0.01;
 
-    shell.current.rotation.x += delta * 0.12;
-    shell.current.rotation.y += delta * 0.20;
 
-    plasma.current.rotation.y -= delta * 0.30;
-    plasma.current.rotation.z += delta * 0.15;
+export default function CoreLayer(){
 
-    const breathe =
-      1 + Math.sin(t * 2.5) * 0.05;
 
-    core.current.scale.setScalar(breathe);
+  const {
 
-    shell.current.scale.setScalar(
-      1.6 + Math.sin(t) * 0.05
+    state,
+
+  } = useGenesis();
+
+
+
+
+
+  const root =
+
+    useRef<Group>(null);
+
+
+
+
+
+  useFrame((_, delta)=>{
+
+
+    if(
+
+      !root.current
+
+    ){
+
+      return;
+
+    }
+
+
+
+
+
+    const genesis =
+
+      state as any;
+
+
+
+
+
+    const energy =
+
+      genesis.energy ??
+
+      0.5;
+
+
+
+
+
+    const age =
+
+      genesis.age ??
+
+      0;
+
+
+
+
+
+    const pulse =
+
+      1 +
+
+      Math.sin(
+
+        Date.now() *
+
+        0.002
+
+      )
+
+      *
+
+      0.04 +
+
+      energy *
+
+      0.05;
+
+
+
+
+
+    root.current.scale.setScalar(
+
+      pulse
+
     );
 
-    plasma.current.scale.setScalar(
-      1.25 + Math.cos(t * 1.4) * 0.04
-    );
+
+
+
+
+    root.current.rotation.y +=
+
+      delta *
+
+      (
+
+        0.05 +
+
+        age *
+
+        0.0001
+
+      );
+
 
   });
 
+
+
+
+
   return (
-    <group ref={root}>
 
-      <mesh ref={shell}>
-        <icosahedronGeometry args={[1.7, 8]} />
-        <meshBasicMaterial
-          color="#55AAFF"
-          transparent
-          opacity={0.10}
-          wireframe
+    <group
+
+      ref={root}
+
+    >
+
+
+      <mesh>
+
+
+        <icosahedronGeometry
+
+          args={[
+
+            0.8,
+
+            64,
+
+          ]}
+
         />
-      </mesh>
 
-      <mesh ref={plasma}>
-        <icosahedronGeometry args={[1.2, 12]} />
-        <meshStandardMaterial
-          color="#66BBFF"
-          emissive="#3388FF"
-          emissiveIntensity={5}
-          transparent
-          opacity={0.45}
-          roughness={0.2}
-        />
-      </mesh>
 
-      <mesh ref={core}>
-        <sphereGeometry args={[0.75, 64, 64]} />
-        <meshStandardMaterial
-          color="#FFFFFF"
-          emissive="#66CCFF"
-          emissiveIntensity={12}
+        <meshPhysicalMaterial
+
+          color="#66ddff"
+
+          emissive="#44ccff"
+
+          emissiveIntensity={3}
+
+          transmission={1}
+
+          thickness={2}
+
           roughness={0}
+
+          metalness={0.2}
+
+          clearcoat={1}
+
         />
+
+
       </mesh>
+
+
+
+
+
+      <mesh>
+
+
+        <sphereGeometry
+
+          args={[
+
+            0.25,
+
+            48,
+
+            48,
+
+          ]}
+
+        />
+
+
+        <meshBasicMaterial
+
+          color="#ffffff"
+
+        />
+
+
+      </mesh>
+
+
+
+
+
+      <pointLight
+
+        intensity={20}
+
+        distance={60}
+
+        color="#66ddff"
+
+      />
+
 
     </group>
+
   );
+
 }

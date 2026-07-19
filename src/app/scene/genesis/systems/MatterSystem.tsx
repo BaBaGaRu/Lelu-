@@ -2,60 +2,112 @@
  * ==========================================================
  * LÉLUVERSE
  * MATTER SYSTEM
+ *
+ * Living matter layer.
+ *
+ * Uses current Genesis state.
  * ==========================================================
  */
 
-import { useFrame } from "@react-three/fiber";
 
-import { useGenesis } from "../GenesisCore";
+import {
+  useFrame,
+} from "@react-three/fiber";
+
+
+import {
+  useRef,
+} from "react";
+
+
+import {
+  useGenesis,
+} from "../GenesisCore";
+
+
+
+
 
 export default function MatterSystem() {
 
-  const genesis = useGenesis();
+
+  const {
+
+    state,
+
+  } = useGenesis();
+
+
+
+
+
+  const matter =
+
+    useRef(0);
+
+
+
+
 
   useFrame((_, delta) => {
 
-    const g = genesis.current;
 
-    if (
+    const active =
 
-      g.energy >
+      state.actions.length > 0 ||
 
-      0.6
+      state.cognition !== null;
 
-    ) {
 
-      g.matter = Math.min(
 
-        1,
 
-        g.matter +
 
-        delta *
+    if (active) {
 
-        0.02,
 
-      );
+      matter.current =
+
+        Math.min(
+
+          1,
+
+          matter.current +
+
+          delta *
+
+          0.02
+
+        );
+
 
     }
 
     else {
 
-      g.matter = Math.max(
 
-        0,
+      matter.current =
 
-        g.matter -
+        Math.max(
 
-        delta *
+          0,
 
-        0.005,
+          matter.current -
 
-      );
+          delta *
+
+          0.005
+
+        );
+
 
     }
 
+
   });
+
+
+
+
 
   return null;
 

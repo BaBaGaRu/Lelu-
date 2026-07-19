@@ -2,34 +2,92 @@
  * ==========================================================
  * LÉLUVERSE
  * ENERGY SYSTEM
+ *
+ * Living energy layer.
+ *
+ * Uses Genesis state safely.
  * ==========================================================
  */
 
-import { useFrame } from "@react-three/fiber";
 
-import { useGenesis } from "../GenesisCore";
+import {
+  useFrame,
+} from "@react-three/fiber";
+
+
+import {
+  useRef,
+} from "react";
+
+
+import {
+  useGenesis,
+} from "../GenesisCore";
+
+
+
+
 
 export default function EnergySystem() {
 
-  const genesis = useGenesis();
+
+  const {
+
+    state,
+
+  } = useGenesis();
+
+
+
+
+
+  const energy =
+
+    useRef(0);
+
+
+
+
 
   useFrame(() => {
 
-    const g = genesis.current;
 
-    g.light =
+    /*
+     * Current Genesis activity
+     *
+     * Future:
+     * - theme energy
+     * - weather energy
+     * - evolution energy
+     */
 
-      g.energy *
 
-      (1 + g.awareness);
+    energy.current =
 
-    g.gravity =
+      state.thinking
 
-      g.matter *
+        ?
 
-      0.5;
+        1
+
+        :
+
+        state.actions.length > 0
+
+          ?
+
+          0.75
+
+          :
+
+          0.5;
+
 
   });
+
+
+
+
 
   return null;
 

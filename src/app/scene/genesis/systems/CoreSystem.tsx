@@ -4,77 +4,326 @@
  * CORE SYSTEM
  *
  * The living heart of Genesis.
- * Everything begins here.
+ *
+ * Behaviors:
+ * - heartbeat
+ * - ocean resonance
+ * - tectonic breathing
+ * - consciousness rotation
+ *
+ * Geometry preserved.
  * ==========================================================
  */
 
-import { useFrame } from "@react-three/fiber";
-import { Group } from "three";
-import { useRef } from "react";
 
-import { useGenesis } from "../GenesisCore";
+import {
+  useFrame,
+} from "@react-three/fiber";
+
+
+import {
+  useRef,
+} from "react";
+
+
+import {
+  Group,
+} from "three";
+
+
+import {
+  useGenesis,
+} from "../GenesisCore";
+
+
+
+
 
 export default function CoreSystem() {
 
-  const genesis = useGenesis();
 
-  const core = useRef<Group>(null);
+  const {
+
+    state,
+
+  } = useGenesis();
+
+
+
+
+
+  const core =
+
+    useRef<Group>(null);
+
+
+
+
+
+  const time =
+
+    useRef(0);
+
+
+
+
 
   useFrame((_, delta) => {
 
-    const g = genesis.current;
 
-    if (!core.current) return;
+    if (!core.current) {
 
-    /**
-     * Living pulse
+      return;
+
+    }
+
+
+
+
+
+    time.current += delta;
+
+
+
+
+
+    /*
+     * Activity resonance
      */
 
-    const pulse =
 
-      1 +
+    const activity =
 
-      Math.sin(g.age * 2) *
+      (
 
-      0.08 *
+        state.thinking ? 1 : 0
 
-      (g.energy + 0.5);
+      )
 
-    core.current.scale.setScalar(pulse);
+      +
 
-    /**
-     * Slow consciousness rotation
+      (
+
+        state.speaking ? 0.7 : 0
+
+      )
+
+      +
+
+      (
+
+        state.listening ? 0.4 : 0
+
+      )
+
+      +
+
+      (
+
+        state.actions.length > 0
+
+          ? 0.5
+
+          : 0
+
+      );
+
+
+
+
+
+    /*
+     * Heartbeat
+     *
+     * Deep biological pulse.
      */
+
+
+    const heartbeat =
+
+      Math.sin(
+
+        time.current * 3
+
+      )
+
+      *
+
+      0.035;
+
+
+
+
+
+    /*
+     * Ocean resonance
+     *
+     * Slow planetary breathing.
+     */
+
+
+    const ocean =
+
+      Math.sin(
+
+        time.current * 0.35
+
+      )
+
+      *
+
+      0.025;
+
+
+
+
+
+    /*
+     * Tectonic rumble
+     *
+     * Subtle earth-like vibration.
+     */
+
+
+    const quake =
+
+      Math.sin(
+
+        time.current * 12
+
+      )
+
+      *
+
+      0.003
+
+      *
+
+      (
+
+        1 +
+
+        activity
+
+      );
+
+
+
+
+
+    const scale =
+
+      1
+
+      +
+
+      heartbeat
+
+      +
+
+      ocean
+
+      +
+
+      activity * 0.02;
+
+
+
+
+
+    core.current.scale.setScalar(
+
+      scale
+
+    );
+
+
+
+
+
+    core.current.position.x =
+
+      quake;
+
+
+
+
+
+    core.current.position.y =
+
+      Math.sin(
+
+        time.current * 0.2
+
+      )
+
+      *
+
+      0.015;
+
+
+
+
+
+    /*
+     * Conscious rotation
+     */
+
 
     core.current.rotation.y +=
 
       delta *
 
-      (0.05 + g.awareness * 0.2);
+      (
 
-    core.current.rotation.x +=
+        state.online
 
-      delta *
+          ?
 
-      (0.01 + g.curiosity * 0.05);
+          0.08 +
+
+            state.messages.length * 0.001
+
+          :
+
+          0.03
+
+      );
+
 
   });
 
+
+
+
+
   return (
 
-    <group ref={core}>
+    <group
 
-      {/* =====================================================
-          Core Shell
-      ===================================================== */}
+      ref={core}
+
+    >
+
+
+      {/* CORE SHELL */}
+
 
       <mesh>
 
+
         <icosahedronGeometry
 
-          args={[0.55, 64]}
+          args={[
+
+            0.55,
+
+            64,
+
+          ]}
 
         />
+
 
         <meshPhysicalMaterial
 
@@ -98,19 +347,33 @@ export default function CoreSystem() {
 
         />
 
+
       </mesh>
 
-      {/* =====================================================
-          Inner Core
-      ===================================================== */}
+
+
+
+
+      {/* INNER CORE */}
+
 
       <mesh>
 
+
         <sphereGeometry
 
-          args={[0.18, 64, 64]}
+          args={[
+
+            0.18,
+
+            64,
+
+            64,
+
+          ]}
 
         />
+
 
         <meshBasicMaterial
 
@@ -118,11 +381,15 @@ export default function CoreSystem() {
 
         />
 
+
       </mesh>
 
-      {/* =====================================================
-          Core Light
-      ===================================================== */}
+
+
+
+
+      {/* CORE LIGHT */}
+
 
       <pointLight
 
@@ -133,6 +400,7 @@ export default function CoreSystem() {
         color="#77ddff"
 
       />
+
 
     </group>
 
