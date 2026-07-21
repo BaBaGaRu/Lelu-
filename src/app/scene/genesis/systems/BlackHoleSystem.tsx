@@ -9,11 +9,7 @@ import { useFrame } from "@react-three/fiber";
 import { Mesh } from "three";
 import { useRef } from "react";
 
-import { useGenesis } from "../GenesisCore";
-
 export default function BlackHoleSystem() {
-
-  const genesis = useGenesis();
 
   const hole = useRef<Mesh>(null);
 
@@ -23,8 +19,7 @@ export default function BlackHoleSystem() {
 
     hole.current.rotation.y += delta;
 
-    hole.current.visible =
-      genesis.current.gravity > 0.8;
+    hole.current.visible = true;
 
   });
 
@@ -32,7 +27,7 @@ export default function BlackHoleSystem() {
 
     <mesh ref={hole}>
 
-      <sphereGeometry args={[0.5,64,64]} />
+      <sphereGeometry args={[0.5, 64, 64]} />
 
       <meshStandardMaterial
 

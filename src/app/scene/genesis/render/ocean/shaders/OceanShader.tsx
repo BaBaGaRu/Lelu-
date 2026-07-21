@@ -8,67 +8,114 @@
 import {
   ShaderMaterial,
   Color,
+  DoubleSide,
 } from "three";
 
 import WaterVertex from "./vertex/WaterVertex.glsl";
 import WaterFragment from "./fragment/WaterFragment.glsl";
 
-const OceanShader = new ShaderMaterial({
+export function createOceanShader() {
 
-  vertexShader: WaterVertex,
+  return new ShaderMaterial({
 
-  fragmentShader: WaterFragment,
+    vertexShader: WaterVertex,
 
-  transparent: true,
+    fragmentShader: WaterFragment,
 
-  side: 2,
+    transparent: true,
 
-  uniforms: {
+    side: DoubleSide,
 
-    uTime: {
+    depthWrite: false,
 
-      value: 0,
+    depthTest: true,
+
+    uniforms: {
+
+      uTime: {
+
+        value: 0,
+
+      },
+
+      uWaveHeight: {
+
+        value: 1.0,
+
+      },
+
+      uTide: {
+
+        value: 0.5,
+
+      },
+
+      uCurrent: {
+
+        value: 1.0,
+
+      },
+
+      uDeepColor: {
+
+        value: new Color("#021B33"),
+
+      },
+
+      uSurfaceColor: {
+
+        value: new Color("#1F7CFF"),
+
+      },
+
+      uFoamColor: {
+
+        value: new Color("#FFFFFF"),
+
+      },
+
+      uGlowColor: {
+
+        value: new Color("#66CCFF"),
+
+      },
+
+      uSkyColor: {
+
+        value: new Color("#87CEEB"),
+
+      },
+
+      uLightColor: {
+
+        value: new Color("#FFFFFF"),
+
+      },
+
+      uShellTint: {
+
+        value: new Color("#021B33"),
+
+      },
+
+      uShellOpacity: {
+
+        value: 1.0,
+
+      },
 
     },
 
-    uDeepColor: {
+  });
 
-      value: new Color("#021B33"),
+}
 
-    },
+const OceanShader = createOceanShader();
 
-    uSurfaceColor: {
+export {
 
-      value: new Color("#1F7CFF"),
+  OceanShader,
 
-    },
-
-    uFoamColor: {
-
-      value: new Color("#FFFFFF"),
-
-    },
-
-    uGlowColor: {
-
-      value: new Color("#66CCFF"),
-
-    },
-
-    uSkyColor: {
-
-      value: new Color("#87CEEB"),
-
-    },
-
-    uLightColor: {
-
-      value: new Color("#FFFFFF"),
-
-    },
-
-  },
-
-});
+};
 
 export default OceanShader;

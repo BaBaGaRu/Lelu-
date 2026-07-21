@@ -14,6 +14,9 @@ uniform vec3 uGlowColor;
 uniform vec3 uSkyColor;
 uniform vec3 uLightColor;
 
+uniform vec3 uShellTint;
+uniform float uShellOpacity;
+
 varying vec2 vUv;
 varying vec3 vPosition;
 varying vec3 vNormal;
@@ -302,13 +305,17 @@ void main() {
 
         );
 
+    color *=
+
+        uShellTint;
+
     gl_FragColor =
 
         vec4(
 
             color,
 
-            1.0
+            uShellOpacity
 
         );
 
