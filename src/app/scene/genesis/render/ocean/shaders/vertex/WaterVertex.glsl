@@ -19,24 +19,25 @@ void main() {
 
     vUv = uv;
 
-    vec3 position = position;
+    // Copy the built-in vertex position into a mutable variable.
+    vec3 pos = position;
 
     float waveA =
         sin(
-            position.x * 0.18 +
+            pos.x * 0.18 +
             uTime * uCurrent
         );
 
     float waveB =
         cos(
-            position.z * 0.15 +
+            pos.z * 0.15 +
             uTime * 0.8
         );
 
     float waveC =
         sin(
-            (position.x + position.z)
-            * 0.08 +
+            (pos.x + pos.z) *
+            0.08 +
             uTime * 0.5
         );
 
@@ -55,17 +56,15 @@ void main() {
 
         tide;
 
-    position.y +=
-
+    pos.y +=
         height *
-
         uWaveHeight;
 
     vHeight = height;
 
-    vPosition = position;
+    vPosition = pos;
 
-    vNormal = normal;
+    vNormal = normalize(normalMatrix * normal);
 
     gl_Position =
 
@@ -75,7 +74,7 @@ void main() {
 
         vec4(
 
-            position,
+            pos,
 
             1.0
 

@@ -2,6 +2,8 @@
  * ==========================================================
  * LÉLUVERSE
  * FOAM FRAGMENT
+ *
+ * Ocean foam utilities.
  * ==========================================================
  */
 
@@ -9,26 +11,78 @@ float applyFoam(
 
     float height,
 
-    float strength
+    float intensity
 
-) {
+){
 
-    return
+    float foam = smoothstep(
 
-        smoothstep(
+        0.25,
 
-            0.45,
+        0.95,
 
-            0.85,
+        height
 
-            abs(
+    );
 
-                height
+    return clamp(
 
-            )
+        foam * intensity,
 
-        ) *
+        0.0,
 
-        strength;
+        1.0
+
+    );
+
+}
+
+float applyFoamEdge(
+
+    float value,
+
+    float width
+
+){
+
+    return smoothstep(
+
+        1.0 - width,
+
+        1.0,
+
+        value
+
+    );
+
+}
+
+vec3 applyFoamColor(
+
+    vec3 water,
+
+    vec3 foamColor,
+
+    float foam
+
+){
+
+    return mix(
+
+        water,
+
+        foamColor,
+
+        clamp(
+
+            foam,
+
+            0.0,
+
+            1.0
+
+        )
+
+    );
 
 }

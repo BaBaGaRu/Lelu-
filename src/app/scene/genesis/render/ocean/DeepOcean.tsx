@@ -5,13 +5,6 @@
  *
  * The deepest visible body of water surrounding
  * the Genesis Core.
- *
- * Responsibilities
- * ----------------
- * • Deep water breathing
- * • Slow planetary currents
- * • Depth glow
- * • Internal wave motion
  * ==========================================================
  */
 
@@ -49,29 +42,27 @@ export default function DeepOcean({
     const tsunami = oceanState.tsunami ?? 0;
 
     ocean.current.rotation.y +=
-      delta * 0.03 * current;
+      delta * 0.025 * current;
 
     ocean.current.rotation.x =
-      Math.sin(time.current * 0.08) *
-      0.03 *
+      Math.sin(time.current * 0.12) *
+      0.02 *
       tide;
 
     ocean.current.rotation.z =
-      Math.cos(time.current * 0.06) *
-      0.02 *
+      Math.cos(time.current * 0.08) *
+      0.015 *
       tide;
 
     const breathe =
       1 +
-      Math.sin(time.current * 0.6) *
-      0.015 *
+      Math.sin(time.current * 0.5) *
+      0.02 *
       tide +
       tsunami *
-      0.02;
+      0.04;
 
-    ocean.current.scale.set(
-      breathe,
-      breathe,
+    ocean.current.scale.setScalar(
       breathe,
     );
 
@@ -79,14 +70,14 @@ export default function DeepOcean({
 
       child.rotation.y +=
         delta *
-        (0.01 + i * 0.003) *
+        (0.008 + i * 0.003) *
         current;
 
-      child.rotation.z =
+      child.rotation.x =
         Math.sin(
-          time.current * 0.2 + i,
+          time.current * 0.15 + i,
         ) *
-        0.02;
+        0.01;
 
     });
 
@@ -94,25 +85,28 @@ export default function DeepOcean({
 
   return (
 
-    <group ref={ocean}>
+    <group ref={ocean} renderOrder={20}>
 
       {shells.map((_, i) => {
 
         const radius =
-          2.05 + i * 0.025;
+          2.35 + i * 0.06;
 
         const opacity =
-          0.07 - i * 0.01;
+          0.55 - i * 0.08;
 
         return (
 
-          <mesh key={i}>
+          <mesh
+            key={i}
+            renderOrder={20 + i}
+          >
 
             <sphereGeometry
               args={[
                 radius,
-                128,
-                128,
+                256,
+                256,
               ]}
             />
 
@@ -122,27 +116,31 @@ export default function DeepOcean({
                 i === 0
                   ? "#00142e"
                   : i === 1
-                  ? "#002b55"
+                  ? "#003c73"
                   : i === 2
-                  ? "#004f87"
+                  ? "#006db6"
                   : i === 3
-                  ? "#006bb3"
-                  : "#009dff"
+                  ? "#00a7ff"
+                  : "#66e0ff"
               }
 
               transparent
 
               opacity={opacity}
 
-              roughness={0.18}
+              transmission={0.12}
+
+              roughness={0.08}
 
               metalness={0}
 
-              transmission={0.18}
-
               clearcoat={1}
 
-              clearcoatRoughness={0.05}
+              clearcoatRoughness={0}
+
+              depthWrite={false}
+
+              depthTest={true}
 
             />
 
@@ -153,16 +151,25 @@ export default function DeepOcean({
       })}
 
       <pointLight
-        color="#0077ff"
-        intensity={4}
-        distance={25}
+
+        color="#009dff"
+
+        intensity={6}
+
+        distance={40}
+
       />
 
       <pointLight
-        color="#00d4ff"
-        intensity={2}
-        distance={18}
-        position={[0, 0, 2]}
+
+        color="#66d9ff"
+
+        intensity={4}
+
+        distance={30}
+
+        position={[0, 0, 3]}
+
       />
 
     </group>

@@ -2,6 +2,8 @@
  * ==========================================================
  * LÉLUVERSE
  * GLOW FRAGMENT
+ *
+ * Ocean glow utilities.
  * ==========================================================
  */
 
@@ -15,41 +17,71 @@ vec3 applyGlow(
 
     float time,
 
-    float intensity
+    float strength
 
-) {
+){
 
     float pulse =
 
+        0.5 +
+
+        0.5 *
+
         sin(
 
-            time * 1.5 +
-
-            uv.x * 8.0 +
-
-            uv.y * 8.0
+            time * 0.8
 
         );
 
-    pulse =
+    float radial =
 
-        pulse *
+        1.0 -
 
-        0.5 +
+        distance(
 
-        0.5;
+            uv,
 
-    float halo =
+            vec2(
 
-        smoothstep(
+                0.5,
+
+                0.5
+
+            )
+
+        ) *
+
+        2.0;
+
+    radial =
+
+        clamp(
+
+            radial,
 
             0.0,
 
-            1.0,
-
-            pulse
+            1.0
 
         );
+
+    radial =
+
+        pow(
+
+            radial,
+
+            2.0
+
+        );
+
+    float glow =
+
+        radial *
+
+        pulse *
+
+        strength;
 
     return
 
@@ -57,10 +89,30 @@ vec3 applyGlow(
 
         glowColor *
 
-        halo *
+        glow;
 
-        intensity *
+}
 
-        0.25;
+vec3 applyEdgeGlow(
+
+    vec3 color,
+
+    vec3 glowColor,
+
+    float fresnel,
+
+    float strength
+
+){
+
+    return
+
+        color +
+
+        glowColor *
+
+        fresnel *
+
+        strength;
 
 }

@@ -3,15 +3,7 @@
  * LÉLUVERSE
  * SURFACE OCEAN
  *
- * The visible outer skin of the Genesis Ocean.
- *
- * Responsibilities
- * ----------------
- * • Surface waves
- * • Planetary shimmer
- * • Slow rolling motion
- * • Tsunami expansion
- * • Living water shell
+ * Living planetary ocean shell.
  * ==========================================================
  */
 
@@ -55,50 +47,44 @@ export default function SurfaceOcean({
 
     surface.current.rotation.y +=
       delta *
-      0.08 *
+      0.05 *
       current;
 
     surface.current.rotation.x =
       Math.sin(
         time.current * 0.12,
       ) *
-      0.02 *
+      0.015 *
       tide;
 
     surface.current.rotation.z =
       Math.cos(
-        time.current * 0.18,
+        time.current * 0.10,
       ) *
-      0.015 *
+      0.01 *
       tide;
 
     const swell =
       1 +
       Math.sin(
-        time.current * 1.4,
+        time.current * 1.2,
       ) *
-      0.01 *
+      0.02 *
       tide +
       tsunami *
-      0.03;
+      0.05;
 
-    surface.current.scale.set(
-      swell,
-      swell,
+    surface.current.scale.setScalar(
       swell,
     );
 
     surface.current.children.forEach(
       (child, i) => {
 
-        child.rotation.z +=
-          delta *
-          (0.05 + i * 0.01);
-
         child.rotation.y +=
           delta *
           current *
-          (0.03 + i * 0.01);
+          (0.02 + i * 0.005);
 
       },
     );
@@ -107,17 +93,18 @@ export default function SurfaceOcean({
 
   return (
 
-    <group ref={surface}>
+    <group
+      ref={surface}
+      renderOrder={100}
+    >
 
-      {/* Main Water Surface */}
-
-      <mesh>
+      <mesh renderOrder={100}>
 
         <sphereGeometry
           args={[
-            2.18,
-            128,
-            128,
+            2.65,
+            256,
+            256,
           ]}
         />
 
@@ -127,11 +114,11 @@ export default function SurfaceOcean({
 
           transparent
 
-          opacity={0.10}
+          opacity={0.92}
 
-          transmission={0.95}
+          transmission={0.08}
 
-          roughness={0.08}
+          roughness={0.05}
 
           metalness={0}
 
@@ -139,16 +126,21 @@ export default function SurfaceOcean({
 
           clearcoatRoughness={0}
 
+          reflectivity={1}
+
+          depthWrite={false}
+
+          depthTest={true}
+
         />
 
       </mesh>
-
-      {/* Moving Surface Bands */}
 
       {bands.map((_, i) => (
 
         <mesh
           key={i}
+          renderOrder={101 + i}
           rotation={[
             Math.PI / 2,
             0,
@@ -158,9 +150,9 @@ export default function SurfaceOcean({
 
           <torusGeometry
             args={[
-              2.22 + i * 0.03,
-              0.004,
-              32,
+              2.72 + i * 0.05,
+              0.01,
+              64,
               256,
             ]}
           />
@@ -169,16 +161,18 @@ export default function SurfaceOcean({
 
             color={
               i % 2 === 0
-                ? "#8cecff"
-                : "#39bfff"
+                ? "#9cefff"
+                : "#3fd4ff"
             }
 
             transparent
 
             opacity={
-              0.05 +
-              i * 0.006
+              0.45 -
+              i * 0.03
             }
+
+            depthWrite={false}
 
           />
 
@@ -186,12 +180,10 @@ export default function SurfaceOcean({
 
       ))}
 
-      {/* Surface Glow */}
-
       <pointLight
-        color="#6dd8ff"
-        intensity={2}
-        distance={20}
+        color="#7fe5ff"
+        intensity={6}
+        distance={50}
       />
 
     </group>
