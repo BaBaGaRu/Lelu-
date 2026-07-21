@@ -4,44 +4,29 @@
  * OCEAN VISUALIZER
  *
  * Visible planetary water layer.
- *
- * Displays:
- * - ocean waves
- * - tidal rings
- * - current movement
- * - tsunami pulses
- *
- * Reads OceanSystem state.
  * ==========================================================
  */
-
 
 import {
   useFrame,
 } from "@react-three/fiber";
-
 
 import {
   useMemo,
   useRef,
 } from "react";
 
-
 import {
   Group,
 } from "three";
 
+import OceanShader from "./ocean/shaders/OceanShader";
 
 import {
   useGenesis,
 } from "../GenesisCore";
 
-
-
-
-
 export default function OceanVisualizer() {
-
 
   const {
 
@@ -49,51 +34,41 @@ export default function OceanVisualizer() {
 
   } = useGenesis();
 
-
-
-
-
   const ocean =
 
     useRef<Group>(null);
-
 
   const waves =
 
     useRef<Group>(null);
 
-
-
-
-
   const time =
 
     useRef(0);
 
+  const rings =
 
+    useMemo(
 
+      () =>
 
+        Array.from({
 
-  const rings = useMemo(
+          length: 12,
 
-    () =>
+        }),
 
-      Array.from({
+      [],
 
-        length:12,
+    );
 
-      }),
+  useFrame((_, delta) => {
 
-    [],
+    time.current += delta;
 
-  );
+    OceanShader.uniforms.uTime.value =
 
-
-
-
-
-  useFrame((_,delta)=>{
-
+      time.current;
 
     if (
 
@@ -107,70 +82,39 @@ export default function OceanVisualizer() {
 
     }
 
-
-
-
-
-    time.current += delta;
-
-
-
-
-
     const water =
 
       (state as any)
 
-        .ocean
+        .ocean ??
 
-        ??
-
-        {};
-
-
-
-
+      {};
 
     const tide =
 
-      water.tide
-
-      ??
+      water.tide ??
 
       0.5;
-
-
-
-
 
     const tsunami =
 
-      water.tsunami
-
-      ??
+      water.tsunami ??
 
       0;
 
-
-
-
-
     const current =
 
-      water.current
-
-      ??
+      water.current ??
 
       0.5;
 
+    ocean.current.rotation.y +=
 
+      delta *
 
+      current *
 
-
-    /*
-     * Ocean breathing
-     */
-
+      0.02;
 
     ocean.current.scale.y =
 
@@ -182,37 +126,17 @@ export default function OceanVisualizer() {
 
         0.8
 
-      )
-
-      *
+      ) *
 
       0.03 *
 
       tide;
-
-
-
-
-
-    /*
-     * Current flow
-     */
-
 
     waves.current.rotation.y +=
 
       delta *
 
       current;
-
-
-
-
-
-    /*
-     * Tsunami expansion
-     */
-
 
     waves.current.scale.setScalar(
 
@@ -224,12 +148,7 @@ export default function OceanVisualizer() {
 
     );
 
-
   });
-
-
-
-
 
   return (
 
@@ -239,14 +158,7 @@ export default function OceanVisualizer() {
 
     >
 
-
-      {/* ======================================
-          WATER FIELD
-      ====================================== */}
-
-
       <mesh>
-
 
         <sphereGeometry
 
@@ -254,36 +166,23 @@ export default function OceanVisualizer() {
 
             2.2,
 
-            64,
+            256,
 
-            64,
+            256,
 
           ]}
 
         />
 
+        <primitive
 
-        <meshBasicMaterial
+          object={OceanShader}
 
-          color="#0066ff"
-
-          transparent
-
-          opacity={0.04}
+          attach="material"
 
         />
 
-
       </mesh>
-
-
-
-
-
-      {/* ======================================
-          WAVE RINGS
-      ====================================== */}
-
 
       <group
 
@@ -291,11 +190,9 @@ export default function OceanVisualizer() {
 
       >
 
-
         {
 
-          rings.map((_,i)=>(
-
+          rings.map((_, i) => (
 
             <mesh
 
@@ -312,7 +209,6 @@ export default function OceanVisualizer() {
               ]}
 
             >
-
 
               <torusGeometry
 
@@ -334,7 +230,6 @@ export default function OceanVisualizer() {
 
               />
 
-
               <meshBasicMaterial
 
                 color="#33ccff"
@@ -345,20 +240,13 @@ export default function OceanVisualizer() {
 
               />
 
-
             </mesh>
-
 
           ))
 
         }
 
-
       </group>
-
-
-
-
 
       <pointLight
 
@@ -369,7 +257,6 @@ export default function OceanVisualizer() {
         color="#33aaff"
 
       />
-
 
     </group>
 
