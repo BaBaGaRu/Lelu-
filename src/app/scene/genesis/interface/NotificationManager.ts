@@ -3,16 +3,9 @@
  * LÉLUVERSE
  * NOTIFICATION MANAGER
  *
- * Manages notifications, alerts, AI events,
- * and interface messages.
+ * Manages interface notifications.
  * ==========================================================
  */
-
-export type NotificationType =
-  | "info"
-  | "success"
-  | "warning"
-  | "error";
 
 export interface InterfaceNotification {
 
@@ -22,13 +15,11 @@ export interface InterfaceNotification {
 
   message: string;
 
-  type: NotificationType;
-
-  visible: boolean;
-
-  timestamp: number;
+  created: number;
 
   duration: number;
+
+  read: boolean;
 
 }
 
@@ -73,20 +64,17 @@ export default class NotificationManager {
 
       if (
 
-        notification.visible &&
-
         notification.duration > 0 &&
 
-        now >=
-
-        notification.timestamp +
+        now - notification.created >=
 
         notification.duration
 
       ) {
 
-        notification.visible =
-          false;
+        this.notifications.delete(
+          notification.id,
+        );
 
       }
 
@@ -103,9 +91,8 @@ export default class NotificationManager {
 
   }
 
-  register(
-    notification:
-      InterfaceNotification,
+  push(
+    notification: InterfaceNotification,
   ): void {
 
     this.notifications.set(
@@ -118,7 +105,7 @@ export default class NotificationManager {
 
   }
 
-  unregister(
+  remove(
     id: string,
   ): void {
 
@@ -128,78 +115,25 @@ export default class NotificationManager {
 
   }
 
-  notify(
+  clear(): void {
 
-    title: string,
-
-    message: string,
-
-    type: NotificationType =
-      "info",
-
-    duration = 5000,
-
-  ): string {
-
-    const id =
-
-      `notification-${Date.now()}-${Math.random()
-        .toString(36)
-        .slice(2)}`;
-
-    const notification:
-      InterfaceNotification = {
-
-      id,
-
-      title,
-
-      message,
-
-      type,
-
-      visible: true,
-
-      timestamp:
-        Date.now(),
-
-      duration,
-
-    };
-
-    this.notifications.set(
-
-      id,
-
-      notification,
-
-    );
-
-    return id;
+    this.notifications.clear();
 
   }
 
-  dismiss(
+  markRead(
     id: string,
   ): void {
 
     const notification =
 
-      this.notifications.get(
-        id,
-      );
+      this.notifications.get(id);
 
     if (!notification)
       return;
 
-    notification.visible =
-      false;
-
-  }
-
-  clear(): void {
-
-    this.notifications.clear();
+    notification.read =
+      true;
 
   }
 

@@ -3,15 +3,13 @@
  * LÉLUVERSE
  * OVERLAY MANAGER
  *
- * Manages every interface overlay.
+ * Manages every overlay in the Lélu interface.
  * ==========================================================
  */
 
 export interface InterfaceOverlay {
 
   id: string;
-
-  type: string;
 
   visible: boolean;
 
@@ -37,7 +35,8 @@ export default class OverlayManager {
     if (this.initialized)
       return;
 
-    this.initialized = true;
+    this.initialized =
+      true;
 
   }
 
@@ -54,7 +53,8 @@ export default class OverlayManager {
 
     this.overlays.clear();
 
-    this.initialized = false;
+    this.initialized =
+      false;
 
   }
 
@@ -81,7 +81,9 @@ export default class OverlayManager {
 
   get(
     id: string,
-  ): InterfaceOverlay | undefined {
+  ):
+    | InterfaceOverlay
+    | undefined {
 
     return this.overlays.get(
       id,
@@ -89,7 +91,8 @@ export default class OverlayManager {
 
   }
 
-  getAll(): InterfaceOverlay[] {
+  getAll():
+    InterfaceOverlay[] {
 
     return Array.from(
       this.overlays.values(),
@@ -107,7 +110,8 @@ export default class OverlayManager {
     if (!overlay)
       return;
 
-    overlay.visible = true;
+    overlay.visible =
+      true;
 
   }
 
@@ -121,7 +125,23 @@ export default class OverlayManager {
     if (!overlay)
       return;
 
-    overlay.visible = false;
+    overlay.visible =
+      false;
+
+  }
+
+  toggle(
+    id: string,
+  ): void {
+
+    const overlay =
+      this.overlays.get(id);
+
+    if (!overlay)
+      return;
+
+    overlay.visible =
+      !overlay.visible;
 
   }
 
@@ -135,7 +155,8 @@ export default class OverlayManager {
 
     ) {
 
-      overlay.visible = false;
+      overlay.visible =
+        false;
 
     }
 

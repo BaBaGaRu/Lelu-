@@ -3,8 +3,7 @@
  * LÉLUVERSE
  * DOCK MANAGER
  *
- * Manages the Lélu dock, pinned applications,
- * running applications, and quick launch.
+ * Manages the Lélu dock.
  * ==========================================================
  */
 
@@ -16,11 +15,9 @@ export interface DockItem {
 
   icon: string;
 
+  enabled: boolean;
+
   pinned: boolean;
-
-  running: boolean;
-
-  visible: boolean;
 
 }
 
@@ -40,7 +37,8 @@ export default class DockManager {
     if (this.initialized)
       return;
 
-    this.initialized = true;
+    this.initialized =
+      true;
 
   }
 
@@ -57,7 +55,8 @@ export default class DockManager {
 
     this.items.clear();
 
-    this.initialized = false;
+    this.initialized =
+      false;
 
   }
 
@@ -98,30 +97,10 @@ export default class DockManager {
     DockItem[] {
 
     return Array.from(
+
       this.items.values(),
+
     );
-
-  }
-
-  getPinned():
-    DockItem[] {
-
-    return this.getAll()
-
-      .filter(
-        item => item.pinned,
-      );
-
-  }
-
-  getRunning():
-    DockItem[] {
-
-    return this.getAll()
-
-      .filter(
-        item => item.running,
-      );
 
   }
 
@@ -130,12 +109,14 @@ export default class DockManager {
   ): void {
 
     const item =
+
       this.items.get(id);
 
     if (!item)
       return;
 
-    item.pinned = true;
+    item.pinned =
+      true;
 
   }
 
@@ -144,76 +125,46 @@ export default class DockManager {
   ): void {
 
     const item =
+
       this.items.get(id);
 
     if (!item)
       return;
 
-    item.pinned = false;
+    item.pinned =
+      false;
 
   }
 
-  launch(
+  enable(
     id: string,
   ): void {
 
     const item =
+
       this.items.get(id);
 
     if (!item)
       return;
 
-    item.running = true;
-
-    item.visible = true;
+    item.enabled =
+      true;
 
   }
 
-  close(
+  disable(
     id: string,
   ): void {
 
     const item =
+
       this.items.get(id);
 
     if (!item)
       return;
 
-    item.running = false;
-
-  }
-
-  show(
-    id: string,
-  ): void {
-
-    const item =
-      this.items.get(id);
-
-    if (!item)
-      return;
-
-    item.visible = true;
-
-  }
-
-  hide(
-    id: string,
-  ): void {
-
-    const item =
-      this.items.get(id);
-
-    if (!item)
-      return;
-
-    item.visible = false;
-
-  }
-
-  clear(): void {
-
-    this.items.clear();
+    item.enabled =
+      false;
 
   }
 

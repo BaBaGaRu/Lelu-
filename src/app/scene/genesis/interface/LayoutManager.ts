@@ -1,121 +1,40 @@
 /**
  * ==========================================================
  * LÉLUVERSE
- * WORKSPACE
+ * LAYOUT MANAGER
  *
- * Represents a single Lélu workspace.
+ * Manages interface layouts.
  * ==========================================================
  */
 
-export interface WorkspaceState {
+export default class LayoutManager {
 
-  id: string;
+  private initialized =
+    false;
 
-  title: string;
+  initialize(): void {
 
-  icon: string;
+    if (this.initialized)
+      return;
 
-  active: boolean;
-
-  visible: boolean;
-
-  locked: boolean;
-
-  created: number;
-
-  updated: number;
-
-}
-
-export default class Workspace {
-
-  readonly state:
-    WorkspaceState;
-
-  constructor(
-    state: WorkspaceState,
-  ) {
-
-    this.state = state;
-
-  }
-
-  activate(): void {
-
-    this.state.active =
+    this.initialized =
       true;
 
-    this.state.updated =
-      Date.now();
-
   }
 
-  deactivate(): void {
-
-    this.state.active =
-      false;
-
-    this.state.updated =
-      Date.now();
-
-  }
-
-  show(): void {
-
-    this.state.visible =
-      true;
-
-    this.state.updated =
-      Date.now();
-
-  }
-
-  hide(): void {
-
-    this.state.visible =
-      false;
-
-    this.state.updated =
-      Date.now();
-
-  }
-
-  lock(): void {
-
-    this.state.locked =
-      true;
-
-    this.state.updated =
-      Date.now();
-
-  }
-
-  unlock(): void {
-
-    this.state.locked =
-      false;
-
-    this.state.updated =
-      Date.now();
-
-  }
-
-  rename(
-    title: string,
+  update(
+    _delta: number,
   ): void {
 
-    this.state.title =
-      title;
-
-    this.state.updated =
-      Date.now();
+    if (!this.initialized)
+      return;
 
   }
 
-  update(): void {
+  shutdown(): void {
 
-    this.state.updated =
-      Date.now();
+    this.initialized =
+      false;
 
   }
 

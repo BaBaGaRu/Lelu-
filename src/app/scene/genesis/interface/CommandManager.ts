@@ -3,9 +3,7 @@
  * LÉLUVERSE
  * COMMAND MANAGER
  *
- * Central command registry and dispatcher.
- * Powers the command palette, shortcuts,
- * AI actions, and automation.
+ * Executes interface commands.
  * ==========================================================
  */
 
@@ -13,11 +11,7 @@ export interface InterfaceCommand {
 
   id: string;
 
-  title: string;
-
-  description: string;
-
-  category: string;
+  name: string;
 
   enabled: boolean;
 
@@ -90,20 +84,50 @@ export default class CommandManager {
   ): boolean {
 
     const command =
+
       this.commands.get(id);
 
-    if (
-      !command ||
-      !command.enabled
-    ) {
-
+    if (!command)
       return false;
 
-    }
+    if (!command.enabled)
+      return false;
 
     command.execute();
 
     return true;
+
+  }
+
+  enable(
+    id: string,
+  ): void {
+
+    const command =
+
+      this.commands.get(id);
+
+    if (!command)
+      return;
+
+    command.enabled =
+      true;
+
+  }
+
+  disable(
+    id: string,
+  ): void {
+
+    const command =
+
+      this.commands.get(id);
+
+    if (!command)
+      return;
+
+    command.enabled =
+      false;
 
   }
 
@@ -127,73 +151,6 @@ export default class CommandManager {
       this.commands.values(),
 
     );
-
-  }
-
-  getCategory(
-    category: string,
-  ):
-    InterfaceCommand[] {
-
-    return this.getAll()
-
-      .filter(
-
-        command =>
-
-          command.category ===
-          category,
-
-      );
-
-  }
-
-  search(
-    query: string,
-  ):
-    InterfaceCommand[] {
-
-    const search =
-
-      query
-        .trim()
-        .toLowerCase();
-
-    if (
-
-      search.length === 0
-
-    ) {
-
-      return this.getAll();
-
-    }
-
-    return this.getAll()
-
-      .filter(
-
-        command =>
-
-          command.title
-            .toLowerCase()
-            .includes(search) ||
-
-          command.description
-            .toLowerCase()
-            .includes(search) ||
-
-          command.category
-            .toLowerCase()
-            .includes(search),
-
-      );
-
-  }
-
-  clear(): void {
-
-    this.commands.clear();
 
   }
 

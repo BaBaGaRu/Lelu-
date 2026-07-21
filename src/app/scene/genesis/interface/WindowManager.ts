@@ -29,12 +29,17 @@ export interface InterfaceWindow {
 
   height: number;
 
+  zIndex: number;
+
 }
 
 export default class WindowManager {
 
   private initialized =
     false;
+
+  private nextZ =
+    1;
 
   private readonly windows =
     new Map<
@@ -47,7 +52,8 @@ export default class WindowManager {
     if (this.initialized)
       return;
 
-    this.initialized = true;
+    this.initialized =
+      true;
 
   }
 
@@ -64,13 +70,20 @@ export default class WindowManager {
 
     this.windows.clear();
 
-    this.initialized = false;
+    this.nextZ =
+      1;
+
+    this.initialized =
+      false;
 
   }
 
   register(
     window: InterfaceWindow,
   ): void {
+
+    window.zIndex =
+      this.nextZ++;
 
     this.windows.set(
       window.id,
@@ -91,7 +104,9 @@ export default class WindowManager {
 
   get(
     id: string,
-  ): InterfaceWindow | undefined {
+  ):
+    | InterfaceWindow
+    | undefined {
 
     return this.windows.get(
       id,
@@ -99,10 +114,13 @@ export default class WindowManager {
 
   }
 
-  getAll(): InterfaceWindow[] {
+  getAll():
+    InterfaceWindow[] {
 
     return Array.from(
+
       this.windows.values(),
+
     );
 
   }
@@ -120,16 +138,9 @@ export default class WindowManager {
     ) {
 
       window.focused =
-
-        window.id === id;
+        false;
 
     }
-
-  }
-
-  show(
-    id: string,
-  ): void {
 
     const window =
 
@@ -138,7 +149,26 @@ export default class WindowManager {
     if (!window)
       return;
 
-    window.visible = true;
+    window.focused =
+      true;
+
+    window.zIndex =
+      this.nextZ++;
+
+  }
+
+  show(
+    id: string,
+  ): void {
+
+    const window =
+      this.windows.get(id);
+
+    if (!window)
+      return;
+
+    window.visible =
+      true;
 
     this.focus(id);
 
@@ -149,15 +179,33 @@ export default class WindowManager {
   ): void {
 
     const window =
-
       this.windows.get(id);
 
     if (!window)
       return;
 
-    window.visible = false;
+    window.visible =
+      false;
 
-    window.focused = false;
+    window.focused =
+      false;
+
+  }
+
+  toggle(
+    id: string,
+  ): void {
+
+    const window =
+      this.windows.get(id);
+
+    if (!window)
+      return;
+
+    if (window.visible)
+      this.hide(id);
+    else
+      this.show(id);
 
   }
 
@@ -172,15 +220,16 @@ export default class WindowManager {
   ): void {
 
     const window =
-
       this.windows.get(id);
 
     if (!window)
       return;
 
-    window.x = x;
+    window.x =
+      x;
 
-    window.y = y;
+    window.y =
+      y;
 
   }
 
@@ -195,15 +244,16 @@ export default class WindowManager {
   ): void {
 
     const window =
-
       this.windows.get(id);
 
     if (!window)
       return;
 
-    window.width = width;
+    window.width =
+      width;
 
-    window.height = height;
+    window.height =
+      height;
 
   }
 
@@ -212,15 +262,16 @@ export default class WindowManager {
   ): void {
 
     const window =
-
       this.windows.get(id);
 
     if (!window)
       return;
 
-    window.minimized = true;
+    window.minimized =
+      true;
 
-    window.maximized = false;
+    window.maximized =
+      false;
 
   }
 
@@ -229,15 +280,18 @@ export default class WindowManager {
   ): void {
 
     const window =
-
       this.windows.get(id);
 
     if (!window)
       return;
 
-    window.maximized = true;
+    window.maximized =
+      true;
 
-    window.minimized = false;
+    window.minimized =
+      false;
+
+    this.focus(id);
 
   }
 
@@ -246,15 +300,16 @@ export default class WindowManager {
   ): void {
 
     const window =
-
       this.windows.get(id);
 
     if (!window)
       return;
 
-    window.minimized = false;
+    window.minimized =
+      false;
 
-    window.maximized = false;
+    window.maximized =
+      false;
 
   }
 

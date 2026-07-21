@@ -3,8 +3,7 @@
  * LÉLUVERSE
  * FOCUS MANAGER
  *
- * Manages interface focus across windows,
- * overlays, workspaces, and interactive elements.
+ * Tracks interface focus.
  * ==========================================================
  */
 
@@ -13,28 +12,17 @@ export default class FocusManager {
   private initialized =
     false;
 
-  private focusedWindow:
+  private focusedId:
     string | null =
-    null;
-
-  private focusedOverlay:
-    string | null =
-    null;
-
-  private focusedWorkspace:
-    string | null =
-    null;
-
-  private focusedElement:
-    string | null =
-    null;
+      null;
 
   initialize(): void {
 
     if (this.initialized)
       return;
 
-    this.initialized = true;
+    this.initialized =
+      true;
 
   }
 
@@ -49,105 +37,42 @@ export default class FocusManager {
 
   shutdown(): void {
 
-    this.clear();
+    this.focusedId =
+      null;
 
-    this.initialized = false;
+    this.initialized =
+      false;
 
   }
 
-  focusWindow(
+  focus(
     id: string,
   ): void {
 
-    this.focusedWindow =
+    this.focusedId =
       id;
-
-  }
-
-  focusOverlay(
-    id: string,
-  ): void {
-
-    this.focusedOverlay =
-      id;
-
-  }
-
-  focusWorkspace(
-    id: string,
-  ): void {
-
-    this.focusedWorkspace =
-      id;
-
-  }
-
-  focusElement(
-    id: string,
-  ): void {
-
-    this.focusedElement =
-      id;
-
-  }
-
-  getFocusedWindow():
-    string | null {
-
-    return this.focusedWindow;
-
-  }
-
-  getFocusedOverlay():
-    string | null {
-
-    return this.focusedOverlay;
-
-  }
-
-  getFocusedWorkspace():
-    string | null {
-
-    return this.focusedWorkspace;
-
-  }
-
-  getFocusedElement():
-    string | null {
-
-    return this.focusedElement;
-
-  }
-
-  hasFocus(): boolean {
-
-    return (
-
-      this.focusedWindow !== null ||
-
-      this.focusedOverlay !== null ||
-
-      this.focusedWorkspace !== null ||
-
-      this.focusedElement !== null
-
-    );
 
   }
 
   clear(): void {
 
-    this.focusedWindow =
+    this.focusedId =
       null;
 
-    this.focusedOverlay =
-      null;
+  }
 
-    this.focusedWorkspace =
-      null;
+  isFocused(
+    id: string,
+  ): boolean {
 
-    this.focusedElement =
-      null;
+    return this.focusedId === id;
+
+  }
+
+  getFocused():
+    string | null {
+
+    return this.focusedId;
 
   }
 
