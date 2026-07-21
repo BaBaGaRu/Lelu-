@@ -302,6 +302,7 @@ export default function CoreSystem() {
     <group
 
       ref={core}
+      renderOrder={200}
 
     >
 
@@ -309,7 +310,7 @@ export default function CoreSystem() {
       {/* CORE SHELL */}
 
 
-      <mesh>
+      <mesh renderOrder={201}>
 
 
         <icosahedronGeometry
@@ -357,7 +358,7 @@ export default function CoreSystem() {
       {/* INNER CORE */}
 
 
-      <mesh>
+      <mesh renderOrder={202}>
 
 
         <sphereGeometry

@@ -16,10 +16,6 @@ import { useFrame } from "@react-three/fiber";
 
 import DeepOcean from "./DeepOcean";
 import SurfaceOcean from "./SurfaceOcean";
-import TideLayer from "./TideLayer";
-import RippleLayer from "./RippleLayer";
-import CurrentStreams from "./CurrentStreams";
-import WhirlpoolLayer from "./WhirlpoolLayer";
 
 export interface OceanState {
   tide?: number;
@@ -77,33 +73,11 @@ export default function Ocean({
 
     <group ref={root}>
 
-      {/* Deep Ocean */}
       <DeepOcean
         oceanState={oceanState}
       />
 
-      {/* Surface */}
       <SurfaceOcean
-        oceanState={oceanState}
-      />
-
-      {/* Planetary Tides */}
-      <TideLayer
-        oceanState={oceanState}
-      />
-
-      {/* Ripples */}
-      <RippleLayer
-        oceanState={oceanState}
-      />
-
-      {/* Ocean Currents */}
-      <CurrentStreams
-        oceanState={oceanState}
-      />
-
-      {/* Whirlpools */}
-      <WhirlpoolLayer
         oceanState={oceanState}
       />
 

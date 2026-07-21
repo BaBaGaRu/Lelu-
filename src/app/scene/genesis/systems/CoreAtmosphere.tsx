@@ -237,6 +237,7 @@ export default function CoreAtmosphere() {
     <group
 
       ref={field}
+      renderOrder={180}
 
     >
 
@@ -247,6 +248,7 @@ export default function CoreAtmosphere() {
       <mesh
 
         ref={halo}
+        renderOrder={181}
 
       >
 
@@ -254,7 +256,7 @@ export default function CoreAtmosphere() {
 
           args={[
 
-            0.9,
+            0.7,
 
             64,
 
@@ -271,7 +273,7 @@ export default function CoreAtmosphere() {
 
           transparent
 
-          opacity={0.08}
+          opacity={0.05}
 
         />
 
@@ -288,6 +290,7 @@ export default function CoreAtmosphere() {
       <mesh
 
         ref={wave}
+        renderOrder={182}
 
       >
 
@@ -295,7 +298,7 @@ export default function CoreAtmosphere() {
 
           args={[
 
-            1.4,
+            1.15,
 
             64,
 
@@ -312,7 +315,7 @@ export default function CoreAtmosphere() {
 
           transparent
 
-          opacity={0.04}
+          opacity={0.02}
 
         />
 

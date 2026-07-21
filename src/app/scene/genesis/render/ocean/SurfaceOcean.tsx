@@ -24,7 +24,7 @@ export default function SurfaceOcean({
   const surface = useRef<Group>(null);
 
   const bands = useMemo(
-    () => Array.from({ length: 8 }),
+    () => Array.from({ length: 1 }),
     [],
   );
 
@@ -102,9 +102,9 @@ export default function SurfaceOcean({
 
         <sphereGeometry
           args={[
-            2.65,
-            256,
-            256,
+            2.75,
+            128,
+            128,
           ]}
         />
 
@@ -114,11 +114,11 @@ export default function SurfaceOcean({
 
           transparent
 
-          opacity={0.92}
+          opacity={0.12}
 
-          transmission={0.08}
+          transmission={0}
 
-          roughness={0.05}
+          roughness={0.15}
 
           metalness={0}
 
@@ -144,33 +144,26 @@ export default function SurfaceOcean({
           rotation={[
             Math.PI / 2,
             0,
-            (Math.PI / 8) * i,
+            0,
           ]}
         >
 
           <torusGeometry
             args={[
-              2.72 + i * 0.05,
-              0.01,
-              64,
-              256,
+              2.78,
+              0.008,
+              24,
+              96,
             ]}
           />
 
           <meshBasicMaterial
 
-            color={
-              i % 2 === 0
-                ? "#9cefff"
-                : "#3fd4ff"
-            }
+            color="#7fe5ff"
 
             transparent
 
-            opacity={
-              0.45 -
-              i * 0.03
-            }
+            opacity={0.08}
 
             depthWrite={false}
 
@@ -182,8 +175,8 @@ export default function SurfaceOcean({
 
       <pointLight
         color="#7fe5ff"
-        intensity={6}
-        distance={50}
+        intensity={2}
+        distance={24}
       />
 
     </group>

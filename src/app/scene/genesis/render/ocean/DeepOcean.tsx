@@ -25,7 +25,7 @@ export default function DeepOcean({
   const ocean = useRef<Group>(null);
 
   const shells = useMemo(
-    () => Array.from({ length: 5 }),
+    () => Array.from({ length: 2 }),
     [],
   );
 
@@ -90,10 +90,10 @@ export default function DeepOcean({
       {shells.map((_, i) => {
 
         const radius =
-          2.35 + i * 0.06;
+          2.85 + i * 0.2;
 
         const opacity =
-          0.55 - i * 0.08;
+          0.12 - i * 0.03;
 
         return (
 
@@ -115,13 +115,7 @@ export default function DeepOcean({
               color={
                 i === 0
                   ? "#00142e"
-                  : i === 1
-                  ? "#003c73"
-                  : i === 2
-                  ? "#006db6"
-                  : i === 3
-                  ? "#00a7ff"
-                  : "#66e0ff"
+                  : "#005f95"
               }
 
               transparent

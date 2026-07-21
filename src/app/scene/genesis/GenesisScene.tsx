@@ -59,11 +59,11 @@ export default function GenesisScene() {
 
           0,
 
-          8,
+          6.2,
 
         ],
 
-        fov:55,
+        fov:46,
 
       }}
 
