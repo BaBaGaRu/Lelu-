@@ -14,7 +14,7 @@ export default class MemorySync {
 
   constructor(
 
-    private readonly store: MemoryStore,
+    _store: MemoryStore,
 
     private readonly backup: MemoryBackup,
 

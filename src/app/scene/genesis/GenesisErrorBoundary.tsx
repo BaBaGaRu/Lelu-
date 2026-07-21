@@ -1,4 +1,4 @@
-import React, {
+import {
   Component,
   type ErrorInfo,
   type ReactNode,

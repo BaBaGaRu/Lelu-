@@ -35,7 +35,7 @@ import MediaApp
   from "./MediaApp";
 
 import BrowserApp
-  from "./BrowserApp";
+  from "./BrowserApp.ts";
 
 import DesktopWindow
   from "../DesktopWindow";

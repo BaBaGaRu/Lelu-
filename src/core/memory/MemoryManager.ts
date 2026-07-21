@@ -48,7 +48,7 @@ export default class MemoryManager {
 
   constructor(
 
-    private readonly store: MemoryStore,
+    store: MemoryStore,
 
   ) {
 

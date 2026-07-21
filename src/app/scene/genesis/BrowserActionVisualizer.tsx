@@ -45,9 +45,7 @@ interface ActionOrbProps {
   index:
     number;
 
-
-  type:
-    string;
+  type?: string;
 
 }
 
@@ -58,9 +56,7 @@ interface ActionOrbProps {
 function ActionOrb({
 
   index,
-
   type,
-
 }: ActionOrbProps) {
 
 
@@ -146,6 +142,8 @@ function ActionOrb({
 
 
 
+      void type;
+
       mesh.current.rotation.y =
 
         time * 0.5;
@@ -229,43 +227,15 @@ export default function BrowserActionVisualizer() {
 
 
   return (
-
     <>
-
-
-      {
-
-        state.actions.map(
-
-          (
-
-            action,
-
-            index,
-
-          ) => (
-
-
-            <ActionOrb
-
-              key={action.id}
-
-              index={index}
-
-              type={action.type}
-
-            />
-
-
-          ),
-
-        )
-
-      }
-
-
+      {state.actions.map((action, index) => (
+        <ActionOrb
+          key={action.id}
+          index={index}
+          type={action.type}
+        />
+      ))}
     </>
-
   );
 
 }

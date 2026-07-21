@@ -37,10 +37,9 @@ async function testRuntime() {
 
   const response =
     await runtime.process({
-
-      prompt:
-        "Hello Lélu",
-
+      messages: [],
+      prompt: "Hello Lélu",
+      timestamp: Date.now(),
     });
 
 

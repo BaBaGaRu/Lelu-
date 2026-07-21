@@ -132,29 +132,12 @@ export default function PlanetaryEventSystem() {
 
 
 
-    const weather =
-
-      (state as any)
-
-        .weather
-
-        ??
-
-        {};
 
 
 
 
 
-    const storm =
 
-      (state as any)
-
-        .storm
-
-        ??
-
-        {};
 
 
 
@@ -214,10 +197,6 @@ export default function PlanetaryEventSystem() {
         1,
 
         (
-
-          storm.intensity
-
-          ??
 
           0
 

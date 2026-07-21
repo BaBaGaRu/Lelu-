@@ -119,15 +119,6 @@ export default function GenesisLightingVisualizer() {
 
 
 
-    const chaos =
-
-      (state as any)
-
-        .chaos
-
-        ??
-
-        0.2;
 
 
 

@@ -28,10 +28,10 @@ export default class ReasoningFacts {
     private readonly inference: InferenceEngine,
   ) {}
 
-  public collect(
+  public async collect(
     request: AIRequest,
     perception: PerceptionResult,
-  ): ReasoningFactsResult {
+  ): Promise<ReasoningFactsResult> {
 
     this.clear();
 
@@ -64,11 +64,10 @@ export default class ReasoningFacts {
     }
 
     // Brain Recall
-    const memories =
-      this.brain.recall(request.message);
+    const memories = await this.brain.recall(request.message);
 
     const confidence =
-      this.brain.confidenceOf(request.message);
+      memories.length > 0 ? 0.9 : 0.1;
 
     for (const memory of memories) {
       this.add({

@@ -155,14 +155,6 @@ export default class CognitiveCore {
    * AgentManager creates these already
    * ==========================================================
    */
-  private createDefaultAgents():
-
-    void {
-
-
-    return;
-
-  }
 
 
 

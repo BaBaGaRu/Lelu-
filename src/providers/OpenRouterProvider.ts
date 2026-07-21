@@ -52,28 +52,13 @@ export default class OpenRouterProvider
 
 
 
-  private apiKey =
-    "";
-
-
   private initialized =
     false;
 
 
 
-  private readonly model =
-    import.meta.env.VITE_OPENROUTER_MODEL ??
-    "openai/gpt-5.5";
-
-
-
   async initialize():
     Promise<void> {
-
-
-    this.apiKey =
-      import.meta.env.VITE_OPENROUTER_API_KEY ??
-      "";
 
 
     this.initialized =

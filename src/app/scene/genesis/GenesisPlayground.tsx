@@ -90,44 +90,14 @@ export default function GenesisPlayground({
   return (
 
     <group>
-
-
       <mesh
-
         onClick={travelToCore}
-
-        position={[
-
-          0,
-
-          -1,
-
-          0,
-
-        ]}
-
+        position={[0, -1, 0]}
+        visible={false}
       >
-
-        <sphereGeometry
-
-          args={[
-
-            0.25,
-
-            16,
-
-            16,
-
-          ]}
-
-        />
-
-
+        <sphereGeometry args={[0.25, 16, 16]} />
         <meshStandardMaterial />
-
       </mesh>
-
-
     </group>
 
   );

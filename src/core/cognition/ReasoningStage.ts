@@ -98,7 +98,7 @@ export default class ReasoningStage {
    * Execute reasoning pipeline
    * ==========================================================
    */
-  public process(
+  public async process(
 
     request:
       AIRequest,
@@ -107,11 +107,11 @@ export default class ReasoningStage {
       PerceptionResult,
 
   ):
-    ReasoningStageResult {
+    Promise<ReasoningStageResult> {
 
 
     const facts =
-      this.factsBuilder.collect(
+      await this.factsBuilder.collect(
 
         request,
 

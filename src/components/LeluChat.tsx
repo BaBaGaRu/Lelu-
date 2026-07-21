@@ -23,7 +23,6 @@ export default function LeluChat() {
     send,
     loading,
     ready,
-    error,
   } = useLeluChat();
 
 

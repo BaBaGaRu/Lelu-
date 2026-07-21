@@ -117,15 +117,6 @@ export default function GenesisTimeVisualizer() {
 
 
 
-    const age =
-
-      (state as any)
-
-        .age
-
-        ??
-
-        0;
 
 
 

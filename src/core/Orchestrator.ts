@@ -110,7 +110,12 @@ export default class Orchestrator {
     private readonly state:
       CognitiveState,
 
-  ) {}
+  ) {
+    void this.knowledge;
+    void this.skills;
+    void this.goals;
+    void this.planner;
+  }
 
   /**
    * Main cognitive loop.
@@ -182,7 +187,7 @@ export default class Orchestrator {
 
     const decision =
 
-      this.decisions.decide(
+      await this.decisions.decide(
         request.prompt,
       );
 

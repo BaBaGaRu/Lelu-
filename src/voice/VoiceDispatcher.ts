@@ -23,9 +23,18 @@ export default class VoiceDispatcher {
     transcript: string,
   ) {
 
-    return this.router.route(
-      transcript,
-    );
+    return this.router.route({
+      request: {
+        messages: [],
+        prompt: transcript,
+        timestamp: Date.now(),
+      },
+      started: Date.now(),
+      brain: undefined as any,
+      knowledgeProviders: undefined as any,
+      aiProviders: undefined as any,
+      logger: undefined as any,
+    } as any);
 
   }
 

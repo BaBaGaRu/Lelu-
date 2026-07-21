@@ -13,22 +13,18 @@ import { useGenesis } from "../GenesisCore";
 
 export default function SolarSystem() {
 
-  const genesis = useGenesis();
+  const { state } = useGenesis();
 
   const orbit = useRef<Group>(null);
 
   useFrame((_, delta) => {
 
     if (!orbit.current) return;
-
-    orbit.current.rotation.y +=
-      delta *
-      0.15;
+    orbit.current.rotation.y += delta * 0.15;
 
   });
 
-  const visible =
-    genesis.current.energy > 0.2;
+  const visible = state.online;
 
   return (
 

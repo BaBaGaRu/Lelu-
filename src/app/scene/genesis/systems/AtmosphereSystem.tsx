@@ -13,7 +13,7 @@ import { useGenesis } from "../GenesisCore";
 
 export default function AtmosphereSystem() {
 
-  const genesis = useGenesis();
+  const { state } = useGenesis();
 
   const atmosphere = useRef<Mesh>(null);
 
@@ -21,23 +21,15 @@ export default function AtmosphereSystem() {
 
     if (!atmosphere.current) return;
 
-    const g = genesis.current;
-
     atmosphere.current.rotation.y +=
-
       delta * 0.01;
 
     const scale =
-
       1.08 +
-
-      g.life * 0.04;
+      (state.thinking ? 0.02 : 0);
 
     atmosphere.current.scale.setScalar(scale);
-
-    atmosphere.current.visible =
-
-      g.life > 0.05;
+    atmosphere.current.visible = true;
 
   });
 

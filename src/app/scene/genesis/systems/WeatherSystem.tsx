@@ -126,29 +126,7 @@ export default function WeatherSystem() {
 
 
 
-    const activity =
-
-      (
-
-        state.thinking
-
-          ? 0.2
-
-          : 0
-
-      )
-
-      +
-
-      (
-
-        state.actions.length > 0
-
-          ? 0.2
-
-          : 0
-
-      );
+    void state;
 
 
 

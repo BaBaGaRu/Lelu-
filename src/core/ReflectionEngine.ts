@@ -51,13 +51,13 @@ export default class ReflectionEngine {
   /**
    * Reflect on the completed interaction.
    */
-  public reflect(
+  public async reflect(
 
     prompt: string,
 
     response: string,
 
-  ): Reflection {
+  ): Promise<Reflection> {
 
     const repeated =
       this.record(
@@ -65,7 +65,7 @@ export default class ReflectionEngine {
       );
 
     const confidence =
-      this.score(
+      await this.score(
 
         prompt,
 
@@ -94,10 +94,9 @@ export default class ReflectionEngine {
 
     ) {
 
-      const best =
-        this.brain.best(
-          prompt,
-        );
+      const best = await this.brain.best(
+        prompt,
+      );
 
       if (
 
@@ -182,20 +181,20 @@ export default class ReflectionEngine {
   /**
    * Estimate confidence.
    */
-  private score(
+  private async score(
 
     prompt: string,
 
     response: string,
 
-  ): number {
+  ): Promise<number> {
 
     let score =
       0.50;
 
     if (
 
-      this.brain.knows(
+      await this.brain.knows(
         prompt,
       )
 

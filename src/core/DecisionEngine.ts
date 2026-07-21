@@ -49,14 +49,13 @@ export default class DecisionEngine {
   /**
    * Decide how Lélu should answer.
    */
-  public decide(
+  public async decide(
     prompt: string,
-  ): DecisionResult {
+  ): Promise<DecisionResult> {
 
-    const knows =
-      this.brain.knows(
-        prompt,
-      );
+    const knows = await this.brain.knows(
+      prompt,
+    );
 
     if (
 
@@ -64,10 +63,7 @@ export default class DecisionEngine {
 
     ) {
 
-      const confidence =
-        this.brain.confidenceOf(
-          prompt,
-        );
+      const confidence = 0.9;
 
       if (
 

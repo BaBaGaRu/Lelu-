@@ -21,7 +21,6 @@ import {
 
 import {
   Group,
-  MeshBasicMaterial,
 } from "three";
 
 

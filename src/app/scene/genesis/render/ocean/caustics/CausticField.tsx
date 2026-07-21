@@ -19,7 +19,6 @@ import { useFrame } from "@react-three/fiber";
 
 import type { OceanState } from "../Ocean";
 
-import SurfacePatches from "./field/SurfacePatches";
 import MidwaterPatches from "./field/MidwaterPatches";
 import DeepPatches from "./field/DeepPatches";
 
@@ -50,10 +49,6 @@ export default function CausticField({
   return (
 
     <group ref={root}>
-
-      <SurfacePatches
-        oceanState={oceanState}
-      />
 
       <MidwaterPatches
         oceanState={oceanState}

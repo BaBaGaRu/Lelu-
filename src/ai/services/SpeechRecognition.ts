@@ -11,13 +11,26 @@ export type SpeechRecognitionCallback =
 export type SpeechErrorCallback =
   (error: string) => void;
 
+type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
+
+interface SpeechRecognitionLike {
+  lang: string;
+  interimResults: boolean;
+  continuous: boolean;
+  onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+  onerror: ((event: { error: string }) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+}
+
 declare global {
 
   interface Window {
 
-    SpeechRecognition?: any;
+    SpeechRecognition?: SpeechRecognitionConstructor;
 
-    webkitSpeechRecognition?: any;
+    webkitSpeechRecognition?: SpeechRecognitionConstructor;
 
   }
 

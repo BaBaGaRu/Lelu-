@@ -22,9 +22,11 @@ export default class AIController {
     message: string,
   ): Promise<string> {
 
-    return await this.service.send(
+    const response = await this.service.chat(
       message,
     );
+
+    return response.text;
 
   }
 

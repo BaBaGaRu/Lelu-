@@ -61,16 +61,15 @@ export default class DecisionExecutor {
       return {
 
         text:
-          this.brain.compose(
+          await this.brain.compose(
             request.prompt,
           ),
 
         provider:
           "brain",
-
         model:
           "memory",
-
+        processingTime: 0,
       };
 
     }
@@ -116,7 +115,7 @@ ${result.url ?? ""}`,
 
         model:
           "knowledge",
-
+        processingTime: 0,
       };
 
     }
@@ -167,7 +166,7 @@ ${result.url ?? ""}`,
     ) {
 
       const memory =
-        this.brain.compose(
+        await this.brain.compose(
           request.prompt,
         );
 
@@ -203,7 +202,7 @@ ${result.content}`,
 
         model:
           "brain+research",
-
+        processingTime: 0,
       };
 
     }
@@ -215,7 +214,9 @@ ${result.content}`,
 
       provider:
         "offline",
-
+      model:
+        "offline",
+      processingTime: 0,
     };
 
   }

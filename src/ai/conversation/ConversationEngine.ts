@@ -9,7 +9,7 @@ import AIService
   from "../services/AIService";
 
 import SpeechRecognitionService
-  from "../services/SpeechRecognitionService";
+  from "../services/SpeechRecognition";
 
 import SpeechSynthesisService
   from "../services/SpeechSynthesisService";
@@ -62,7 +62,7 @@ export default class ConversationEngine {
 
     this.speechRecognition.onTranscript(
 
-      async transcript => {
+      async (transcript: string) => {
 
         await this.send(
           transcript,

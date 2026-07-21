@@ -36,11 +36,18 @@ export default class VoiceAI {
 
     const intent =
 
-      this.runtime.router.route(
-
-        transcript,
-
-      );
+      await this.runtime.router.route({
+        request: {
+          messages: [],
+          prompt: transcript,
+          timestamp: Date.now(),
+        },
+        started: Date.now(),
+        brain: this.runtime.brain,
+        knowledgeProviders: this.runtime.core.getKnowledgeProviders(),
+        aiProviders: this.runtime.core.getAIProviders(),
+        logger: this.runtime.core.getLogger(),
+      } as any);
 
     await this.output.speak(
 
