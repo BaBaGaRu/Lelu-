@@ -1,5 +1,7 @@
 import {
+  AdditiveBlending,
   Color,
+  FrontSide,
   ShaderMaterial,
 } from "three";
 
@@ -13,6 +15,12 @@ export default class GenesisCoreMaterial extends ShaderMaterial {
 
       depthWrite: false,
 
+      depthTest: true,
+
+      blending: AdditiveBlending,
+
+      side: FrontSide,
+
       uniforms: {
 
         uTime: {
@@ -24,44 +32,63 @@ export default class GenesisCoreMaterial extends ShaderMaterial {
         },
 
         uCoreColor: {
-          value: new Color("#55ccff"),
+          value: new Color("#38bfff"),
         },
 
         uGlowColor: {
-          value: new Color("#ffffff"),
+          value: new Color("#dffcff"),
         },
 
       },
 
       vertexShader: `
-varying vec3 vPosition;
 varying vec3 vNormal;
+varying vec3 vWorldPosition;
 
 uniform float uTime;
 uniform float uActivity;
 
 void main(){
 
-    vPosition = position;
-    vNormal = normal;
+    vNormal = normalize(normalMatrix * normal);
 
     float wave =
-        sin(position.y * 8.0 + uTime * 2.0) * 0.015;
 
-    wave +=
-        sin(position.x * 5.0 - uTime) * 0.01;
+        sin(position.y * 8.0 + uTime * 2.5) * 0.02 +
+
+        sin(position.x * 6.0 - uTime * 1.8) * 0.015 +
+
+        sin(position.z * 10.0 + uTime * 4.0) * 0.008;
 
     wave *=
-        1.0 + uActivity * 0.4;
+
+        1.0 +
+
+        uActivity * 0.45;
 
     vec3 displaced =
+
         position +
+
         normal * wave;
 
-    gl_Position =
-        projectionMatrix *
-        modelViewMatrix *
+    vec4 worldPosition =
+
+        modelMatrix *
+
         vec4(displaced,1.0);
+
+    vWorldPosition =
+
+        worldPosition.xyz;
+
+    gl_Position =
+
+        projectionMatrix *
+
+        viewMatrix *
+
+        worldPosition;
 
 }
 `,
@@ -73,45 +100,122 @@ uniform float uTime;
 uniform float uActivity;
 
 varying vec3 vNormal;
-varying vec3 vPosition;
+varying vec3 vWorldPosition;
 
 void main(){
 
+    vec3 viewDir =
+
+        normalize(
+
+            cameraPosition -
+
+            vWorldPosition
+
+        );
+
     float fresnel =
+
         pow(
+
             1.0 -
-            abs(dot(
-                normalize(vNormal),
-                vec3(0.0,0.0,1.0)
-            )),
-            2.5
+
+            max(
+
+                dot(
+
+                    normalize(vNormal),
+
+                    viewDir
+
+                ),
+
+                0.0
+
+            ),
+
+            3.5
+
         );
 
-    float pulse =
-        0.5 +
-        0.5 *
+    float energy =
+
+        0.6 +
+
+        0.4 *
+
         sin(
-            uTime * 3.0
+
+            uTime * 3.5
+
         );
 
-    pulse +=
-        uActivity * 0.25;
+    float veins =
+
+        sin(
+
+            vWorldPosition.y * 18.0 +
+
+            uTime * 5.0
+
+        ) *
+
+        0.5 +
+
+        0.5;
+
+    veins +=
+
+        sin(
+
+            vWorldPosition.x * 12.0 -
+
+            uTime * 3.0
+
+        ) *
+
+        0.25;
+
+    energy +=
+
+        veins * 0.25;
+
+    energy +=
+
+        uActivity * 0.35;
 
     vec3 color =
+
         mix(
+
             uCoreColor,
+
             uGlowColor,
+
             fresnel
+
         );
 
     color *=
-        0.8 +
-        pulse * 0.4;
+
+        energy;
+
+    float alpha =
+
+        0.45 +
+
+        fresnel * 0.45 +
+
+        uActivity * 0.08;
 
     gl_FragColor =
+
         vec4(
+
             color,
-            0.92
+
+            alpha
+
         );
 
 }

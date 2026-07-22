@@ -1,14 +1,17 @@
 import {
+  AdditiveBlending,
+  Color,
+  Mesh,
+} from "three";
+
+import {
   useFrame,
 } from "@react-three/fiber";
 
 import {
+  useMemo,
   useRef,
 } from "react";
-
-import {
-  Mesh,
-} from "three";
 
 interface Props {
 
@@ -25,6 +28,16 @@ export default function GenesisSeed({
   const seed =
 
     useRef<Mesh>(null);
+
+  const glow =
+
+    useMemo(
+
+      () => new Color("#7be8ff"),
+
+      [],
+
+    );
 
   useFrame((_, delta) => {
 
@@ -46,9 +59,9 @@ export default function GenesisSeed({
 
       (
 
-        0.04 +
+        0.06 +
 
-        activity * 0.015
+        activity * 0.02
 
       );
 
@@ -60,7 +73,11 @@ export default function GenesisSeed({
 
     seed.current.rotation.y +=
 
-      delta * 0.25;
+      delta * 0.35;
+
+    seed.current.rotation.x +=
+
+      delta * 0.08;
 
   });
 
@@ -78,11 +95,11 @@ export default function GenesisSeed({
 
         args={[
 
-          0.17,
+          0.09,
 
-          48,
+          64,
 
-          48,
+          64,
 
         ]}
 
@@ -90,7 +107,15 @@ export default function GenesisSeed({
 
       <meshBasicMaterial
 
-        color="#ffffff"
+        color={glow}
+
+        transparent
+
+        opacity={0.95}
+
+        blending={AdditiveBlending}
+
+        depthWrite={false}
 
         toneMapped={false}
 
@@ -98,17 +123,17 @@ export default function GenesisSeed({
 
       <pointLight
 
-        color="#88ddff"
+        color="#7be8ff"
 
         intensity={
 
-          14 +
+          22 +
 
-          activity * 8
+          activity * 14
 
         }
 
-        distance={25}
+        distance={35}
 
       />
 

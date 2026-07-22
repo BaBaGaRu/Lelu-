@@ -3,60 +3,179 @@
  * LÉLUVERSE
  * SURFACE OCEAN
  *
- * Animated ocean surface surrounding Genesis.
+ * Animated planetary ocean surface
+ * surrounding the Deep Ocean.
  * ==========================================================
  */
 
-import { useFrame } from "@react-three/fiber";
-import { useMemo } from "react";
+import {
+  useFrame,
+} from "@react-three/fiber";
 
-import OceanMaterial from "../../materials/OceanMaterial";
+import {
+  useMemo,
+  useRef,
+} from "react";
+
+import {
+  Mesh,
+} from "three";
+
+import OceanMaterial
+  from "../../materials/OceanMaterial";
+
+import type {
+  OceanState,
+} from "./Ocean";
 
 interface Props {
 
-  activity: number;
+  oceanState?: OceanState;
 
 }
 
 export default function SurfaceOcean({
 
-  activity,
+  oceanState = {},
 
 }: Props) {
 
-  const material = useMemo(
+  const surface =
 
-    () => new OceanMaterial(),
+    useRef<Mesh>(null);
 
-    []
+  const material =
 
-  );
+    useMemo(
+
+      () => new OceanMaterial(),
+
+      [],
+
+    );
+
+  const time =
+
+    useRef(0);
 
   useFrame((_, delta) => {
 
-    material.uniforms.uTime.value += delta;
+    if (!surface.current) {
 
-    material.uniforms.uActivity.value = activity;
+      return;
+
+    }
+
+    time.current += delta;
+
+    const tide =
+
+      oceanState.tide ?? 0.5;
+
+    const current =
+
+      oceanState.current ?? 0.5;
+
+    const tsunami =
+
+      oceanState.tsunami ?? 0;
+
+    material.uniforms.uTime.value =
+
+      time.current;
+
+    material.uniforms.uActivity.value =
+
+      tsunami +
+
+      current * 0.5;
+
+    surface.current.rotation.y +=
+
+      delta *
+
+      0.012 *
+
+      current;
+
+    surface.current.rotation.x =
+
+      Math.sin(
+
+        time.current * 0.10
+
+      ) *
+
+      0.01 *
+
+      tide;
+
+    surface.current.rotation.z =
+
+      Math.cos(
+
+        time.current * 0.08
+
+      ) *
+
+      0.008 *
+
+      tide;
+
+    const breathe =
+
+      1 +
+
+      Math.sin(
+
+        time.current * 0.45
+
+      ) *
+
+      0.01 *
+
+      tide +
+
+      tsunami * 0.02;
+
+    surface.current.scale.setScalar(
+
+      breathe,
+
+    );
 
   });
 
   return (
 
     <mesh
-      rotation={[-Math.PI / 2, 0, 0]}
+
+      ref={surface}
+
       renderOrder={40}
+
     >
 
-      <circleGeometry
+      <sphereGeometry
+
         args={[
-          2.75,
+
+          3.12,
+
           256,
+
+          256,
+
         ]}
+
       />
 
       <primitive
+
         object={material}
+
         attach="material"
+
       />
 
     </mesh>

@@ -12,7 +12,9 @@ export default class OceanMaterial extends ShaderMaterial {
 
       transparent: true,
 
-      depthWrite: false,
+      depthWrite: true,
+
+      depthTest: true,
 
       side: DoubleSide,
 
@@ -27,57 +29,45 @@ export default class OceanMaterial extends ShaderMaterial {
         },
 
         uDeepColor: {
-          value: new Color("#031225"),
+          value: new Color("#003b7a"),
         },
 
         uSurfaceColor: {
-          value: new Color("#38cfff"),
+          value: new Color("#32c8ff"),
         },
 
       },
 
       vertexShader: `
 
-uniform float uTime;
-uniform float uActivity;
-
-varying vec3 vPosition;
+varying vec3 vWorldPosition;
 varying vec3 vNormal;
+
+uniform float uTime;
 
 void main(){
 
-    vPosition = position;
-    vNormal = normal;
+    vec3 p = position;
 
-    float wave =
+    p.y +=
+        sin(p.x * 0.25 + uTime * 0.9) * 0.35;
 
-        sin(position.x*4.0+uTime*0.8)*0.06 +
+    p.y +=
+        cos(p.z * 0.20 + uTime * 1.2) * 0.25;
 
-        cos(position.z*3.5-uTime*0.7)*0.05 +
+    p.y +=
+        sin((p.x + p.z) * 0.12 + uTime * 0.6) * 0.20;
 
-        sin(position.x*10.0+uTime*2.5)*0.015 +
+    vec4 world = modelMatrix * vec4(p,1.0);
 
-        cos(position.z*9.0-uTime*2.2)*0.015;
+    vWorldPosition = world.xyz;
 
-    wave *=
-
-        1.0 +
-
-        uActivity*0.35;
-
-    vec3 displaced =
-
-        position +
-
-        normal*wave;
+    vNormal = normalize(normalMatrix * normal);
 
     gl_Position =
-
         projectionMatrix *
-
-        modelViewMatrix *
-
-        vec4(displaced,1.0);
+        viewMatrix *
+        world;
 
 }
 
@@ -88,91 +78,41 @@ void main(){
 uniform vec3 uDeepColor;
 uniform vec3 uSurfaceColor;
 
-uniform float uTime;
-
-varying vec3 vPosition;
+varying vec3 vWorldPosition;
 varying vec3 vNormal;
 
 void main(){
 
-    float depth =
-
-        clamp(
-
-            (vPosition.y+3.0)/6.0,
-
-            0.0,
-
-            1.0
-
-        );
-
-    float shimmer =
-
-        sin(
-
-            vPosition.x*8.0 +
-
-            uTime*2.0
-
-        ) *
-
-        cos(
-
-            vPosition.z*8.0 -
-
-            uTime*1.8
-
-        );
-
-    shimmer =
-
-        shimmer*0.08;
-
-    vec3 color =
-
-        mix(
-
-            uDeepColor,
-
-            uSurfaceColor,
-
-            depth + shimmer
-
+    vec3 viewDir =
+        normalize(
+            cameraPosition -
+            vWorldPosition
         );
 
     float fresnel =
-
         pow(
-
             1.0 -
-
-            abs(vNormal.y),
-
-            2.5
-
+            max(
+                dot(
+                    normalize(vNormal),
+                    viewDir
+                ),
+                0.0
+            ),
+            3.0
         );
 
-    color +=
-
-        fresnel *
-
-        0.35;
-
-    float alpha =
-
-        0.08 +
-
-        fresnel*0.22;
+    vec3 color =
+        mix(
+            uDeepColor,
+            uSurfaceColor,
+            fresnel
+        );
 
     gl_FragColor =
-
         vec4(
-
             color,
-
-            alpha
-
+            0.82
         );
 
 }
