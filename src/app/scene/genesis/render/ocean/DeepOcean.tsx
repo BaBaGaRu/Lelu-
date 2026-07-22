@@ -12,6 +12,8 @@ import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import { Group } from "three";
 
+import OceanMaterial from "../../materials/OceanMaterial";
+
 import type { OceanState } from "./Ocean";
 
 interface Props {
@@ -26,6 +28,15 @@ export default function DeepOcean({
 
   const shells = useMemo(
     () => Array.from({ length: 2 }),
+    [],
+  );
+
+  const materials = useMemo(
+    () =>
+      Array.from(
+        { length: 2 },
+        () => new OceanMaterial(),
+      ),
     [],
   );
 
@@ -59,8 +70,7 @@ export default function DeepOcean({
       Math.sin(time.current * 0.5) *
       0.02 *
       tide +
-      tsunami *
-      0.04;
+      tsunami * 0.04;
 
     ocean.current.scale.setScalar(
       breathe,
@@ -81,19 +91,31 @@ export default function DeepOcean({
 
     });
 
+    materials.forEach((material, i) => {
+
+      material.uniforms.uTime.value =
+        time.current;
+
+      material.uniforms.uActivity.value =
+        tsunami +
+        current * 0.5 +
+        i * 0.15;
+
+    });
+
   });
 
   return (
 
-    <group ref={ocean} renderOrder={20}>
+    <group
+      ref={ocean}
+      renderOrder={20}
+    >
 
       {shells.map((_, i) => {
 
         const radius =
           2.85 + i * 0.2;
-
-        const opacity =
-          0.12 - i * 0.03;
 
         return (
 
@@ -110,32 +132,9 @@ export default function DeepOcean({
               ]}
             />
 
-            <meshPhysicalMaterial
-
-              color={
-                i === 0
-                  ? "#00142e"
-                  : "#005f95"
-              }
-
-              transparent
-
-              opacity={opacity}
-
-              transmission={0.12}
-
-              roughness={0.08}
-
-              metalness={0}
-
-              clearcoat={1}
-
-              clearcoatRoughness={0}
-
-              depthWrite={false}
-
-              depthTest={true}
-
+            <primitive
+              object={materials[i]}
+              attach="material"
             />
 
           </mesh>
@@ -145,25 +144,16 @@ export default function DeepOcean({
       })}
 
       <pointLight
-
         color="#009dff"
-
         intensity={6}
-
         distance={40}
-
       />
 
       <pointLight
-
         color="#66d9ff"
-
         intensity={4}
-
         distance={30}
-
         position={[0, 0, 3]}
-
       />
 
     </group>

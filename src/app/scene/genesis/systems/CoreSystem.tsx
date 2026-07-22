@@ -15,32 +15,45 @@
  * ==========================================================
  */
 
-
 import {
   useFrame,
 } from "@react-three/fiber";
 
-
 import {
+  useMemo,
   useRef,
 } from "react";
-
 
 import {
   Group,
 } from "three";
 
-
 import {
   useGenesis,
 } from "../GenesisCore";
 
+import CoreConductor
+  from "../materials/CoreConductor";
 
+import GenesisCore
+  from "../materials/GenesisCore";
 
+import GenesisSeed
+  from "../materials/GenesisSeed";
 
+import GenesisCorona
+  from "../materials/GenesisCorona";
+
+import CrystalShell
+  from "../materials/CrystalShell";
+
+import ElectricShell
+  from "../materials/ElectricShell";
+
+import HaloShell
+  from "../materials/HaloShell";
 
 export default function CoreSystem() {
-
 
   const {
 
@@ -48,28 +61,57 @@ export default function CoreSystem() {
 
   } = useGenesis();
 
+  const conductor =
 
+    useMemo(
 
+      () => new CoreConductor(),
 
+      [],
+
+    );
 
   const core =
 
     useRef<Group>(null);
 
+  const activity =
 
+    (
 
+      state.thinking ? 1 : 0
 
+    )
 
-  const time =
+    +
 
-    useRef(0);
+    (
 
+      state.speaking ? 0.7 : 0
 
+    )
 
+    +
 
+    (
+
+      state.listening ? 0.4 : 0
+
+    )
+
+    +
+
+    (
+
+      state.actions.length > 0
+
+        ? 0.5
+
+        : 0
+
+    );
 
   useFrame((_, delta) => {
-
 
     if (!core.current) {
 
@@ -77,139 +119,23 @@ export default function CoreSystem() {
 
     }
 
+    conductor.update(
 
+      delta,
 
+      activity,
 
+    );
 
-    time.current += delta;
+    const {
 
+      heartbeat,
 
+      resonance,
 
+      quake,
 
-
-    /*
-     * Activity resonance
-     */
-
-
-    const activity =
-
-      (
-
-        state.thinking ? 1 : 0
-
-      )
-
-      +
-
-      (
-
-        state.speaking ? 0.7 : 0
-
-      )
-
-      +
-
-      (
-
-        state.listening ? 0.4 : 0
-
-      )
-
-      +
-
-      (
-
-        state.actions.length > 0
-
-          ? 0.5
-
-          : 0
-
-      );
-
-
-
-
-
-    /*
-     * Heartbeat
-     *
-     * Deep biological pulse.
-     */
-
-
-    const heartbeat =
-
-      Math.sin(
-
-        time.current * 3
-
-      )
-
-      *
-
-      0.035;
-
-
-
-
-
-    /*
-     * Ocean resonance
-     *
-     * Slow planetary breathing.
-     */
-
-
-    const ocean =
-
-      Math.sin(
-
-        time.current * 0.35
-
-      )
-
-      *
-
-      0.025;
-
-
-
-
-
-    /*
-     * Tectonic rumble
-     *
-     * Subtle earth-like vibration.
-     */
-
-
-    const quake =
-
-      Math.sin(
-
-        time.current * 12
-
-      )
-
-      *
-
-      0.003
-
-      *
-
-      (
-
-        1 +
-
-        activity
-
-      );
-
-
-
-
+    } = conductor.state;
 
     const scale =
 
@@ -221,15 +147,11 @@ export default function CoreSystem() {
 
       +
 
-      ocean
+      resonance
 
       +
 
       activity * 0.02;
-
-
-
-
 
     core.current.scale.setScalar(
 
@@ -237,38 +159,21 @@ export default function CoreSystem() {
 
     );
 
-
-
-
-
     core.current.position.x =
 
       quake;
-
-
-
-
 
     core.current.position.y =
 
       Math.sin(
 
-        time.current * 0.2
+        conductor.state.time * 0.2
 
       )
 
       *
 
       0.015;
-
-
-
-
-
-    /*
-     * Conscious rotation
-     */
-
 
     core.current.rotation.y +=
 
@@ -282,7 +187,7 @@ export default function CoreSystem() {
 
           0.08 +
 
-            state.messages.length * 0.001
+          state.messages.length * 0.001
 
           :
 
@@ -290,118 +195,53 @@ export default function CoreSystem() {
 
       );
 
-
   });
-
-
-
-
 
   return (
 
     <group
 
       ref={core}
+
       renderOrder={200}
 
     >
 
+      <GenesisSeed
 
-      {/* CORE SHELL */}
-
-
-      <mesh renderOrder={201}>
-
-
-        <icosahedronGeometry
-
-          args={[
-
-            0.55,
-
-            64,
-
-          ]}
-
-        />
-
-
-        <meshPhysicalMaterial
-
-          color="#88ddff"
-
-          emissive="#55ccff"
-
-          emissiveIntensity={4}
-
-          transmission={1}
-
-          thickness={2}
-
-          roughness={0}
-
-          metalness={0.15}
-
-          clearcoat={1}
-
-          clearcoatRoughness={0}
-
-        />
-
-
-      </mesh>
-
-
-
-
-
-      {/* INNER CORE */}
-
-
-      <mesh renderOrder={202}>
-
-
-        <sphereGeometry
-
-          args={[
-
-            0.18,
-
-            64,
-
-            64,
-
-          ]}
-
-        />
-
-
-        <meshBasicMaterial
-
-          color="#ffffff"
-
-        />
-
-
-      </mesh>
-
-
-
-
-
-      {/* CORE LIGHT */}
-
-
-      <pointLight
-
-        intensity={35}
-
-        distance={80}
-
-        color="#77ddff"
+        activity={activity}
 
       />
 
+      <GenesisCore
+
+        activity={activity}
+
+      />
+
+      <CrystalShell
+
+        activity={activity}
+
+      />
+
+      <ElectricShell
+
+        activity={activity}
+
+      />
+
+      <HaloShell
+
+        activity={activity}
+
+      />
+
+      <GenesisCorona
+
+        activity={activity}
+
+      />
 
     </group>
 
