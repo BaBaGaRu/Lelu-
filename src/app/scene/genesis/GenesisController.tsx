@@ -10,22 +10,26 @@ import GenesisTime from "./GenesisTime";
 import GenesisInterface from "./GenesisInterface";
 import GenesisPlayground from "./GenesisPlayground";
 
-export default function GenesisController() {
+import LeluAssistant from "../../../abilities/assistant/LeluAssistant";
 
+interface GenesisControllerProps {
+  assistant: LeluAssistant;
+}
+
+export default function GenesisController({
+  assistant,
+}: GenesisControllerProps) {
   return (
-
     <>
-
       <GenesisTime />
 
       <GenesisCore />
 
-      <GenesisInterface />
+      <GenesisInterface
+        assistant={assistant}
+      />
 
       <GenesisPlayground />
-
     </>
-
   );
-
 }

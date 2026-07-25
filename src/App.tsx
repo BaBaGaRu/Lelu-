@@ -10,16 +10,27 @@ import { OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
 
 import GenesisScene from "./app/scene/genesis/GenesisScene";
+import InterfaceManager from "./ui/windows/InterfaceManager";
 import LeluAssistant from "./abilities/assistant/LeluAssistant";
-import LeluAssistantPanel from "./ui/components/LeluAssistantPanel";
 
 import "./App.css";
 
 export default function App() {
-  const assistant = useMemo(() => new LeluAssistant(), []);
+  const assistant = useMemo(
+    () => new LeluAssistant(),
+    [],
+  );
 
   return (
-    <main className="app">
+    <main
+      className="app"
+      style={{
+        position: "relative",
+        width: "100vw",
+        height: "100vh",
+        overflow: "hidden",
+      }}
+    >
       <Canvas
         shadows
         camera={{
@@ -27,11 +38,16 @@ export default function App() {
           fov: 55,
         }}
       >
-        <color attach="background" args={["#000000"]} />
+        <color
+          attach="background"
+          args={["#000000"]}
+        />
 
         <ambientLight intensity={0.15} />
 
-        <GenesisScene />
+        <GenesisScene
+          assistant={assistant}
+        />
 
         <OrbitControls
           enablePan={false}
@@ -44,7 +60,9 @@ export default function App() {
         />
       </Canvas>
 
-      <LeluAssistantPanel assistant={assistant} />
+      <InterfaceManager
+        assistant={assistant}
+      />
     </main>
   );
 }
