@@ -51,7 +51,7 @@ export default class StartupOrchestrator {
       if (voiceService) {
         this.state = { ...this.state, phase: "voice" };
         try {
-          await voiceService.startListening(() => undefined);
+          await voiceService.prepare();
           this.state = { ...this.state, voiceReady: true };
         }
         catch {

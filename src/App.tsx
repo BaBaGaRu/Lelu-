@@ -9,12 +9,14 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { useEffect, useMemo, useState } from "react";
 import APIConsole from "./ui/components/APIConsole";
+import VoiceDebugPanel from "./ui/components/VoiceDebugPanel";
+import MissionControlPanel from "./ui/components/MissionControlPanel";
+import WorkspaceShell from "./ui/components/WorkspaceShell";
 
 import GenesisScene from "./app/scene/genesis/GenesisScene";
-import InterfaceManager from "./ui/windows/InterfaceManager";
-import LogsWindow from "./ui/windows/LogsWindow";
 import LeluAssistant from "./abilities/assistant/LeluAssistant";
 import StartupOrchestrator from "./core/StartupOrchestrator";
+import AgentOrchestrator from "./core/AgentOrchestrator";
 
 import "./App.css";
 import "./ui/styles/chat.css";
@@ -25,19 +27,15 @@ export default function App() {
     [],
   );
   const startup = useMemo(() => new StartupOrchestrator(), []);
+  const missionControl = useMemo(() => new AgentOrchestrator(), []);
 
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [isLogsOpen, setIsLogsOpen] = useState(false);
   const [isApiConsoleOpen, setIsApiConsoleOpen] = useState(false);
   const [authState, setAuthState] = useState(() => startup.getAuthService().getSnapshot());
   const [startupState, setStartupState] = useState(() => startup.getState());
 
   const toggleChat = () => {
     setIsChatOpen((current) => !current);
-  };
-
-  const toggleLogs = () => {
-    setIsLogsOpen((current) => !current);
   };
 
   useEffect(() => {
@@ -57,10 +55,14 @@ export default function App() {
         overflow: "hidden",
       }}
     >
-      <div style={{ position: "absolute", top: 16, left: 16, zIndex: 10, display: "flex", flexDirection: "column", gap: 6, fontSize: 12, color: "#f8fafc", background: "rgba(2,6,23,0.7)", padding: "8px 10px", borderRadius: 12 }}>
-        <div>Auth: {authState.isAuthenticated ? "ready" : authState.isGuest ? "guest" : "idle"}</div>
-        <div>Startup: {startupState.phase}</div>
-        <div>Voice: {assistant.state.voiceEnabled ? "enabled" : "off"}</div>
+      <div style={{ position: "absolute", top: 16, left: 16, zIndex: 10, display: "flex", flexDirection: "column", gap: 10, fontSize: 12, color: "#f8fafc" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, background: "rgba(2,6,23,0.7)", padding: "8px 10px", borderRadius: 12 }}>
+          <div>Auth: {authState.isAuthenticated ? "ready" : authState.isGuest ? "guest" : "idle"}</div>
+          <div>Startup: {startupState.phase}</div>
+          <div>Voice: {assistant.state.voiceEnabled ? "enabled" : "off"}</div>
+        </div>
+        <VoiceDebugPanel voiceService={assistant.voice} />
+        <MissionControlPanel orchestrator={missionControl} />
       </div>
 
       <Canvas
@@ -81,7 +83,7 @@ export default function App() {
           assistant={assistant}
           isChatOpen={isChatOpen}
           onToggleChat={toggleChat}
-          onToggleLogs={toggleLogs}
+          onToggleLogs={() => undefined}
           onToggleApiConsole={() => setIsApiConsoleOpen((current) => !current)}
         />
 
@@ -96,17 +98,9 @@ export default function App() {
         />
       </Canvas>
 
-      <InterfaceManager
+      <WorkspaceShell
         assistant={assistant}
-        isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
-        panel="chat"
-      />
-
-      <LogsWindow
-        assistant={assistant}
-        isOpen={isLogsOpen}
-        onClose={() => setIsLogsOpen(false)}
+        missionControl={missionControl}
       />
 
       <APIConsole

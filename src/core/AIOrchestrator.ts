@@ -33,6 +33,8 @@ export interface OrchestratorNotification {
 
 export interface OrchestratorRuntimeState {
   activeProvider: AIProvider | null;
+  currentRequestId: string | null;
+  paused: boolean;
   queueSize: number;
   notifications: OrchestratorNotification[];
   recentRequests: string[];
@@ -42,15 +44,28 @@ export interface OrchestratorRuntimeState {
   switchHistory: Array<{ from: AIProvider | null; to: AIProvider }>;
 }
 
+interface OrchestratorQueueEntry {
+  requestId: string;
+  request: string;
+  controller: AbortController;
+  resolve: (value: string) => void;
+  reject: (reason?: any) => void;
+  canceled: boolean;
+  task: () => Promise<string>;
+}
+
 export default class AIOrchestrator {
   private readonly registry = new ProviderRegistry();
   private readonly router = new AIRouter();
   private readonly health = new ProviderHealthManager();
   private readonly memory = new MemorySystem();
   private readonly knowledge = new KnowledgeRegistry();
-  private readonly queue: Array<() => Promise<string>> = [];
+  private queue: OrchestratorQueueEntry[] = [];
   private running = false;
+  private paused = false;
   private activeProvider: AIProvider | null = null;
+  private activeItem: OrchestratorQueueEntry | null = null;
+  private currentRequestId: string | null = null;
   private readonly notifications: OrchestratorNotification[] = [];
   private readonly recentRequests: string[] = [];
   private readonly recentResponses: string[] = [];
@@ -94,20 +109,64 @@ export default class AIOrchestrator {
     });
   }
 
-  async process(input: string): Promise<string> {
-    const requestId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  async process(input: string, requestId?: string): Promise<string> {
+    const id = requestId ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
     const request = this.normalize(input);
     this.recentRequests.push(request);
     if (this.recentRequests.length > 20) {
       this.recentRequests.shift();
     }
 
-    return await this.enqueue(request, requestId);
+    return await this.enqueue(request, id);
+  }
+
+  pause(): void {
+    this.paused = true;
+    if (this.activeItem) {
+      this.activeItem.controller.abort();
+    }
+    this.notify("Orchestrator paused", "info");
+  }
+
+  resume(): void {
+    if (!this.paused) return;
+    this.paused = false;
+    this.notify("Orchestrator resumed", "info");
+    if (!this.running && this.queue.length > 0) {
+      void this.drainQueue();
+    }
+  }
+
+  cancel(requestId: string): void {
+    const queued = this.queue.find((entry) => entry.requestId === requestId);
+    if (queued) {
+      queued.canceled = true;
+      queued.controller.abort();
+      queued.reject(new Error("Request canceled"));
+      this.queue = this.queue.filter((entry) => entry.requestId !== requestId);
+      this.notify(`Canceled queued request ${requestId}`);
+    }
+
+    if (this.activeItem?.requestId === requestId) {
+      this.activeItem.canceled = true;
+      this.activeItem.controller.abort();
+      this.notify(`Canceled active request ${requestId}`);
+    }
+  }
+
+  stopCurrent(): void {
+    if (this.activeItem) {
+      this.activeItem.canceled = true;
+      this.activeItem.controller.abort();
+      this.notify("Stopped current request", "info");
+    }
   }
 
   getRuntimeState(): OrchestratorRuntimeState {
     return {
       activeProvider: this.activeProvider,
+      currentRequestId: this.currentRequestId,
+      paused: this.paused,
       queueSize: this.queue.length,
       notifications: [...this.notifications].slice(-10),
       recentRequests: [...this.recentRequests].slice(-10),
@@ -144,22 +203,42 @@ export default class AIOrchestrator {
 
   private async enqueue(request: string, requestId: string): Promise<string> {
     return await new Promise<string>((resolve, reject) => {
-      const task = async (): Promise<string> => {
-        try {
-          const response = await this.executeWithFallback(request, requestId);
-          resolve(response);
-          return response;
-        }
-        catch (error) {
-          const message = error instanceof Error ? error.message : "Unknown error";
-          this.recentErrors.push(message);
-          reject(error);
-          throw error;
-        }
+      const controller = new AbortController();
+      const entry: OrchestratorQueueEntry = {
+        requestId,
+        request,
+        controller,
+        resolve,
+        reject,
+        canceled: false,
+        task: async () => {
+          try {
+            this.currentRequestId = requestId;
+            this.activeItem = entry;
+            const response = await this.executeWithFallback(request, requestId, controller.signal);
+            if (entry.canceled) {
+              throw new Error("Request canceled");
+            }
+            resolve(response);
+            return response;
+          }
+          catch (error) {
+            const message = error instanceof Error ? error.message : "Unknown error";
+            this.recentErrors.push(message);
+            reject(error);
+            throw error;
+          }
+          finally {
+            if (this.activeItem === entry) {
+              this.activeItem = null;
+              this.currentRequestId = null;
+            }
+          }
+        },
       };
 
-      this.queue.push(task);
-      if (!this.running) {
+      this.queue.push(entry);
+      if (!this.running && !this.paused) {
         this.running = true;
         void this.drainQueue();
       }
@@ -168,17 +247,21 @@ export default class AIOrchestrator {
 
   private async drainQueue(): Promise<void> {
     while (this.queue.length > 0) {
-      const task = this.queue.shift();
-      if (!task) {
+      if (this.paused) {
+        this.running = false;
+        return;
+      }
+      const entry = this.queue.shift();
+      if (!entry || entry.canceled) {
         continue;
       }
-      await task();
+      await entry.task();
     }
 
     this.running = false;
   }
 
-  private async executeWithFallback(request: string, requestId: string): Promise<string> {
+  private async executeWithFallback(request: string, requestId: string, signal: AbortSignal): Promise<string> {
     const intent = this.router.route(request);
     const providers = this.registry.ordered().filter((provider) => this.registry.getConfig(provider).enabled);
     const attempted = new Set<AIProvider>();
@@ -196,6 +279,10 @@ export default class AIOrchestrator {
     let lastError: unknown;
 
     while (!attempted.has(provider)) {
+      if (signal.aborted) {
+        throw new Error("Request aborted");
+      }
+
       attempted.add(provider);
       this.health.setQueueSize(provider, this.queue.length);
       this.activeProvider = provider;
@@ -209,7 +296,7 @@ export default class AIOrchestrator {
 
       try {
         const prompt = await this.composePrompt(request, intent);
-        const response = await this.callProvider(provider, prompt);
+        const response = await this.callProvider(provider, prompt, signal);
         this.recentResponses.push(response);
         if (this.recentResponses.length > 20) {
           this.recentResponses.shift();
@@ -226,6 +313,12 @@ export default class AIOrchestrator {
         return response;
       }
       catch (error) {
+        if (signal.aborted) {
+          const abortedError = new Error("Request aborted");
+          appLog.append({ type: "info", provider, message: abortedError.message });
+          throw abortedError;
+        }
+
         lastError = error;
         const message = error instanceof Error ? error.message : "Provider failed";
         this.recentErrors.push(message);
@@ -289,15 +382,37 @@ export default class AIOrchestrator {
     ].filter(Boolean).join("\n");
   }
 
-  private async callProvider(provider: AIProvider, request: string): Promise<string> {
+  private createAbortSignal(primary: AbortSignal, secondary: AbortSignal): AbortSignal {
+    if (primary.aborted) {
+      return primary;
+    }
+
+    if (secondary.aborted) {
+      return secondary;
+    }
+
+    const controller = new AbortController();
+    const onAbort = () => controller.abort();
+    primary.addEventListener("abort", onAbort);
+    secondary.addEventListener("abort", onAbort);
+    controller.signal.addEventListener("abort", () => {
+      primary.removeEventListener("abort", onAbort);
+      secondary.removeEventListener("abort", onAbort);
+    });
+
+    return controller.signal;
+  }
+
+  private async callProvider(provider: AIProvider, request: string, signal: AbortSignal): Promise<string> {
     const config = this.registry.getConfig(provider);
     if (!config.apiKey) {
       throw new Error(`${provider} is not configured.`);
     }
 
     const startedAt = Date.now();
-    const controller = new AbortController();
-    const timeoutId = globalThis.setTimeout(() => controller.abort(), config.timeout);
+    const timeoutController = new AbortController();
+    const timeoutId = globalThis.setTimeout(() => timeoutController.abort(), config.timeout);
+    const combinedSignal = this.createAbortSignal(signal, timeoutController.signal);
 
     try {
       const payload = provider === "google"
@@ -315,7 +430,7 @@ export default class AIOrchestrator {
           : config.endpoint,
         {
           method: "POST",
-          signal: controller.signal,
+          signal: combinedSignal,
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${config.apiKey}`,

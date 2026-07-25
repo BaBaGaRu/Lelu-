@@ -1,5 +1,6 @@
 import LeluAssistant from "../../abilities/assistant/LeluAssistant";
 import LiveLogViewer from "../components/LiveLogViewer";
+import VoiceDebugPanel from "../components/VoiceDebugPanel";
 import Window from "./Window";
 
 interface LogsWindowProps {
@@ -18,6 +19,7 @@ export default function LogsWindow({ assistant: _assistant, isOpen, onClose }: L
             <div style={{ fontSize: 24, fontWeight: 700 }}>Logs</div>
           </div>
         </div>
+        <VoiceDebugPanel voiceService={_assistant.voice} />
         <LiveLogViewer />
       </div>
     </Window>

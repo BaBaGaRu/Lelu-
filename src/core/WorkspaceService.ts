@@ -1,5 +1,8 @@
 import appLog from "./APIEventLog";
-import type { AuthUser } from "./AuthService";
+
+interface WorkspaceUserLike {
+  id?: string | null;
+}
 
 export interface UserProfile {
   user_id: string;
@@ -101,7 +104,7 @@ export default class WorkspaceService {
     private readonly anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() ?? "",
   ) {}
 
-  async initialize(user: AuthUser | null, accessToken?: string): Promise<void> {
+  async initialize(user: WorkspaceUserLike | null, accessToken?: string): Promise<void> {
     this.currentUserId = user?.id ?? null;
     this.accessToken = accessToken ?? null;
     this.restoreFromLocalStorage();

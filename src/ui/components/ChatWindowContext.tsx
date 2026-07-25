@@ -24,9 +24,16 @@ interface ChatWindowContextProps {
 }
 
 type Status =
-  | "ONLINE"
+  | "IDLE"
+  | "LISTENING"
   | "THINKING"
-  | "LISTENING";
+  | "SPEAKING"
+  | "ERROR"
+  | "RECONNECTING"
+  | "PAUSED"
+  | "STOPPED"
+  | "CANCELED"
+  | "READY";
 
 export default function ChatWindowContext({
   assistant,
@@ -50,13 +57,23 @@ export default function ChatWindowContext({
     >("chat");
 
   const [status, setStatus] =
-    useState<Status>("ONLINE");
+    useState<Status>("IDLE");
 
   const [voiceActive, setVoiceActive] =
     useState(assistant.state.voiceEnabled);
 
   const [typingId, setTypingId] =
     useState<string | null>(null);
+  const [activeRequestId, setActiveRequestId] =
+    useState<string | null>(null);
+  const [isPaused, setIsPaused] =
+    useState(false);
+  const [isMuted, setIsMuted] =
+    useState(false);
+  const [lastUserPrompt, setLastUserPrompt] =
+    useState("");
+  const [conversationId, setConversationId] =
+    useState(`conv-${Date.now()}`);
 
   const logRef =
     useRef<HTMLDivElement>(null);
@@ -78,22 +95,33 @@ export default function ChatWindowContext({
   }, [assistant, voiceActive]);
 
   useEffect(() => {
+    const unsubscribe = assistant.voice.subscribe((state) => {
+      setStatus(state.toUpperCase() as Status);
+    });
+
     return () => {
-      assistant.voice.dispose();
+      unsubscribe();
     };
   }, [assistant]);
 
   function statusColor() {
     switch (status) {
-      case "ONLINE":
-        return "#22c55e";
+      case "LISTENING":
+        return "#38bdf8";
 
       case "THINKING":
         return "#facc15";
 
-      case "LISTENING":
-        return "#38bdf8";
+      case "SPEAKING":
+        return "#a78bfa";
 
+      case "ERROR":
+        return "#f87171";
+
+      case "RECONNECTING":
+        return "#fb923c";
+
+      case "IDLE":
       default:
         return "#22c55e";
     }
@@ -121,6 +149,9 @@ export default function ChatWindowContext({
       i <= text.length;
       i++
     ) {
+      if (!typingId) {
+        // allow interruption by user controls
+      }
       await new Promise(
         (resolve) =>
           setTimeout(
@@ -146,13 +177,13 @@ export default function ChatWindowContext({
 
     setTypingId(null);
 
+    setStatus("SPEAKING");
     assistant.voice.speak(text);
-
-    setStatus("ONLINE");
   }
 
   async function sendMessage(
     value: string,
+    isRegeneration = false,
   ) {
     const text =
       value.trim();
@@ -161,36 +192,59 @@ export default function ChatWindowContext({
       return;
     }
 
-    setMessages((current) => [
-      ...current,
-      {
-        id:
-          `${Date.now()}-user`,
-        role: "user",
-        text,
-      },
-    ]);
+    if (!isRegeneration) {
+      setMessages((current) => [
+        ...current,
+        {
+          id:
+            `${Date.now()}-user`,
+          role: "user",
+          text,
+        },
+      ]);
+    }
 
     setDraft("");
-
+    setLastUserPrompt(text);
     setStatus("THINKING");
 
-    const reply =
-      mode === "engineering"
-        ? await assistant.respondEngineering(
-            text,
-          )
-        : await assistant.respond(
-            text,
-          );
-              await typeReply(reply.text);
+    const requestId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    setActiveRequestId(requestId);
+
+    try {
+      const reply =
+        mode === "engineering"
+          ? await assistant.respondEngineering(text, requestId)
+          : await assistant.respond(text, requestId);
+
+      setActiveRequestId(reply.requestId ?? requestId);
+      await typeReply(reply.text);
+    }
+    catch (error) {
+      setStatus("ERROR");
+      const message = error instanceof Error ? error.message : "An error occurred.";
+      setMessages((current) => [
+        ...current,
+        {
+          id: `${Date.now()}-assistant-error`,
+          role: "assistant",
+          text: `[${message}]`,
+        },
+      ]);
+    }
+    finally {
+      setActiveRequestId(null);
+      if (!assistant.voice.getState() || assistant.voice.getState() === "idle") {
+        setStatus("IDLE");
+      }
+    }
   }
 
   async function toggleListening() {
     if (voiceActive) {
       assistant.voice.stopListening();
       setVoiceActive(false);
-      setStatus("ONLINE");
+      if (!isPaused) setStatus("IDLE");
       return;
     }
 
@@ -198,13 +252,13 @@ export default function ChatWindowContext({
     setStatus("LISTENING");
 
     await assistant.voice.startListening((transcript) => {
-      setStatus("ONLINE");
       setVoiceActive(true);
       if (!transcript) {
         return;
       }
 
       setDraft(transcript);
+      setStatus("THINKING");
       void sendMessage(transcript);
     });
   }
@@ -262,74 +316,139 @@ export default function ChatWindowContext({
           ● {status}
         </div>
 
+      <div className="chat-console-controls">
+        <button type="button" onClick={() => void sendMessage(draft)}>
+          ▶ Send
+        </button>
+        <button type="button" onClick={() => {
+          if (isPaused) {
+            assistant.orchestrator.resume();
+            setIsPaused(false);
+            setStatus("IDLE");
+          }
+          else {
+            assistant.orchestrator.pause();
+            assistant.voice.stopSpeaking();
+            setIsPaused(true);
+            setStatus("PAUSED");
+          }
+        }}>
+          {isPaused ? "▶ Resume" : "⏸ Pause"}
+        </button>
+        <button type="button" onClick={() => {
+          assistant.orchestrator.stopCurrent();
+          assistant.voice.stopSpeaking();
+          assistant.voice.stopListening();
+          setStatus("IDLE");
+        }}>
+          ⏹ Stop
+        </button>
+        <button type="button" onClick={() => {
+          if (activeRequestId) {
+            assistant.orchestrator.cancel(activeRequestId);
+            assistant.voice.stopSpeaking();
+            assistant.voice.stopListening();
+            setStatus("CANCELED");
+          }
+        }}>
+          ✖ Cancel
+        </button>
+        <button type="button" onClick={() => {
+          if (lastUserPrompt) {
+            assistant.orchestrator.stopCurrent();
+            void sendMessage(lastUserPrompt, true);
+          }
+        }}>
+          🔄 Regenerate
+        </button>
+        <button type="button" onClick={() => void toggleListening()}>
+          {voiceActive ? "🎤 Listening" : "🎤 Voice"}
+        </button>
+        <button type="button" onClick={() => {
+          assistant.voice.toggleMute();
+          setIsMuted(!isMuted);
+        }}>
+          {isMuted ? "🔊 Unmute" : "🔇 Mute"}
+        </button>
+        <button type="button" onClick={() => {
+          setMessages([
+            {
+              id: "welcome",
+              role: "assistant",
+              text: "Lélu online.",
+            },
+          ]);
+          setDraft("");
+          setLastUserPrompt("");
+          setActiveRequestId(null);
+          setStatus("READY");
+        }}>
+          🧹 Clear Chat
+        </button>
+        <button type="button" onClick={() => {
+          setMessages([
+            {
+              id: "welcome",
+              role: "assistant",
+              text: "Conversation deleted. Start a new one.",
+            },
+          ]);
+          setDraft("");
+          setLastUserPrompt("");
+          setActiveRequestId(null);
+          setConversationId(`conv-${Date.now()}`);
+          assistant.orchestrator.stopCurrent();
+          setStatus("READY");
+        }}>
+          🗑 Delete Conversation
+        </button>
+      </div>
       </header>
 
       <div
         ref={logRef}
         className="chat-console-log"
       >
-        {messages.map(
-          (message) => (
-            <div
-              key={
-                message.id
-              }
-              className={`console-line ${message.role}`}
-            >
-              <span className="console-speaker">
-                {message.role ===
-                "assistant"
-                  ? "Lélu"
-                  : "You"}
-                {" > "}
-              </span>
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={`console-line ${message.role}`}
+          >
+            <span className="console-speaker">
+              {message.role === "assistant" ? "Lélu" : "You"}
+              {" > "}
+            </span>
 
-              <span className="console-text">
-                {message.text}
+            <span className="console-text">
+              {message.text}
 
-                {typingId ===
-                  message.id && (
-                  <span className="console-cursor">
-                    ▋
-                  </span>
-                )}
-              </span>
-            </div>
-          ),
-        )}
+              {typingId === message.id && (
+                <span className="console-cursor">
+                  ▋
+                </span>
+              )}
+            </span>
+          </div>
+        ))}
       </div>
 
       <form
         className="chat-console-input"
-        onSubmit={(
-          event,
-        ) => {
+        onSubmit={(event) => {
           event.preventDefault();
-          void sendMessage(
-            draft,
-          );
+          void sendMessage(draft);
         }}
       >
         <input
           value={draft}
-          onChange={(
-            event,
-          ) =>
-            setDraft(
-              event.target
-                .value,
-            )
-          }
+          onChange={(event) => setDraft(event.target.value)}
           placeholder={
-            mode ===
-            "engineering"
+            mode === "engineering"
               ? "Ask an engineering question..."
               : "Type a message..."
           }
           autoComplete="off"
-          spellCheck={
-            false
-          }
+          spellCheck={false}
         />
 
         <button
@@ -341,14 +460,8 @@ export default function ChatWindowContext({
           {voiceActive ? "■" : "🎤"}
         </button>
 
-        <button
-          type="submit"
-        >
-          ➜
-        </button>
-
+        <button type="submit">➜</button>
       </form>
-
     </section>
   );
 }
