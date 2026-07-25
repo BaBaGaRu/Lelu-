@@ -52,6 +52,9 @@ export default function ChatWindowContext({
   const [status, setStatus] =
     useState<Status>("ONLINE");
 
+  const [voiceActive, setVoiceActive] =
+    useState(assistant.state.voiceEnabled);
+
   const [typingId, setTypingId] =
     useState<string | null>(null);
 
@@ -69,6 +72,10 @@ export default function ChatWindowContext({
   useEffect(() => {
     assistant.setMode(mode);
   }, [assistant, mode]);
+
+  useEffect(() => {
+    assistant.setVoiceEnabled(voiceActive);
+  }, [assistant, voiceActive]);
 
   useEffect(() => {
     return () => {
@@ -179,30 +186,27 @@ export default function ChatWindowContext({
               await typeReply(reply.text);
   }
 
-  function toggleListening() {
-    if (status === "LISTENING") {
+  async function toggleListening() {
+    if (voiceActive) {
       assistant.voice.stopListening();
+      setVoiceActive(false);
       setStatus("ONLINE");
       return;
     }
 
+    setVoiceActive(true);
     setStatus("LISTENING");
 
-    assistant.voice.startListening(
-      (transcript) => {
-        setStatus("ONLINE");
+    await assistant.voice.startListening((transcript) => {
+      setStatus("ONLINE");
+      setVoiceActive(true);
+      if (!transcript) {
+        return;
+      }
 
-        if (!transcript) {
-          return;
-        }
-
-        setDraft(transcript);
-
-        void sendMessage(
-          transcript,
-        );
-      },
-    );
+      setDraft(transcript);
+      void sendMessage(transcript);
+    });
   }
 
   return (
@@ -330,14 +334,11 @@ export default function ChatWindowContext({
 
         <button
           type="button"
-          onClick={
-            toggleListening
-          }
+          onClick={() => {
+            void toggleListening();
+          }}
         >
-          {status ===
-          "LISTENING"
-            ? "■"
-            : "🎤"}
+          {voiceActive ? "■" : "🎤"}
         </button>
 
         <button

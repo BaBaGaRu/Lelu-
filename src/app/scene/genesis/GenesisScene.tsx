@@ -15,12 +15,16 @@ interface GenesisSceneProps {
   assistant: LeluAssistant;
   isChatOpen: boolean;
   onToggleChat: () => void;
+  onToggleLogs: () => void;
+  onToggleApiConsole: () => void;
 }
 
 export default function GenesisScene({
   assistant,
   isChatOpen,
   onToggleChat,
+  onToggleLogs,
+  onToggleApiConsole,
 }: GenesisSceneProps) {
   return (
     <>
@@ -33,6 +37,8 @@ export default function GenesisScene({
         assistant={assistant}
         isChatOpen={isChatOpen}
         onToggleChat={onToggleChat}
+        onToggleLogs={onToggleLogs}
+        onToggleApiConsole={onToggleApiConsole}
       />
     </>
   );

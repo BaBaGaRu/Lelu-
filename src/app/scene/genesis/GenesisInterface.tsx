@@ -15,6 +15,8 @@ interface GenesisInterfaceProps {
   assistant: LeluAssistant;
   isChatOpen: boolean;
   onToggleChat: () => void;
+  onToggleLogs: () => void;
+  onToggleApiConsole: () => void;
 }
 
 export default function GenesisInterface({

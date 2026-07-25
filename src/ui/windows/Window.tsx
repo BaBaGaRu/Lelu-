@@ -12,12 +12,14 @@ interface WindowProps {
   children: ReactNode;
   isOpen?: boolean;
   onClose?: () => void;
+  title?: string;
 }
 
 export default function Window({
   children,
   isOpen = true,
   onClose,
+  title,
 }: WindowProps) {
   if (!isOpen) {
     return null;
@@ -34,6 +36,9 @@ export default function Window({
         zIndex: 9999,
       }}
     >
+      {title ? (
+        <div style={{ position: "absolute", top: 20, left: 20, color: "#f8fafc", fontSize: 14, fontWeight: 700, pointerEvents: "none" }}>{title}</div>
+      ) : null}
       <button
         type="button"
         onClick={onClose}

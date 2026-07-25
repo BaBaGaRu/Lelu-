@@ -16,12 +16,16 @@ interface GenesisControllerProps {
   assistant: LeluAssistant;
   isChatOpen: boolean;
   onToggleChat: () => void;
+  onToggleLogs: () => void;
+  onToggleApiConsole: () => void;
 }
 
 export default function GenesisController({
   assistant,
   isChatOpen,
   onToggleChat,
+  onToggleLogs,
+  onToggleApiConsole,
 }: GenesisControllerProps) {
   return (
     <>
@@ -33,6 +37,8 @@ export default function GenesisController({
         assistant={assistant}
         isChatOpen={isChatOpen}
         onToggleChat={onToggleChat}
+        onToggleLogs={onToggleLogs}
+        onToggleApiConsole={onToggleApiConsole}
       />
 
       <GenesisPlayground />

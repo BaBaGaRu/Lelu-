@@ -23,6 +23,8 @@ export interface AIProviderConfig {
 
   streaming: boolean;
 
+  enabled: boolean;
+
 }
 
 export default class AIConfig {
@@ -38,19 +40,14 @@ export default class AIConfig {
 
       endpoint:
         "https://api.groq.com/openai/v1/chat/completions",
-
       model:
         "openai/gpt-oss-120b",
-
       apiKey:
         import.meta.env.VITE_GROQ_API_KEY ?? "",
-
       timeout: 15000,
-
       priority: 1,
-
       streaming: true,
-
+      enabled: Boolean(import.meta.env.VITE_GROQ_API_KEY),
     },
 
     google: {
@@ -71,6 +68,8 @@ export default class AIConfig {
       priority: 2,
 
       streaming: true,
+
+      enabled: Boolean(import.meta.env.VITE_GOOGLE_API_KEY || import.meta.env.VITE_GEMINI_API_KEY),
 
     },
 
@@ -93,6 +92,8 @@ export default class AIConfig {
 
       streaming: true,
 
+      enabled: Boolean(import.meta.env.VITE_OPENROUTER_API_KEY),
+
     },
 
     cerebras: {
@@ -113,6 +114,8 @@ export default class AIConfig {
       priority: 4,
 
       streaming: true,
+
+      enabled: Boolean(import.meta.env.VITE_CEREBRAS_API_KEY),
 
     },
 
@@ -135,6 +138,8 @@ export default class AIConfig {
 
       streaming: true,
 
+      enabled: Boolean(import.meta.env.VITE_MISTRAL_API_KEY),
+
     },
 
     fireworks: {
@@ -155,6 +160,8 @@ export default class AIConfig {
       priority: 6,
 
       streaming: true,
+
+      enabled: Boolean(import.meta.env.VITE_FIREWORKS_API_KEY),
 
     },
 

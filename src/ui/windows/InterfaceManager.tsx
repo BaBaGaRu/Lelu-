@@ -13,21 +13,22 @@ interface InterfaceManagerProps {
   assistant: LeluAssistant;
   isOpen: boolean;
   onClose: () => void;
+  panel: "chat" | "logs";
 }
 
 export default function InterfaceManager({
   assistant,
   isOpen,
   onClose,
+  panel,
 }: InterfaceManagerProps) {
   return (
     <Window
-      isOpen={isOpen}
+      isOpen={isOpen && panel === "chat"}
       onClose={onClose}
+      title="Chat"
     >
-      <ChatWindow
-        assistant={assistant}
-      />
+      <ChatWindow assistant={assistant} />
     </Window>
   );
 }
