@@ -1,24 +1,33 @@
 /**
  * ==========================================================
  * LÉLUVERSE
- * GENESIS INTERFACE
- * ==========================================================
- *
- * InterfaceManager is now mounted by App.tsx
- * outside of the Canvas. This component
- * intentionally renders nothing so the
- * Genesis scene remains 3D-only.
+ * INTERFACE MANAGER
  * ==========================================================
  */
 
-import LeluAssistant from "../../../abilities/assistant/LeluAssistant";
+import LeluAssistant from "../../abilities/assistant/LeluAssistant";
+import ChatWindow from "./ChatWindow";
+import Window from "./Window";
 
-interface GenesisInterfaceProps {
+interface InterfaceManagerProps {
   assistant: LeluAssistant;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export default function GenesisInterface({
-  assistant: _assistant,
-}: GenesisInterfaceProps) {
-  return null;
+export default function InterfaceManager({
+  assistant,
+  isOpen,
+  onClose,
+}: InterfaceManagerProps) {
+  return (
+    <Window
+      isOpen={isOpen}
+      onClose={onClose}
+    >
+      <ChatWindow
+        assistant={assistant}
+      />
+    </Window>
+  );
 }

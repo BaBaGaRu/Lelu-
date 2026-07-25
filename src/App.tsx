@@ -7,19 +7,26 @@
 
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import GenesisScene from "./app/scene/genesis/GenesisScene";
 import InterfaceManager from "./ui/windows/InterfaceManager";
 import LeluAssistant from "./abilities/assistant/LeluAssistant";
 
 import "./App.css";
+import "./ui/styles/chat.css";
 
 export default function App() {
   const assistant = useMemo(
     () => new LeluAssistant(),
     [],
   );
+
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
+  const toggleChat = () => {
+    setIsChatOpen((current) => !current);
+  };
 
   return (
     <main
@@ -47,6 +54,8 @@ export default function App() {
 
         <GenesisScene
           assistant={assistant}
+          isChatOpen={isChatOpen}
+          onToggleChat={toggleChat}
         />
 
         <OrbitControls
@@ -62,6 +71,10 @@ export default function App() {
 
       <InterfaceManager
         assistant={assistant}
+        isOpen={isChatOpen}
+        onClose={() =>
+          setIsChatOpen(false)
+        }
       />
     </main>
   );

@@ -67,6 +67,10 @@ export default function ChatWindowContext({
   }, [messages]);
 
   useEffect(() => {
+    assistant.setMode(mode);
+  }, [assistant, mode]);
+
+  useEffect(() => {
     return () => {
       assistant.voice.dispose();
     };

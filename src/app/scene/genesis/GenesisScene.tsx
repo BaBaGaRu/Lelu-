@@ -13,10 +13,14 @@ import LeluAssistant from "../../../abilities/assistant/LeluAssistant";
 
 interface GenesisSceneProps {
   assistant: LeluAssistant;
+  isChatOpen: boolean;
+  onToggleChat: () => void;
 }
 
 export default function GenesisScene({
   assistant,
+  isChatOpen,
+  onToggleChat,
 }: GenesisSceneProps) {
   return (
     <>
@@ -27,6 +31,8 @@ export default function GenesisScene({
 
       <GenesisController
         assistant={assistant}
+        isChatOpen={isChatOpen}
+        onToggleChat={onToggleChat}
       />
     </>
   );
