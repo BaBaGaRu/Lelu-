@@ -52,17 +52,39 @@ export default function ElectricShell({
 
   useFrame((_, delta) => {
 
-    material.uniforms.uTime.value +=
-      delta;
+    if (!material?.uniforms) {
 
-    material.uniforms.uActivity.value =
-      activity;
+      return;
 
-    material.uniforms.uIntensity.value =
+    }
 
-      1 +
+    const uTime = material.uniforms.uTime;
+    const uActivity = material.uniforms.uActivity;
+    const uIntensity = material.uniforms.uIntensity;
 
-      activity * 0.35;
+    if (uTime?.value !== undefined) {
+
+      uTime.value +=
+        delta;
+
+    }
+
+    if (uActivity?.value !== undefined) {
+
+      uActivity.value =
+        activity;
+
+    }
+
+    if (uIntensity?.value !== undefined) {
+
+      uIntensity.value =
+
+        1 +
+
+        activity * 0.35;
+
+    }
 
     if (!shell.current) {
 

@@ -66,9 +66,13 @@ export default function OceanVisualizer() {
 
     time.current += delta;
 
-    OceanShader.uniforms.uTime.value =
+    if (OceanShader?.uniforms?.uTime?.value !== undefined) {
 
-      time.current;
+      OceanShader.uniforms.uTime.value =
+
+        time.current;
+
+    }
 
     if (
 

@@ -3,44 +3,52 @@
  * LÉLUVERSE
  * GENESIS BRIDGE
  *
+ * SINGLE SOURCE OF TRUTH
+ *
  * Connects:
  *
- * AIService
- *      ↓
- * Actions + Cognition
- *      ↓
- * GenesisCore
- *      ↓
- * Genesis World
+ * Shared AIService
+ *        ↓
+ * Brain / Runtime
+ *        ↓
+ * Genesis Context
+ *        ↓
+ * Genesis World + Interface
  *
  * ==========================================================
  */
 
-
-import {
-  useEffect,
-} from "react";
-
+import { useEffect } from "react";
 
 import {
   useGenesis,
 } from "./GenesisCore";
 
-
 import AIService, {
-
   type AIActionEvent,
-
   type CognitionEvent,
-
 } from "../../../core/AIService";
 
+/*
+ * IMPORTANT:
+ *
+ * AIService should expose ONE shared instance.
+ *
+ * Example:
+ *
+ *   static getInstance()
+ *
+ * or
+ *
+ *   export const aiService
+ *
+ * Do NOT construct another runtime here.
+ */
 
-
-
+const ai =
+  AIService.getInstance();
 
 export default function GenesisBridge() {
-
 
   const {
 
@@ -48,142 +56,168 @@ export default function GenesisBridge() {
 
     updateCognition,
 
+    addMessage,
+
+    setThinking,
+
+    setSpeaking,
+
+    setListening,
+
+    notify,
+
   } = useGenesis();
-
-
-
-
 
   useEffect(() => {
 
-
-    const ai =
-
-      new AIService();
-
-
-
-
+    ai.initialize().catch(console.error);
 
     const removeActions =
-
       ai.subscribeActions(
 
-        (
-
-          event:
-
-            AIActionEvent,
-
-        ) => {
-
+        (event: AIActionEvent) => {
 
           addAction({
 
-            id:
+            id: event.id,
 
-              event.id,
+            type: event.type,
 
+            label: event.label,
 
-            type:
-
-              event.type,
-
-
-            label:
-
-              event.label,
-
-
-            source:
-
-              "ai",
-
+            source: "ai",
 
             status:
-
               event.status === "error"
-
                 ? "failed"
-
                 : event.status,
 
-
             progress:
-
               event.status === "complete"
-
                 ? 100
-
                 : 0,
 
-
-            timestamp:
-
-              event.timestamp,
+            timestamp: event.timestamp,
 
           });
-
 
         },
 
       );
 
-
-
-
-
     const removeCognition =
-
       ai.subscribeCognition(
 
-        (
-
-          state:
-
-            CognitionEvent,
-
-        ) => {
-
+        (state: CognitionEvent) => {
 
           updateCognition({
 
-            agents:
+            agents: state.agents,
 
-              state.agents,
+            workspaces: state.workspaces,
 
-
-            workspaces:
-
-              state.workspaces,
-
-
-            nodes:
-
-              state.nodes,
+            nodes: state.nodes,
 
           });
-
 
         },
 
       );
 
+    const removeMessages =
+      ai.subscribeMessages(
 
+        message => {
 
+          addMessage({
 
+            id: message.id,
+
+            role: message.role,
+
+            text: message.text,
+
+            timestamp: message.timestamp,
+
+            source: "ai",
+
+            provider: message.provider,
+
+            confidence: message.confidence,
+
+          });
+
+        },
+
+      );
+
+    const removeThinking =
+      ai.subscribeThinking(
+
+        value => {
+
+          setThinking(value);
+
+        },
+
+      );
+
+    const removeSpeaking =
+      ai.subscribeSpeaking(
+
+        value => {
+
+          setSpeaking(value);
+
+        },
+
+      );
+
+    const removeListening =
+      ai.subscribeListening(
+
+        value => {
+
+          setListening(value);
+
+        },
+
+      );
+
+    const removeNotifications =
+      ai.subscribeNotifications(
+
+        notification => {
+
+          notify(
+
+            notification.title,
+
+            notification.description,
+
+          );
+
+        },
+
+      );
 
     return () => {
 
-
       removeActions();
-
 
       removeCognition();
 
+      removeMessages();
+
+      removeThinking();
+
+      removeSpeaking();
+
+      removeListening();
+
+      removeNotifications();
 
     };
-
 
   }, [
 
@@ -191,11 +225,17 @@ export default function GenesisBridge() {
 
     updateCognition,
 
+    addMessage,
+
+    setThinking,
+
+    setSpeaking,
+
+    setListening,
+
+    notify,
+
   ]);
-
-
-
-
 
   return null;
 

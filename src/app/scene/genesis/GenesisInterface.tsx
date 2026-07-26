@@ -17,6 +17,7 @@ import {
   Html,
 } from "@react-three/drei";
 
+import GenesisChat from "./GenesisChat";
 
 import {
   useGenesis,
@@ -337,7 +338,7 @@ export default function GenesisInterface() {
 
                         "blur(20px)",
 
-                      maxHeight:320,
+                      maxHeight:440,
 
                       overflowY:"auto",
 
@@ -345,40 +346,55 @@ export default function GenesisInterface() {
 
                   >
 
+                    <div
 
-                    {
+                      style={{
 
-                      state.messages
+                        maxHeight:220,
 
-                      .slice(-12)
+                        overflowY:"auto",
 
-                      .map(message => (
+                        marginBottom:16,
 
+                      }}
 
-                        <p
+                    >
+                      {
 
-                          key={message.id}
+                        state.messages
 
-                        >
+                        .slice(-12)
 
-                          <b>
-
-                            {message.role}
-
-                          </b>
-
-                          {" "}
-
-                          {message.text}
+                        .map(message => (
 
 
-                        </p>
+                          <p
+
+                            key={message.id}
+
+                          >
+
+                            <b>
+
+                              {message.role}
+
+                            </b>
+
+                            {" "}
+
+                            {message.text}
 
 
-                      ))
+                          </p>
 
-                    }
 
+                        ))
+
+                      }
+
+                    </div>
+
+                    <GenesisChat />
 
                   </div>
 

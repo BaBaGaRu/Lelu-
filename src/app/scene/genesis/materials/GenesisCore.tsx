@@ -42,9 +42,26 @@ export default function GenesisCore({
 
   useFrame((_, delta) => {
 
-    material.uniforms.uTime.value += delta;
+    if (!material?.uniforms) {
 
-    material.uniforms.uActivity.value = activity;
+      return;
+
+    }
+
+    const uTime = material.uniforms.uTime;
+    const uActivity = material.uniforms.uActivity;
+
+    if (uTime?.value !== undefined) {
+
+      uTime.value += delta;
+
+    }
+
+    if (uActivity?.value !== undefined) {
+
+      uActivity.value = activity;
+
+    }
 
     if (!mesh.current) {
 

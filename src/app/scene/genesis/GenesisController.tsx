@@ -33,6 +33,10 @@ import GenesisRenderer
   from "./render/GenesisRenderer";
 
 
+import GenesisInterface
+  from "./GenesisInterface";
+
+
 
 
 
@@ -95,6 +99,8 @@ export default function GenesisController() {
       {/* ==========================================
           HUD
       ========================================== */}
+
+      <GenesisInterface />
 
 
 
