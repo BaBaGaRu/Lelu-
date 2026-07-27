@@ -1,19 +1,3 @@
-/**
- * ==========================================================
- * LÉLUVERSE
- * BUBBLE SPRAY
- *
- * Bubble spray rising from breaking waves.
- *
- * Responsibilities
- * ----------------
- * • Rising bubbles
- * • Surface spray
- * • Tide response
- * • Current drift
- * ==========================================================
- */
-
 import { useFrame } from "@react-three/fiber";
 import {
   useMemo,
@@ -23,6 +7,8 @@ import {
 import {
   Group,
   Mesh,
+  DoubleSide,
+  Vector3,
 } from "three";
 
 import type { OceanState } from "../../Ocean";
@@ -33,23 +19,23 @@ interface Props {
 
 interface Bubble {
 
-  x: number;
+  direction: Vector3;
 
-  y: number;
-
-  z: number;
+  radius: number;
 
   size: number;
 
   speed: number;
 
-  rise: number;
+  drift: number;
 
   offset: number;
 
   opacity: number;
 
 }
+
+const SURFACE_RADIUS = 3.18;
 
 export default function BubbleSpray({
   oceanState = {},
@@ -66,31 +52,32 @@ export default function BubbleSpray({
 
       return Array.from({
 
-        length: 320,
+        length: 180,
 
       }, (): Bubble => ({
 
-        x:
-          (Math.random() - 0.5) * 4.4,
+        direction:
+          new Vector3(
+            Math.random() * 2 - 1,
+            Math.random() * 2 - 1,
+            Math.random() * 2 - 1,
+          ).normalize(),
 
-        y:
-          2.08 +
-          Math.random() * 0.08,
-
-        z:
-          (Math.random() - 0.5) * 4.4,
-
-        size:
-          0.008 +
+        radius:
+          SURFACE_RADIUS +
           Math.random() * 0.03,
 
-        speed:
-          0.4 +
-          Math.random() * 0.8,
+        size:
+          0.02 +
+          Math.random() * 0.05,
 
-        rise:
-          0.25 +
-          Math.random() * 0.55,
+        speed:
+          0.20 +
+          Math.random() * 0.35,
+
+        drift:
+          0.02 +
+          Math.random() * 0.05,
 
         offset:
           Math.random() * 100,
@@ -102,8 +89,7 @@ export default function BubbleSpray({
       }));
 
     }, []);
-
-  useFrame((_, delta) => {
+      useFrame((_, delta) => {
 
     if (!group.current)
       return;
@@ -116,86 +102,90 @@ export default function BubbleSpray({
     const tide =
       oceanState.tide ?? 0.5;
 
-    group.current.children.forEach(
-      (child, i) => {
+    group.current.children.forEach((child, i) => {
 
-        const mesh =
-          child as Mesh;
+      const mesh =
+        child as Mesh;
 
-        const bubble =
-          bubbles[i];
+      const bubble =
+        bubbles[i];
 
-        mesh.position.x =
-          bubble.x +
-          Math.sin(
-            time.current *
-            bubble.speed +
-            bubble.offset,
-          ) *
-          0.08 *
-          current;
+      const dir =
+        bubble.direction.clone();
 
-        mesh.position.z =
-          bubble.z +
-          Math.cos(
-            time.current *
-            bubble.speed +
-            bubble.offset,
-          ) *
-          0.08 *
-          current;
+      const t =
+        time.current *
+        bubble.speed +
+        bubble.offset;
 
-        mesh.position.y =
-          bubble.y +
+      dir.x +=
+        Math.sin(t) *
+        bubble.drift *
+        current;
 
-          ((time.current *
-            bubble.rise +
-            bubble.offset) %
-            1.5);
+      dir.y +=
+        Math.cos(
+          t * 0.8
+        ) *
+        bubble.drift *
+        0.6 *
+        tide;
 
-        if (
-          mesh.position.y >
-          3.6
-        ) {
+      dir.z +=
+        Math.cos(
+          t * 1.15
+        ) *
+        bubble.drift *
+        current;
 
-          mesh.position.y =
-            bubble.y;
+      dir.normalize();
 
-        }
+      const radius =
+        bubble.radius +
 
-        const pulse =
+        Math.sin(
+          t * 3
+        ) *
+        0.02 *
+        tide;
 
-          1 +
+      mesh.position.copy(
+        dir.multiplyScalar(
+          radius
+        )
+      );
 
-          Math.sin(
+      mesh.quaternion.setFromUnitVectors(
+        new Vector3(
+          0,
+          0,
+          1,
+        ),
+        dir,
+      );
 
-            time.current *
+      mesh.rotateZ(
+        t
+      );
 
-            6 +
+      const pulse =
+        1 +
 
-            bubble.offset,
+        Math.sin(
+          t * 4 +
+          bubble.offset
+        ) *
+        0.25;
 
-          ) *
+      mesh.scale.setScalar(
+        bubble.size *
+        pulse
+      );
 
-          0.25 *
-
-          tide;
-
-        mesh.scale.setScalar(
-
-          bubble.size *
-
-          pulse,
-
-        );
-
-      },
-
-    );
+    });
 
   });
-
-  return (
+    return (
 
     <group ref={group}>
 
@@ -209,12 +199,13 @@ export default function BubbleSpray({
 
         <mesh
           key={i}
+          frustumCulled={false}
+          renderOrder={3}
         >
 
-          <sphereGeometry
+          <circleGeometry
             args={[
               1,
-              10,
               10,
             ]}
           />
@@ -229,7 +220,15 @@ export default function BubbleSpray({
               bubble.opacity
             }
 
+            side={
+              DoubleSide
+            }
+
             depthWrite={false}
+
+            depthTest={true}
+
+            toneMapped={false}
 
           />
 

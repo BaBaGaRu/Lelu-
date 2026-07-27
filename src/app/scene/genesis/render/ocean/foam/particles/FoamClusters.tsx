@@ -1,20 +1,3 @@
-/**
- * ==========================================================
- * LÉLUVERSE
- * FOAM CLUSTERS
- *
- * Floating groups of ocean foam that gather and
- * separate as the currents move.
- *
- * Responsibilities
- * ----------------
- * • Floating foam islands
- * • Ocean current response
- * • Tide breathing
- * • Cluster motion
- * ==========================================================
- */
-
 import { useFrame } from "@react-three/fiber";
 import {
   useMemo,
@@ -25,6 +8,7 @@ import {
   Group,
   Mesh,
   DoubleSide,
+  Vector3,
 } from "three";
 
 import type { OceanState } from "../../Ocean";
@@ -35,21 +19,23 @@ interface Props {
 
 interface Cluster {
 
-  x: number;
+  direction: Vector3;
 
-  y: number;
-
-  z: number;
+  radius: number;
 
   size: number;
 
   speed: number;
+
+  drift: number;
 
   offset: number;
 
   opacity: number;
 
 }
+
+const SURFACE_RADIUS = 3.18;
 
 export default function FoamClusters({
   oceanState = {},
@@ -70,15 +56,16 @@ export default function FoamClusters({
 
       }, (): Cluster => ({
 
-        x:
-          (Math.random() - 0.5) * 4.6,
+        direction:
+          new Vector3(
+            Math.random() * 2 - 1,
+            Math.random() * 2 - 1,
+            Math.random() * 2 - 1,
+          ).normalize(),
 
-        y:
-          2.18 +
-          Math.random() * 0.05,
-
-        z:
-          (Math.random() - 0.5) * 4.6,
+        radius:
+          SURFACE_RADIUS +
+          Math.random() * 0.03,
 
         size:
           0.08 +
@@ -87,6 +74,10 @@ export default function FoamClusters({
         speed:
           0.08 +
           Math.random() * 0.18,
+
+        drift:
+          0.02 +
+          Math.random() * 0.04,
 
         offset:
           Math.random() * 100,
@@ -98,8 +89,7 @@ export default function FoamClusters({
       }));
 
     }, []);
-
-  useFrame((_, delta) => {
+      useFrame((_, delta) => {
 
     if (!group.current)
       return;
@@ -112,85 +102,107 @@ export default function FoamClusters({
     const current =
       oceanState.current ?? 0.5;
 
-    group.current.children.forEach(
-      (child, i) => {
+    const up =
+      new Vector3(0, 0, 1);
 
-        const mesh =
-          child as Mesh;
+    group.current.children.forEach((child, i) => {
 
-        const cluster =
-          clusters[i];
+      const mesh =
+        child as Mesh;
 
-        mesh.position.x =
-          cluster.x +
-          Math.sin(
-            time.current *
-            cluster.speed +
-            cluster.offset,
-          ) *
-          0.15 *
-          current;
+      const cluster =
+        clusters[i];
 
-        mesh.position.z =
-          cluster.z +
-          Math.cos(
-            time.current *
-            cluster.speed +
-            cluster.offset,
-          ) *
-          0.15 *
-          current;
+      const dir =
+        cluster.direction.clone();
 
-        mesh.position.y =
-          cluster.y +
-          Math.sin(
-            time.current *
-            1.5 +
-            cluster.offset,
-          ) *
-          0.025 *
-          tide;
+      const t =
+        time.current *
+        cluster.speed +
+        cluster.offset;
 
-        mesh.rotation.z +=
-          delta *
-          0.25;
+      dir.x +=
+        Math.sin(t) *
+        cluster.drift *
+        current;
 
-        const pulse =
-          1 +
-          Math.sin(
-            time.current *
-            2.5 +
-            cluster.offset,
-          ) *
-          0.18;
+      dir.y +=
+        Math.cos(
+          t * 0.7
+        ) *
+        cluster.drift *
+        tide;
 
-        mesh.scale.setScalar(
-          cluster.size *
-          pulse,
-        );
+      dir.z +=
+        Math.cos(
+          t * 1.1
+        ) *
+        cluster.drift *
+        current;
 
-      },
-    );
+      dir.normalize();
+
+      const radius =
+        cluster.radius +
+        Math.sin(
+          t * 2
+        ) *
+        0.02 *
+        tide;
+
+      mesh.position.copy(
+        dir.multiplyScalar(
+          radius
+        )
+      );
+
+      mesh.quaternion.setFromUnitVectors(
+        up,
+        dir,
+      );
+
+      mesh.rotateZ(
+        t
+      );
+
+      const pulse =
+        1 +
+        Math.sin(
+          t * 2.5 +
+          cluster.offset
+        ) *
+        0.18;
+
+      mesh.scale.setScalar(
+        cluster.size *
+        pulse
+      );
+
+    });
 
   });
-
-  return (
+    return (
 
     <group ref={group}>
 
       {clusters.map((
+
         cluster,
+
         i,
+
       ) => (
 
         <mesh
           key={i}
+          frustumCulled={false}
+          renderOrder={2}
         >
 
           <circleGeometry
             args={[
               1,
-              20,
+              10,
             ]}
           />
 
@@ -209,6 +221,10 @@ export default function FoamClusters({
             }
 
             depthWrite={false}
+
+            depthTest
+
+            toneMapped={false}
 
           />
 

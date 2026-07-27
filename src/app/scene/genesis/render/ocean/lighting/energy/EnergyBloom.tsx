@@ -3,8 +3,9 @@
  * LÉLUVERSE
  * ENERGY BLOOM
  *
- * Large energetic blooms that pulse through
- * the Genesis Ocean.
+ * Distributed ocean energy field.
+ *
+ * No crown stacking.
  * ==========================================================
  */
 
@@ -19,11 +20,13 @@ import {
   DoubleSide,
   Group,
   Mesh,
+  AdditiveBlending,
 } from "three";
 
 import type {
   OceanState,
 } from "../../Ocean";
+
 
 interface Props {
 
@@ -31,25 +34,25 @@ interface Props {
 
 }
 
+
 interface Bloom {
 
-  radius: number;
+  x:number;
 
-  angle: number;
+  y:number;
 
-  depth: number;
+  z:number;
 
-  size: number;
+  size:number;
 
-  speed: number;
+  speed:number;
 
-  pulse: number;
+  pulse:number;
 
-  offset: number;
-
-  opacity: number;
+  offset:number;
 
 }
+
 
 export default function EnergyBloom({
 
@@ -57,193 +60,189 @@ export default function EnergyBloom({
 
 }: Props) {
 
+
   const group =
     useRef<Group>(null);
 
+
   const blooms =
-    useMemo<Bloom[]>(() => {
+    useMemo<Bloom[]>(()=>{
 
-      return Array.from({
+      return Array.from(
+        {
+          length:36,
+        },
 
-        length: 36,
+        ():Bloom=>({
 
-      }, (): Bloom => ({
+          x:
+            (Math.random()-0.5)*4,
 
-        radius:
-          Math.random() * 1.8,
+          y:
+            (Math.random()-0.5)*3,
 
-        angle:
-          Math.random() *
-          Math.PI * 2,
+          z:
+            (Math.random()-0.5)*4,
 
-        depth:
-          -0.3 -
-          Math.random() * 1.8,
+          size:
+            0.08 +
+            Math.random()*0.22,
 
-        size:
-          0.18 +
-          Math.random() * 0.45,
+          speed:
+            0.1 +
+            Math.random()*0.3,
 
-        speed:
-          0.03 +
-          Math.random() * 0.12,
+          pulse:
+            0.5 +
+            Math.random()*2,
 
-        pulse:
-          0.5 +
-          Math.random() * 1.6,
+          offset:
+            Math.random()*100,
 
-        offset:
-          Math.random() * 100,
+        })
 
-        opacity:
-          0.02 +
-          Math.random() * 0.05,
+      );
 
-      }));
+    },[]);
 
-    }, []);
 
-  useFrame((state) => {
 
-    if (!group.current)
+  useFrame((state,delta)=>{
+
+
+    if(!group.current)
       return;
+
 
     const time =
       state.clock.elapsedTime;
 
-    const current =
-      oceanState.current ?? 0.5;
 
     const tide =
       oceanState.tide ?? 0.5;
 
+
     group.current.children.forEach(
 
-      (child, i) => {
+      (child,i)=>{
+
 
         const mesh =
           child as Mesh;
 
+
         const bloom =
           blooms[i];
 
-        const angle =
-
-          bloom.angle +
-
-          time *
-
-          bloom.speed *
-
-          current;
 
         mesh.position.x =
 
-          Math.cos(angle) *
+          bloom.x +
 
-          bloom.radius;
+          Math.sin(
+            time*bloom.speed +
+            bloom.offset
+          ) *
+          0.15;
 
-        mesh.position.z =
-
-          Math.sin(angle) *
-
-          bloom.radius;
 
         mesh.position.y =
 
-          bloom.depth +
+          bloom.y +
 
           Math.sin(
-
-            time *
-
-            bloom.speed +
-
-            bloom.offset,
-
+            time*0.8 +
+            bloom.offset
           ) *
-
-          0.08 *
-
+          0.1 *
           tide;
+
+
+        mesh.position.z =
+
+          bloom.z +
+
+          Math.cos(
+            time*bloom.speed +
+            bloom.offset
+          ) *
+          0.15;
+
 
         const pulse =
 
           1 +
 
           Math.sin(
-
-            time *
-
-            bloom.pulse +
-
-            bloom.offset,
-
+            time*bloom.pulse +
+            bloom.offset
           ) *
+          0.25;
 
-          0.35;
 
         mesh.scale.setScalar(
 
           bloom.size *
-
-          pulse,
+          pulse
 
         );
 
-        mesh.rotation.z +=
-          0.0015;
 
-      },
+        mesh.rotation.z +=
+
+          delta *
+          0.4;
+
+
+      }
 
     );
 
+
   });
+
+
 
   return (
 
     <group ref={group}>
 
-      {blooms.map((
+      {
+        blooms.map((_,i)=>(
 
-        bloom,
+          <mesh key={i}>
 
-        i,
+            <circleGeometry
+              args={[
+                1,
+                24,
+              ]}
+            />
 
-      ) => (
 
-        <mesh
-          key={i}
-        >
+            <meshBasicMaterial
 
-          <circleGeometry
-            args={[
-              1,
-              32,
-            ]}
-          />
+              color="#63dfff"
 
-          <meshBasicMaterial
+              transparent
 
-            color="#63dfff"
+              opacity={0.035}
 
-            transparent
+              side={DoubleSide}
 
-            opacity={
-              bloom.opacity
-            }
+              depthWrite={false}
 
-            side={
-              DoubleSide
-            }
+              depthTest={true}
 
-            depthWrite={false}
+              blending={AdditiveBlending}
 
-          />
+            />
 
-        </mesh>
 
-      ))}
+          </mesh>
+
+        ))
+      }
 
     </group>
 

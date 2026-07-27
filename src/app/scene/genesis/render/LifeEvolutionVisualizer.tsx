@@ -5,14 +5,14 @@
  *
  * Living biosphere layer.
  *
- * Displays:
- * - organic growth
- * - life energy
- * - evolutionary waves
- * - ecosystem fields
- * - intelligence emergence
+ * Connected to Genesis universe state.
  *
- * Visual layer only.
+ * Uses:
+ * - life
+ * - energy
+ * - awareness
+ * - intelligence
+ * - evolutionSystem
  * ==========================================================
  */
 
@@ -41,29 +41,26 @@ import {
 
 
 
-export default function LifeEvolutionVisualizer() {
+export default function LifeEvolutionVisualizer(){
 
 
   const {
-
-    state,
-
+    universe,
   } = useGenesis();
 
 
 
 
 
-  const life =
+  const lifeGroup =
 
     useRef<Group>(null);
 
 
-  const growth =
+
+  const growthGroup =
 
     useRef<Group>(null);
-
-
 
 
 
@@ -75,34 +72,38 @@ export default function LifeEvolutionVisualizer() {
 
 
 
-  const organisms = useMemo(
+  const organisms =
 
-    () =>
+    useMemo(
 
-      Array.from({
+      () =>
 
-        length:40,
+        Array.from({
 
-      }),
+          length:40,
 
-    [],
+        }),
 
-  );
+      [],
 
-
-
-
-
-  useFrame((_,delta)=>{
+    );
 
 
-    if (
 
-      !life.current ||
 
-      !growth.current
 
-    ) {
+
+
+  useFrame((_, delta)=>{
+
+
+    if(
+
+      !lifeGroup.current ||
+
+      !growthGroup.current
+
+    ){
 
       return;
 
@@ -118,33 +119,47 @@ export default function LifeEvolutionVisualizer() {
 
 
 
-    const reality =
+    const lifeAmount =
 
-      (state as any);
-
-
+      universe.life ?? 0;
 
 
 
-    const lifeEnergy =
+    const energyAmount =
 
-      reality.life
-
-      ??
-
-      0.2;
+      universe.energy ?? 0;
 
 
 
+    const intelligenceAmount =
+
+      universe.intelligence ?? 0;
 
 
-    const intelligence =
 
-      reality.intelligence
+    const awarenessAmount =
 
-      ??
+      universe.awareness ?? 0;
 
-      0.1;
+
+
+    const growthAmount =
+
+      universe.evolutionSystem?.growth ?? 0;
+
+
+
+    const mutationAmount =
+
+      universe.evolutionSystem?.mutation ?? 0;
+
+
+
+    const adaptationAmount =
+
+      universe.evolutionSystem?.adaptation ?? 0;
+
+
 
 
 
@@ -155,7 +170,8 @@ export default function LifeEvolutionVisualizer() {
      */
 
 
-    life.current.scale.setScalar(
+    lifeGroup.current.scale.setScalar(
+
 
       1 +
 
@@ -169,11 +185,20 @@ export default function LifeEvolutionVisualizer() {
 
       *
 
-      lifeEnergy *
+      lifeAmount *
 
       0.05
 
+      +
+
+      energyAmount *
+
+      0.01
+
+
     );
+
+
 
 
 
@@ -184,7 +209,8 @@ export default function LifeEvolutionVisualizer() {
      */
 
 
-    growth.current.rotation.y +=
+    growthGroup.current.rotation.y +=
+
 
       delta *
 
@@ -192,11 +218,49 @@ export default function LifeEvolutionVisualizer() {
 
         0.1 +
 
-        intelligence *
+        intelligenceAmount *
 
-        0.5
+        0.5 +
+
+        growthAmount *
+
+        0.3 +
+
+        mutationAmount *
+
+        0.2
 
       );
+
+
+
+
+
+    growthGroup.current.rotation.x =
+
+
+      Math.sin(
+
+        time.current *
+
+        0.2
+
+      )
+
+      *
+
+      (
+
+        growthAmount +
+
+        adaptationAmount
+
+      )
+
+      *
+
+      0.1;
+
 
 
   });
@@ -205,18 +269,28 @@ export default function LifeEvolutionVisualizer() {
 
 
 
+
+
   return (
+
+
 
     <group
 
-      ref={life}
+      ref={lifeGroup}
+
+      name="LifeEvolution"
 
     >
+
+
+
 
 
       {/* ======================================
           BIOSPHERE FIELD
       ====================================== */}
+
 
 
       <mesh>
@@ -243,7 +317,21 @@ export default function LifeEvolutionVisualizer() {
 
           transparent
 
-          opacity={0.025}
+          opacity={
+
+            0.015 +
+
+            energyAmountSafe(
+
+              universe.energy
+
+            ) *
+
+            0.03
+
+          }
+
+          depthWrite={false}
 
         />
 
@@ -254,21 +342,27 @@ export default function LifeEvolutionVisualizer() {
 
 
 
+
+
       {/* ======================================
           ORGANIC EVOLUTION NODES
       ====================================== */}
 
 
+
       <group
 
-        ref={growth}
+        ref={growthGroup}
+
+        name="EvolutionNodes"
 
       >
 
 
+
         {
 
-          organisms.map((_,i)=>(
+          organisms.map((_, i)=>(
 
 
             <mesh
@@ -277,32 +371,48 @@ export default function LifeEvolutionVisualizer() {
 
               position={[
 
-                Math.sin(i)*2,
 
-                Math.cos(i*2)*1.5,
+                Math.sin(i) *
 
-                Math.sin(i*3),
+                2,
+
+
+                Math.cos(i * 2) *
+
+                1.5,
+
+
+                Math.sin(i * 3),
+
 
               ]}
 
             >
 
 
+
               <sphereGeometry
 
                 args={[
 
+
                   0.03 +
 
-                  (i%4)*0.01,
+                  (i % 4) *
+
+                  0.01,
+
 
                   12,
 
+
                   12,
+
 
                 ]}
 
               />
+
 
 
               <meshBasicMaterial
@@ -311,9 +421,24 @@ export default function LifeEvolutionVisualizer() {
 
                 transparent
 
-                opacity={0.35}
+                opacity={
+
+                  0.2 +
+
+                  awarenessAmountSafe(
+
+                    universe.awareness
+
+                  ) *
+
+                  0.5
+
+                }
+
+                depthWrite={false}
 
               />
+
 
 
             </mesh>
@@ -324,7 +449,10 @@ export default function LifeEvolutionVisualizer() {
         }
 
 
+
       </group>
+
+
 
 
 
@@ -332,7 +460,27 @@ export default function LifeEvolutionVisualizer() {
 
       <pointLight
 
-        intensity={6}
+        intensity={
+
+          2 +
+
+          energyAmountSafe(
+
+            universe.energy
+
+          ) *
+
+          4 +
+
+          awarenessAmountSafe(
+
+            universe.awareness
+
+          ) *
+
+          2
+
+        }
 
         distance={40}
 
@@ -341,8 +489,39 @@ export default function LifeEvolutionVisualizer() {
       />
 
 
+
+
+
     </group>
 
+
   );
+
+}
+
+
+
+
+
+
+function energyAmountSafe(
+
+  value:number | undefined,
+
+){
+
+  return value ?? 0;
+
+}
+
+
+
+function awarenessAmountSafe(
+
+  value:number | undefined,
+
+){
+
+  return value ?? 0;
 
 }

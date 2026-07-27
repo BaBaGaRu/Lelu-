@@ -1,20 +1,3 @@
-/**
- * ==========================================================
- * LÉLUVERSE
- * SHORE FOAM
- *
- * Floating foam that gathers along the outer edge of
- * the Genesis Ocean.
- *
- * Responsibilities
- * ----------------
- * • Shoreline foam
- * • Circular foam bands
- * • Slow drift
- * • Tide response
- * ==========================================================
- */
-
 import { useFrame } from "@react-three/fiber";
 import {
   useMemo,
@@ -25,6 +8,7 @@ import {
   Group,
   Mesh,
   DoubleSide,
+  Vector3,
 } from "three";
 
 import type { OceanState } from "../../Ocean";
@@ -35,21 +19,23 @@ interface Props {
 
 interface FoamPatch {
 
+  direction: Vector3;
+
   radius: number;
-
-  angle: number;
-
-  height: number;
 
   size: number;
 
   speed: number;
+
+  drift: number;
 
   offset: number;
 
   opacity: number;
 
 }
+
+const SURFACE_RADIUS = 3.20;
 
 export default function ShoreFoam({
   oceanState = {},
@@ -70,17 +56,16 @@ export default function ShoreFoam({
 
       }, (): FoamPatch => ({
 
+        direction:
+          new Vector3(
+            Math.random() * 2 - 1,
+            Math.random() * 2 - 1,
+            Math.random() * 2 - 1,
+          ).normalize(),
+
         radius:
-          2.30 +
-          Math.random() * 0.18,
-
-        angle:
-          Math.random() *
-          Math.PI * 2,
-
-        height:
-          2.18 +
-          Math.random() * 0.04,
+          SURFACE_RADIUS +
+          Math.random() * 0.025,
 
         size:
           0.03 +
@@ -89,6 +74,10 @@ export default function ShoreFoam({
         speed:
           0.08 +
           Math.random() * 0.25,
+
+        drift:
+          0.015 +
+          Math.random() * 0.035,
 
         offset:
           Math.random() * 100,
@@ -100,8 +89,7 @@ export default function ShoreFoam({
       }));
 
     }, []);
-
-  useFrame((_, delta) => {
+      useFrame((_, delta) => {
 
     if (!group.current)
       return;
@@ -114,98 +102,88 @@ export default function ShoreFoam({
     const current =
       oceanState.current ?? 0.5;
 
-    group.current.children.forEach(
-      (child, i) => {
+    const up =
+      new Vector3(0, 0, 1);
 
-        const mesh =
-          child as Mesh;
+    group.current.children.forEach((child, i) => {
 
-        const patch =
-          foam[i];
+      const mesh =
+        child as Mesh;
 
-        const angle =
+      const patch =
+        foam[i];
 
-          patch.angle +
+      const dir =
+        patch.direction.clone();
 
-          time.current *
+      const t =
+        time.current *
+        patch.speed +
+        patch.offset;
 
-          patch.speed *
+      dir.x +=
+        Math.sin(t) *
+        patch.drift *
+        current;
 
-          current *
+      dir.y +=
+        Math.cos(
+          t * 0.75
+        ) *
+        patch.drift *
+        tide;
 
-          0.08;
+      dir.z +=
+        Math.cos(
+          t * 1.15
+        ) *
+        patch.drift *
+        current;
 
-        mesh.position.x =
+      dir.normalize();
 
-          Math.cos(angle) *
+      const radius =
+        patch.radius +
 
-          patch.radius;
+        Math.sin(
+          t * 2.5
+        ) *
+        0.015 *
+        tide;
 
-        mesh.position.z =
+      mesh.position.copy(
+        dir.multiplyScalar(
+          radius
+        )
+      );
 
-          Math.sin(angle) *
+      mesh.quaternion.setFromUnitVectors(
+        up,
+        dir,
+      );
 
-          patch.radius;
+      mesh.rotateZ(
+        t
+      );
 
-        mesh.position.y =
+      const pulse =
+        1 +
 
-          patch.height +
+        Math.sin(
+          t * 2.5 +
+          patch.offset
+        ) *
+        0.18;
 
-          Math.sin(
+      mesh.scale.setScalar(
+        patch.size *
+        pulse
+      );
 
-            time.current *
-
-            1.8 +
-
-            patch.offset,
-
-          ) *
-
-          0.02 *
-
-          tide;
-
-        mesh.lookAt(
-          0,
-          mesh.position.y,
-          0,
-        );
-
-        mesh.rotation.z +=
-          delta *
-          0.3;
-
-        const pulse =
-
-          1 +
-
-          Math.sin(
-
-            time.current *
-
-            2.5 +
-
-            patch.offset,
-
-          ) *
-
-          0.18;
-
-        mesh.scale.setScalar(
-
-          patch.size *
-
-          pulse,
-
-        );
-
-      },
-
-    );
+    });
 
   });
-
-  return (
+    return (
 
     <group ref={group}>
 
@@ -218,13 +196,19 @@ export default function ShoreFoam({
       ) => (
 
         <mesh
+
           key={i}
+
+          frustumCulled={false}
+
+          renderOrder={3}
+
         >
 
           <circleGeometry
             args={[
               1,
-              16,
+              10,
             ]}
           />
 
@@ -243,6 +227,10 @@ export default function ShoreFoam({
             }
 
             depthWrite={false}
+
+            depthTest
+
+            toneMapped={false}
 
           />
 

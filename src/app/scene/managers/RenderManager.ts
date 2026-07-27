@@ -21,7 +21,11 @@ export default class RenderManager {
 
   render() {
 
-    this.pipeline.render();
+    this.pipeline.render({
+      time: performance.now(),
+      delta: 0.016,
+      activity: 0,
+    });
 
   }
 

@@ -2,11 +2,13 @@
  * ==========================================================
  * LÉLUVERSE
  * PORTAL TYPES
+ *
+ * Shared portal and particle definitions.
+ * True 3D orbital particle model.
  * ==========================================================
  */
 
 export type PortalState =
-
   | "forming"
   | "opening"
   | "stable"
@@ -15,7 +17,6 @@ export type PortalState =
   | "rebirth";
 
 export type PortalEvent =
-
   | "none"
   | "portal"
   | "warp"
@@ -31,96 +32,125 @@ export type PortalEvent =
 
 export interface LivingPortal {
 
-  id:number;
+  id: number;
 
-  position:[
-
+  position: [
     number,
-
     number,
-
     number,
-
   ];
 
-  baseRadius:number;
+  baseRadius: number;
 
-  radius:number;
+  radius: number;
 
-  energy:number;
+  energy: number;
 
-  age:number;
+  age: number;
 
-  phase:number;
+  phase: number;
 
-  frequency:number;
+  frequency: number;
 
-  growth:number;
+  growth: number;
 
-  rotation:number;
+  rotation: number;
 
-  spin:number;
+  spin: number;
 
-  timer:number;
+  timer: number;
 
-  state:PortalState;
+  state: PortalState;
 
-  event:PortalEvent;
+  event: PortalEvent;
 
 }
 
-export interface PortalParticle{
+export type ParticleEvolution =
+  | "birth"
+  | "warp"
+  | "morph"
+  | "portal"
+  | "galaxy"
+  | "bloom"
+  | "crystal"
+  | "death"
+  | "rebirth";
 
-  id:number;
+export interface PortalParticle {
 
-  portalId:number;
+  id: number;
 
-  position:[
+  portalId: number;
 
+  /**
+   * Current world position.
+   */
+  position: [
     number,
-
     number,
-
     number,
-
   ];
 
-  velocity:[
-
+  /**
+   * Velocity for secondary motion.
+   */
+  velocity: [
     number,
-
     number,
-
     number,
-
   ];
 
-  angle:number;
+  /**
+   * Normalized direction from the
+   * center of the portal.
+   */
+  direction: [
+    number,
+    number,
+    number,
+  ];
 
-  orbit:number;
+  /**
+   * Normalized rotation axis.
+   */
+  axis: [
+    number,
+    number,
+    number,
+  ];
 
-  speed:number;
+  /**
+   * Current angular rotation.
+   */
+  rotation: number;
 
-  size:number;
+  /**
+   * Distance from portal center.
+   */
+  orbit: number;
 
-  pulse:number;
+  /**
+   * Angular velocity.
+   */
+  speed: number;
 
-  age:number;
+  /**
+   * Visual radius multiplier.
+   */
+  size: number;
 
-  life:number;
+  /**
+   * Animation offset.
+   */
+  pulse: number;
 
-  evolution:
+  age: number;
 
-    | "birth"
-    | "warp"
-    | "morph"
-    | "portal"
-    | "galaxy"
-    | "bloom"
-    | "crystal"
-    | "death"
-    | "rebirth";
+  life: number;
 
-  alive:boolean;
+  evolution: ParticleEvolution;
+
+  alive: boolean;
 
 }

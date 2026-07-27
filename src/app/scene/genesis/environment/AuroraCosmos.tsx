@@ -5,7 +5,9 @@
  *
  * Living cosmic ribbons.
  *
- * Scaled for Genesis space.
+ * Visible atmospheric layer.
+ * Surrounds Genesis space without blocking core.
+ *
  * ==========================================================
  */
 
@@ -100,49 +102,89 @@ export default function AuroraCosmos(){
       }).map(()=>({
 
 
+
         x:
 
-          (Math.random()-.5)*18,
+          (Math.random() - 0.5)
+
+          *
+
+          14,
+
 
 
         y:
 
-          (Math.random()-.5)*12,
+          (Math.random() - 0.5)
+
+          *
+
+          10,
+
 
 
         z:
 
-          -8 -
+          -3 -
 
-          Math.random()*25,
+          Math.random()
+
+          *
+
+          8,
+
 
 
         rotation:
 
-          Math.random() *
+          Math.random()
 
-          Math.PI * 2,
+          *
+
+          Math.PI
+
+          *
+
+          2,
+
 
 
         scale:
 
-          4 +
+          2 +
 
-          Math.random()*8,
+          Math.random()
+
+          *
+
+          5,
+
 
 
         speed:
 
-          .002 +
+          0.01 +
 
-          Math.random()*.004,
+          Math.random()
+
+          *
+
+          0.02,
+
 
 
         pulse:
 
-          Math.random() *
+          Math.random()
 
-          Math.PI * 2,
+          *
+
+          Math.PI
+
+          *
+
+          2,
+
 
 
         color:
@@ -151,7 +193,9 @@ export default function AuroraCosmos(){
 
             Math.floor(
 
-              Math.random() *
+              Math.random()
+
+              *
 
               colors.length
 
@@ -164,6 +208,8 @@ export default function AuroraCosmos(){
 
 
     },[]);
+
+
 
 
 
@@ -203,6 +249,7 @@ export default function AuroraCosmos(){
 
         mesh.rotation.z +=
 
+
           delta *
 
           r.speed;
@@ -213,11 +260,14 @@ export default function AuroraCosmos(){
 
         mesh.rotation.y +=
 
+
           delta *
 
           r.speed *
 
-          .5;
+          0.5;
+
+
 
 
 
@@ -225,15 +275,24 @@ export default function AuroraCosmos(){
 
         mesh.position.x =
 
+
           r.x +
 
           Math.sin(
 
-            t*.08 +
+            t *
 
-            index,
+            0.08 +
 
-          )*.5;
+            index
+
+          )
+
+          *
+
+          0.4;
+
+
 
 
 
@@ -241,15 +300,24 @@ export default function AuroraCosmos(){
 
         mesh.position.y =
 
+
           r.y +
 
           Math.cos(
 
-            t*.06 +
+            t *
 
-            index,
+            0.06 +
 
-          )*.4;
+            index
+
+          )
+
+          *
+
+          0.3;
+
+
 
 
 
@@ -257,15 +325,24 @@ export default function AuroraCosmos(){
 
         const glow =
 
-          .7 +
+
+          0.8 +
 
           Math.sin(
 
-            t*1.4 +
+            t *
 
-            r.pulse,
+            1.4 +
 
-          )*.15;
+            r.pulse
+
+          )
+
+          *
+
+          0.2;
+
+
 
 
 
@@ -275,7 +352,9 @@ export default function AuroraCosmos(){
 
           r.scale,
 
-          glow*3,
+          glow *
+
+          2,
 
           1,
 
@@ -293,19 +372,28 @@ export default function AuroraCosmos(){
 
 
 
+
+
   return (
+
 
 
     <group
 
       ref={root}
 
+      name="AuroraCosmos"
+
+      renderOrder={5}
+
     >
+
 
 
       {
 
         ribbons.map((r,i)=>(
+
 
 
           <mesh
@@ -335,17 +423,19 @@ export default function AuroraCosmos(){
           >
 
 
+
             <planeGeometry
 
               args={[
 
-                1,
+                3,
 
-                .08,
+                0.15,
 
               ]}
 
             />
+
 
 
             <meshBasicMaterial
@@ -354,19 +444,22 @@ export default function AuroraCosmos(){
 
               transparent
 
-              opacity={0.035}
+              opacity={0.12}
 
               depthWrite={false}
 
             />
 
 
+
           </mesh>
+
 
 
         ))
 
       }
+
 
 
     </group>

@@ -6,237 +6,84 @@
  * SINGLE SOURCE OF TRUTH
  *
  * Connects:
- *
- * Shared AIService
- *        ↓
- * Brain / Runtime
- *        ↓
- * Genesis Context
- *        ↓
- * Genesis World + Interface
- *
+ * Shared AIService → Brain / Runtime → Genesis Context → Genesis World + Interface
  * ==========================================================
  */
 
 import { useEffect } from "react";
-
-import {
-  useGenesis,
-} from "./GenesisCore";
-
+import { useGenesis } from "./GenesisCore";
 import AIService, {
   type AIActionEvent,
+  type AIMessageEvent,
   type CognitionEvent,
 } from "../../../core/AIService";
 
-/*
- * IMPORTANT:
- *
- * AIService should expose ONE shared instance.
- *
- * Example:
- *
- *   static getInstance()
- *
- * or
- *
- *   export const aiService
- *
- * Do NOT construct another runtime here.
- */
-
-const ai =
-  AIService.getInstance();
+const ai = AIService.getInstance();
 
 export default function GenesisBridge() {
-
-  const {
-
-    addAction,
-
-    updateCognition,
-
-    addMessage,
-
-    setThinking,
-
-    setSpeaking,
-
-    setListening,
-
-    notify,
-
-  } = useGenesis();
+  const { addAction, updateCognition, addMessage, setThinking, setSpeaking, setListening, notify } = useGenesis();
 
   useEffect(() => {
-
     ai.initialize().catch(console.error);
 
-    const removeActions =
-      ai.subscribeActions(
+    const removeActions = ai.subscribeActions((event: AIActionEvent) => {
+      addAction({
+        id: event.id,
+        type: event.type,
+        label: event.label,
+        source: "ai",
+        status: event.status === "error" ? "failed" : event.status,
+        progress: event.status === "complete" ? 100 : 0,
+        timestamp: event.timestamp,
+      });
+    });
 
-        (event: AIActionEvent) => {
+    const removeCognition = ai.subscribeCognition((state: CognitionEvent) => {
+      updateCognition({
+        agents: state.agents,
+        workspaces: state.workspaces,
+        nodes: state.nodes,
+      });
+    });
 
-          addAction({
+    const removeMessages = ai.subscribeMessages((message: AIMessageEvent) => {
+      addMessage({
+        id: message.id,
+        role: message.role,
+        text: message.text,
+        timestamp: message.timestamp,
+        source: "ai",
+        provider: message.provider,
+        confidence: message.confidence,
+      });
+    });
 
-            id: event.id,
+    const removeThinking = ai.subscribeThinking((value: boolean) => {
+      setThinking(value);
+    });
 
-            type: event.type,
+    const removeSpeaking = ai.subscribeSpeaking((value: boolean) => {
+      setSpeaking(value);
+    });
 
-            label: event.label,
+    const removeListening = ai.subscribeListening((value: boolean) => {
+      setListening(value);
+    });
 
-            source: "ai",
-
-            status:
-              event.status === "error"
-                ? "failed"
-                : event.status,
-
-            progress:
-              event.status === "complete"
-                ? 100
-                : 0,
-
-            timestamp: event.timestamp,
-
-          });
-
-        },
-
-      );
-
-    const removeCognition =
-      ai.subscribeCognition(
-
-        (state: CognitionEvent) => {
-
-          updateCognition({
-
-            agents: state.agents,
-
-            workspaces: state.workspaces,
-
-            nodes: state.nodes,
-
-          });
-
-        },
-
-      );
-
-    const removeMessages =
-      ai.subscribeMessages(
-
-        message => {
-
-          addMessage({
-
-            id: message.id,
-
-            role: message.role,
-
-            text: message.text,
-
-            timestamp: message.timestamp,
-
-            source: "ai",
-
-            provider: message.provider,
-
-            confidence: message.confidence,
-
-          });
-
-        },
-
-      );
-
-    const removeThinking =
-      ai.subscribeThinking(
-
-        value => {
-
-          setThinking(value);
-
-        },
-
-      );
-
-    const removeSpeaking =
-      ai.subscribeSpeaking(
-
-        value => {
-
-          setSpeaking(value);
-
-        },
-
-      );
-
-    const removeListening =
-      ai.subscribeListening(
-
-        value => {
-
-          setListening(value);
-
-        },
-
-      );
-
-    const removeNotifications =
-      ai.subscribeNotifications(
-
-        notification => {
-
-          notify(
-
-            notification.title,
-
-            notification.description,
-
-          );
-
-        },
-
-      );
+    const removeNotifications = ai.subscribeNotifications((notification: { title: string; description?: string }) => {
+      notify(notification.title, notification.description);
+    });
 
     return () => {
-
       removeActions();
-
       removeCognition();
-
       removeMessages();
-
       removeThinking();
-
       removeSpeaking();
-
       removeListening();
-
       removeNotifications();
-
     };
-
-  }, [
-
-    addAction,
-
-    updateCognition,
-
-    addMessage,
-
-    setThinking,
-
-    setSpeaking,
-
-    setListening,
-
-    notify,
-
-  ]);
+  }, [addAction, updateCognition, addMessage, setThinking, setSpeaking, setListening, notify]);
 
   return null;
-
 }

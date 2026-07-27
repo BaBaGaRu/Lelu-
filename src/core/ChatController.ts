@@ -56,7 +56,7 @@ export default class ChatController {
   constructor() {
 
     this.ai =
-      new AIService();
+      AIService.getInstance();
 
   }
 

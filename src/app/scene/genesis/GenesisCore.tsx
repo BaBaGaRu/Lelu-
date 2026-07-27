@@ -3,16 +3,19 @@
  * LÉLUVERSE
  * GENESIS CORE
  *
- * Living interface state.
+ * Living interface + universe state bridge.
  *
  * Controls:
+ * - UI state
  * - chat
  * - panels
- * - cognition state
- * - workspaces
- * - live actions
- * - browser/task visualization
- * - ecosystem state
+ * - cognition
+ * - universe simulation state
+ *
+ * Optimized:
+ * - live engine mutation ref
+ * - reactive universe snapshots
+ * - simulation friendly updates
  * ==========================================================
  */
 
@@ -27,9 +30,20 @@ import {
 
   useState,
 
+  useRef,
+
   type ReactNode,
 
 } from "react";
+
+
+import {
+
+  defaultGenesisState,
+
+  type GenesisState as UniverseState,
+
+} from "./state/GenesisState";
 
 
 import type {
@@ -136,11 +150,6 @@ export interface GenesisCognitionState {
 
 
 
-/*
- * ECOSYSTEM STATE
- */
-
-
 export interface GenesisEcosystemState {
 
   biodiversity:number;
@@ -161,50 +170,35 @@ export interface GenesisEcosystemState {
 
 
 
-export interface GenesisState {
-
+export interface GenesisUIState {
 
   initialized:boolean;
 
-
   thinking:boolean;
-
 
   speaking:boolean;
 
-
   listening:boolean;
-
 
   online:boolean;
 
-
   mode:GenesisMode;
-
 
   messages:GenesisMessage[];
 
-
   notifications:GenesisNotification[];
-
 
   activePanel:GenesisPanel;
 
-
   minimized:boolean;
-
 
   activeWorkspace:string | null;
 
-
   cognition:GenesisCognitionState | null;
-
 
   actions:GenesisAction[];
 
-
   ecosystem:GenesisEcosystemState;
-
 
 }
 
@@ -215,7 +209,24 @@ export interface GenesisState {
 export interface GenesisContextValue {
 
 
-  state:GenesisState;
+  state:GenesisUIState;
+
+
+  universe:UniverseState;
+
+
+
+  updateUniverse(
+
+    updater:
+
+    (
+
+      state:UniverseState,
+
+    )=>void,
+
+  ):void;
 
 
 
@@ -364,7 +375,7 @@ export function useGenesis(){
 
     throw new Error(
 
-      "useGenesis must be used inside GenesisCore.",
+      "useGenesis must be used inside GenesisCore",
 
     );
 
@@ -396,75 +407,280 @@ export default function GenesisCore({
 }:GenesisCoreProps){
 
 
-  const [state,setState] =
 
-    useState<GenesisState>({
+  const [
 
+    state,
 
-      initialized:true,
+    setState,
 
-
-      thinking:false,
-
-
-      speaking:false,
+  ] = useState<GenesisUIState>({
 
 
-      listening:false,
+    initialized:true,
+
+    thinking:false,
+
+    speaking:false,
+
+    listening:false,
+
+    online:true,
+
+    mode:"chat",
+
+    messages:[],
+
+    notifications:[],
+
+    activePanel:"chat",
+
+    minimized:false,
+
+    activeWorkspace:null,
 
 
-      online:true,
+    cognition:{
 
 
-      mode:"chat",
+      agents:[
+
+        {
+
+          id:"lelu",
+
+          name:"Lélu",
+
+          role:"Primary companion",
+
+        },
+
+      ],
 
 
-      messages:[],
+      workspaces:[
+
+        {
+
+          id:"core",
+
+          name:"Genesis Core",
+
+        },
 
 
-      notifications:[],
+        {
+
+          id:"research",
+
+          name:"Research Lab",
+
+        },
 
 
-      activePanel:"none",
+        {
+
+          id:"creation",
+
+          name:"Creation Studio",
+
+        },
+
+      ],
 
 
-      minimized:false,
+      nodes:[
+
+        {
+
+          id:"node-core",
+
+          name:"Core node",
+
+        },
+
+      ],
+
+    },
 
 
-      activeWorkspace:null,
+    actions:[],
 
 
-      cognition:null,
+    ecosystem:{
 
 
-      actions:[],
+      biodiversity:0.1,
+
+      vegetation:0.1,
+
+      biomass:0.1,
+
+      stability:0.8,
+
+      adaptation:0,
+
+      extinction:0,
 
 
-      ecosystem:{
+    },
 
 
-        biodiversity:0.1,
+  });
 
 
-        vegetation:0.1,
 
 
-        biomass:0.1,
 
 
-        stability:0.8,
+
+  const universeRef =
+
+    useRef<UniverseState>(
+
+      structuredClone(
+
+        defaultGenesisState,
+
+      ),
+
+    );
 
 
-        adaptation:0,
 
 
-        extinction:0,
 
+  const [
+
+    universeVersion,
+
+    setUniverseVersion,
+
+  ] = useState(0);
+
+
+
+
+
+
+
+  /*
+   * Reactive snapshot.
+   *
+   * Engines mutate universeRef.
+   * React receives fresh data.
+   */
+
+
+  const universe =
+
+    useMemo(()=>({
+
+
+      ...universeRef.current,
+
+
+      astrology:{
+
+        ...universeRef.current.astrology,
 
       },
 
 
-    });
+      celestial:{
+
+        ...universeRef.current.celestial,
+
+      },
+
+
+      ocean:{
+
+        ...universeRef.current.ocean,
+
+      },
+
+
+      evolutionSystem:{
+
+        ...universeRef.current.evolutionSystem,
+
+      },
+
+
+      memory:{
+
+        ...universeRef.current.memory,
+
+      },
+
+
+      timeline:{
+
+        ...universeRef.current.timeline,
+
+      },
+
+
+      pulse:{
+
+        ...universeRef.current.pulse,
+
+      },
+
+
+    }),
+
+
+    [
+
+      universeVersion,
+
+    ],
+
+
+  );
+
+
+
+
+
+
+
+  const updateUniverse =
+
+
+    (
+
+      updater:
+
+      (
+
+        state:UniverseState,
+
+      )=>void,
+
+    )=>{
+
+
+      updater(
+
+        universeRef.current,
+
+      );
+
+
+
+      setUniverseVersion(
+
+        value => value + 1,
+
+      );
+
+
+    };
+
+
 
 
 
@@ -474,10 +690,16 @@ export default function GenesisCore({
 
     useMemo<GenesisContextValue>(
 
-      () => ({
+      ()=>({
 
 
         state,
+
+
+        universe,
+
+
+        updateUniverse,
 
 
 
@@ -486,11 +708,15 @@ export default function GenesisCore({
 
           setState(current=>({
 
+
             ...current,
+
 
             mode,
 
+
           }));
+
 
         },
 
@@ -501,7 +727,9 @@ export default function GenesisCore({
 
           setState(current=>({
 
+
             ...current,
+
 
             messages:[
 
@@ -511,7 +739,9 @@ export default function GenesisCore({
 
             ],
 
+
           }));
+
 
         },
 
@@ -522,11 +752,15 @@ export default function GenesisCore({
 
           setState(current=>({
 
+
             ...current,
+
 
             messages:[],
 
+
           }));
+
 
         },
 
@@ -537,11 +771,15 @@ export default function GenesisCore({
 
           setState(current=>({
 
+
             ...current,
+
 
             thinking:value,
 
+
           }));
+
 
         },
 
@@ -552,11 +790,15 @@ export default function GenesisCore({
 
           setState(current=>({
 
+
             ...current,
+
 
             speaking:value,
 
+
           }));
+
 
         },
 
@@ -567,11 +809,15 @@ export default function GenesisCore({
 
           setState(current=>({
 
+
             ...current,
+
 
             listening:value,
 
+
           }));
+
 
         },
 
@@ -582,13 +828,18 @@ export default function GenesisCore({
 
           setState(current=>({
 
+
             ...current,
+
 
             activePanel:panel,
 
+
             minimized:false,
 
+
           }));
+
 
         },
 
@@ -599,11 +850,15 @@ export default function GenesisCore({
 
           setState(current=>({
 
+
             ...current,
+
 
             minimized:true,
 
+
           }));
+
 
         },
 
@@ -614,11 +869,15 @@ export default function GenesisCore({
 
           setState(current=>({
 
+
             ...current,
+
 
             minimized:false,
 
+
           }));
+
 
         },
 
@@ -629,11 +888,15 @@ export default function GenesisCore({
 
           setState(current=>({
 
+
             ...current,
+
 
             activeWorkspace:id,
 
+
           }));
+
 
         },
 
@@ -644,11 +907,15 @@ export default function GenesisCore({
 
           setState(current=>({
 
+
             ...current,
+
 
             cognition,
 
+
           }));
+
 
         },
 
@@ -659,11 +926,15 @@ export default function GenesisCore({
 
           setState(current=>({
 
+
             ...current,
+
 
             ecosystem,
 
+
           }));
+
 
         },
 
@@ -674,7 +945,9 @@ export default function GenesisCore({
 
           setState(current=>({
 
+
             ...current,
+
 
             actions:[
 
@@ -684,7 +957,9 @@ export default function GenesisCore({
 
             ],
 
+
           }));
+
 
         },
 
@@ -695,7 +970,9 @@ export default function GenesisCore({
 
           setState(current=>({
 
+
             ...current,
+
 
             actions:
 
@@ -703,23 +980,32 @@ export default function GenesisCore({
 
                 action =>
 
+
                   action.id === id
+
 
                     ? {
 
-                        ...action,
 
-                        status,
+                      ...action,
 
-                      }
+                      status,
+
+
+                    }
+
 
                     :
 
+
                       action,
+
 
               ),
 
+
           }));
+
 
         },
 
@@ -743,7 +1029,9 @@ export default function GenesisCore({
               {
 
 
-                id:crypto.randomUUID(),
+                id:
+
+                  crypto.randomUUID(),
 
 
                 title,
@@ -752,7 +1040,9 @@ export default function GenesisCore({
                 description,
 
 
-                created:Date.now(),
+                created:
+
+                  Date.now(),
 
 
               },
@@ -762,6 +1052,7 @@ export default function GenesisCore({
 
 
           }));
+
 
         },
 
@@ -773,9 +1064,14 @@ export default function GenesisCore({
 
         state,
 
+        universe,
+
       ],
 
+
     );
+
+
 
 
 

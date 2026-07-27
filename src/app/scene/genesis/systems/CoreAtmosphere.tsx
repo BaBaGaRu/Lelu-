@@ -3,13 +3,9 @@
  * LÉLUVERSE
  * CORE ATMOSPHERE SYSTEM
  *
- * Living field around the Genesis heart.
+ * Living shell around Genesis Core.
  *
- * Features:
- * - breathing aura
- * - resonance waves
- * - plasma glow
- * - future thermal fusion layer
+ * Visual layer only.
  * ==========================================================
  */
 
@@ -25,76 +21,49 @@ import {
 
 
 import {
-  Mesh,
   Group,
+  Mesh,
 } from "three";
 
 
-import {
-  useGenesis,
-} from "../GenesisCore";
 
 
 
-
-
-export default function CoreAtmosphere() {
-
-
-  const {
-
-    state,
-
-  } = useGenesis();
-
-
-
+export default function CoreAtmosphere(){
 
 
   const field =
-
     useRef<Group>(null);
 
 
-
-
-
-  const halo =
-
+  const aura =
     useRef<Mesh>(null);
 
 
-
-
-
-  const wave =
-
+  const aurora =
     useRef<Mesh>(null);
 
 
-
+  const resonance =
+    useRef<Mesh>(null);
 
 
   const time =
-
     useRef(0);
 
 
 
 
 
-  useFrame((_, delta)=>{
+  useFrame((_,delta)=>{
 
 
-    if (
-
+    if(
       !field.current ||
-
-      !halo.current ||
-
-      !wave.current
-
-    ) {
+      !aura.current ||
+      !aurora.current ||
+      !resonance.current
+    ){
 
       return;
 
@@ -110,101 +79,37 @@ export default function CoreAtmosphere() {
 
 
 
-    const activity =
+    field.current.rotation.y +=
 
-      (
+      delta *
 
-        state.thinking ? 1 : 0
-
-      )
-
-      +
-
-      (
-
-        state.speaking ? 0.5 : 0
-
-      )
-
-      +
-
-      (
-
-        state.actions.length > 0
-
-          ? 0.5
-
-          : 0
-
-      );
+      0.04;
 
 
 
-
-
-    /*
-     * Soft ocean breathing
-     */
-
-
-    const breath =
-
-      1 +
-
-      Math.sin(
-
-        time.current * 0.5
-
-      )
-
-      *
-
-      0.08;
-
-
-
-
-
-    halo.current.scale.setScalar(
-
-      breath +
-
-      activity * 0.02
-
-    );
-
-
-
-
-
-    /*
-     * Resonance wave
-     */
 
 
     const pulse =
 
       1 +
 
-      (
+      Math.sin(
 
-        Math.sin(
+        time.current *
 
-          time.current * 2
+        0.7
 
-        )
+      )
 
-        *
+      *
 
-        0.15
-
-      );
+      0.04;
 
 
 
 
 
-    wave.current.scale.setScalar(
+    aura.current.scale.setScalar(
 
       pulse
 
@@ -214,19 +119,50 @@ export default function CoreAtmosphere() {
 
 
 
-    /*
-     * Slow planetary drift
-     */
+    aurora.current.scale.setScalar(
+
+      1.05 +
+
+      Math.sin(
+
+        time.current *
+
+        0.4
+
+      )
+
+      *
+
+      0.03
+
+    );
 
 
-    field.current.rotation.y +=
 
-      delta *
 
-      0.08;
+
+    resonance.current.scale.setScalar(
+
+      1.12 +
+
+      Math.sin(
+
+        time.current *
+
+        1.6
+
+      )
+
+      *
+
+      0.05
+
+    );
 
 
   });
+
+
 
 
 
@@ -237,18 +173,18 @@ export default function CoreAtmosphere() {
     <group
 
       ref={field}
-      renderOrder={180}
+
+      name="CoreAtmosphere"
 
     >
 
 
-      {/* INNER AURA */}
-
 
       <mesh
 
-        ref={halo}
-        renderOrder={181}
+        ref={aura}
+
+        renderOrder={100}
 
       >
 
@@ -256,7 +192,7 @@ export default function CoreAtmosphere() {
 
           args={[
 
-            0.7,
+            0.72,
 
             64,
 
@@ -265,7 +201,6 @@ export default function CoreAtmosphere() {
           ]}
 
         />
-
 
         <meshBasicMaterial
 
@@ -273,10 +208,11 @@ export default function CoreAtmosphere() {
 
           transparent
 
-          opacity={0.05}
+          opacity={0.035}
+
+          depthWrite={false}
 
         />
-
 
       </mesh>
 
@@ -284,13 +220,11 @@ export default function CoreAtmosphere() {
 
 
 
-      {/* OUTER RESONANCE WAVE */}
-
-
       <mesh
 
-        ref={wave}
-        renderOrder={182}
+        ref={aurora}
+
+        renderOrder={101}
 
       >
 
@@ -298,7 +232,7 @@ export default function CoreAtmosphere() {
 
           args={[
 
-            1.15,
+            0.9,
 
             64,
 
@@ -308,17 +242,17 @@ export default function CoreAtmosphere() {
 
         />
 
-
         <meshBasicMaterial
 
-          color="#7c3cff"
+          color="#8fffff"
 
           transparent
 
-          opacity={0.02}
+          opacity={0.025}
+
+          depthWrite={false}
 
         />
-
 
       </mesh>
 
@@ -326,18 +260,56 @@ export default function CoreAtmosphere() {
 
 
 
-      {/* FIELD LIGHT */}
+      <mesh
+
+        ref={resonance}
+
+        renderOrder={102}
+
+      >
+
+        <sphereGeometry
+
+          args={[
+
+            1.1,
+
+            64,
+
+            64,
+
+          ]}
+
+        />
+
+        <meshBasicMaterial
+
+          color="#dfffff"
+
+          transparent
+
+          opacity={0.012}
+
+          depthWrite={false}
+
+        />
+
+      </mesh>
+
+
+
 
 
       <pointLight
 
-        intensity={8}
+        intensity={2}
 
-        distance={20}
+        distance={8}
 
-        color="#66ddff"
+        color="#7eeeff"
 
       />
+
 
 
     </group>

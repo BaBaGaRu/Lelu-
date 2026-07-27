@@ -3,7 +3,8 @@
  * LÉLUVERSE
  * GOD RAYS
  *
- * Sun beams piercing through the Genesis Ocean.
+ * Soft underwater light shafts.
+ * Integrated into the ocean volume.
  * ==========================================================
  */
 
@@ -18,233 +19,203 @@ import {
   Group,
   Mesh,
   DoubleSide,
+  AdditiveBlending,
 } from "three";
 
 import type {
   OceanState,
 } from "../../Ocean";
 
+
 interface Props {
-
   oceanState?: OceanState;
-
 }
+
 
 interface Ray {
 
-  radius: number;
+  radius:number;
 
-  angle: number;
+  angle:number;
 
-  height: number;
+  depth:number;
 
-  width: number;
+  width:number;
 
-  length: number;
+  length:number;
 
-  speed: number;
+  speed:number;
 
-  offset: number;
-
-  opacity: number;
+  offset:number;
 
 }
+
 
 export default function GodRays({
 
   oceanState = {},
 
-}: Props) {
+}:Props){
+
 
   const group =
     useRef<Group>(null);
 
+
   const rays =
-    useMemo<Ray[]>(() => {
+    useMemo<Ray[]>(()=>{
 
-      return Array.from({
+      return Array.from(
+        {
+          length:24,
+        },
 
-        length: 48,
+        ():Ray=>({
 
-      }, (): Ray => ({
+          radius:
+            0.5 +
+            Math.random()*2.5,
 
-        radius:
-          Math.random() * 1.8,
+          angle:
+            Math.random() *
+            Math.PI *
+            2,
 
-        angle:
-          Math.random() *
-          Math.PI * 2,
+          depth:
+            -1.5 -
+            Math.random()*2,
 
-        height:
-          3.8 +
-          Math.random() * 0.5,
+          width:
+            0.04 +
+            Math.random()*0.08,
 
-        width:
-          0.08 +
-          Math.random() * 0.12,
+          length:
+            1 +
+            Math.random()*1.8,
 
-        length:
-          1.8 +
-          Math.random() * 2.5,
+          speed:
+            0.01 +
+            Math.random()*0.03,
 
-        speed:
-          0.01 +
-          Math.random() * 0.03,
+          offset:
+            Math.random()*100,
 
-        offset:
-          Math.random() * 100,
+        })
 
-        opacity:
-          0.025 +
-          Math.random() * 0.035,
+      );
 
-      }));
+    },[]);
 
-    }, []);
 
-  useFrame((state) => {
 
-    if (!group.current)
+  useFrame((state)=>{
+
+
+    if(!group.current)
       return;
+
 
     const time =
       state.clock.elapsedTime;
 
+
     const tide =
       oceanState.tide ?? 0.5;
 
+
     group.current.children.forEach(
 
-      (child, i) => {
+      (child,i)=>{
+
 
         const mesh =
           child as Mesh;
 
+
         const ray =
           rays[i];
 
+
         const angle =
-
           ray.angle +
-
           time *
-
           ray.speed;
 
+
         mesh.position.x =
-
           Math.cos(angle) *
-
           ray.radius;
+
 
         mesh.position.z =
-
           Math.sin(angle) *
-
           ray.radius;
 
+
         mesh.position.y =
-
-          ray.height +
-
+          ray.depth +
           Math.sin(
-
-            time * 0.4 +
-
-            ray.offset,
-
+            time * 0.5 +
+            ray.offset
           ) *
-
-          0.08 *
-
+          0.05 *
           tide;
 
+
         mesh.lookAt(
-
           0,
-
           0,
-
           0,
-
         );
 
-        mesh.scale.set(
 
-          ray.width,
-
-          ray.length *
-
-          (
-
-            1 +
-
-            Math.sin(
-
-              time +
-
-              ray.offset,
-
-            ) *
-
-            0.08
-
-          ),
-
-          1,
-
-        );
-
-      },
+      }
 
     );
 
+
   });
+
+
 
   return (
 
     <group ref={group}>
 
-      {rays.map((
+      {
+        rays.map((ray,i)=>(
 
-        ray,
+          <mesh key={i}>
 
-        i,
+            <planeGeometry
+              args={[
+                1,
+                1,
+              ]}
+            />
 
-      ) => (
+            <meshBasicMaterial
 
-        <mesh
-          key={i}
-        >
+              color="#fff6c9"
 
-          <planeGeometry
-            args={[
-              1,
-              1,
-            ]}
-          />
+              transparent
 
-          <meshBasicMaterial
+              opacity={0.02}
 
-            color="#fff6c9"
+              side={DoubleSide}
 
-            transparent
+              depthWrite={false}
 
-            opacity={
-              ray.opacity
-            }
+              depthTest={true}
 
-            side={
-              DoubleSide
-            }
+              blending={AdditiveBlending}
 
-            depthWrite={false}
+            />
 
-          />
+          </mesh>
 
-        </mesh>
-
-      ))}
+        ))
+      }
 
     </group>
 

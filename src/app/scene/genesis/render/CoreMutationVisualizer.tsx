@@ -3,7 +3,11 @@
  * LÉLUVERSE
  * CORE MUTATION VISUALIZER
  *
- * Makes evolution visible.
+ * Visible plasma mutation field.
+ *
+ * Surrounds the Genesis Core.
+ * Does not create a second core.
+ *
  * ==========================================================
  */
 
@@ -19,31 +23,38 @@ import {
 
 
 import {
-  Color,
   Mesh,
 } from "three";
 
 
-export default function CoreMutationVisualizer() {
+
+import {
+  useGenesis,
+} from "../GenesisCore";
 
 
-  const outer =
+
+
+
+export default function CoreMutationVisualizer(){
+
+
+  const {
+
+    universe,
+
+  } = useGenesis();
+
+
+
+
+
+  const field =
 
     useRef<Mesh>(null);
 
 
-  const inner =
 
-    useRef<Mesh>(null);
-
-
-  const color =
-
-    useRef(
-
-      new Color("#88ddff")
-
-    );
 
 
   const time =
@@ -54,22 +65,62 @@ export default function CoreMutationVisualizer() {
 
 
 
-  useFrame((_, delta)=>{
 
 
-    if (
-
-      !outer.current ||
-
-      !inner.current
-
-    ) return;
+  useFrame((_,delta)=>{
 
 
+    if(!field.current)
+
+      return;
 
 
 
     time.current += delta;
+
+
+
+    const mutation =
+
+      universe.evolutionSystem?.mutation ?? 0;
+
+
+
+    const awareness =
+
+      universe.awareness ?? 0;
+
+
+
+    const activity =
+
+      Math.max(
+
+        mutation,
+
+        awareness,
+
+        0.15
+
+      );
+
+
+
+
+
+    field.current.rotation.y +=
+
+      delta *
+
+      (
+
+        0.2 +
+
+        activity *
+
+        0.5
+
+      );
 
 
 
@@ -81,82 +132,30 @@ export default function CoreMutationVisualizer() {
 
       Math.sin(
 
-        time.current *
-
-        1.2
+        time.current * 2
 
       )
 
       *
 
-      0.08;
+      (
+
+        0.03 +
+
+        activity * 0.08
+
+      );
 
 
 
 
 
-    outer.current.scale.setScalar(
+    field.current.scale.setScalar(
 
       pulse
 
     );
 
-
-
-
-
-    inner.current.rotation.y +=
-
-      delta *
-
-      0.5;
-
-
-
-
-
-    const hue =
-
-      (
-
-        time.current *
-
-        0.03
-
-      )
-
-      %
-
-      1;
-
-
-
-
-
-    color.current.setHSL(
-
-      hue,
-
-      0.8,
-
-      0.6
-
-    );
-
-
-
-
-
-    const material =
-
-      outer.current.material as any;
-
-
-    material.color.copy(
-
-      color.current
-
-    );
 
 
   });
@@ -165,85 +164,158 @@ export default function CoreMutationVisualizer() {
 
 
 
+
+
   return (
 
-    <group>
+    <mesh
 
+      ref={field}
 
-      <mesh
+      name="MutationPlasma"
 
-        ref={outer}
+      renderOrder={220}
 
-      >
-
-        <sphereGeometry
-
-          args={[
-
-            1.05,
-
-            64,
-
-            64,
-
-          ]}
-
-        />
-
-
-        <meshBasicMaterial
-
-          transparent
-
-          opacity={0.05}
-
-        />
-
-
-      </mesh>
+    >
 
 
 
+      <sphereGeometry
+
+        args={[
+
+          0.95,
+
+          128,
+
+          128,
+
+        ]}
+
+      />
 
 
-      <mesh
 
-        ref={inner}
+      <shaderMaterial
 
-      >
+        transparent
 
-        <torusGeometry
+        depthWrite={false}
 
-          args={[
+        uniforms={{
 
-            0.9,
+          uTime:{
 
-            0.015,
+            value:0,
 
-            32,
+          },
 
-            256,
-
-          ]}
-
-        />
+        }}
 
 
-        <meshBasicMaterial
 
-          color="#ffffff"
+        vertexShader={`
 
-          transparent
+          varying vec3 vPosition;
 
-          opacity={0.2}
-
-        />
+          uniform float uTime;
 
 
-      </mesh>
+          void main(){
+
+            vPosition = position;
 
 
-    </group>
+            vec3 p = position;
+
+
+            float wave =
+
+              sin(
+
+                position.y * 10.0 +
+
+                uTime * 3.0
+
+              ) * 0.04;
+
+
+            p += normal * wave;
+
+
+            gl_Position =
+
+              projectionMatrix *
+
+              modelViewMatrix *
+
+              vec4(
+
+                p,
+
+                1.0
+
+              );
+
+          }
+
+        `}
+
+
+
+        fragmentShader={`
+
+          uniform float uTime;
+
+          varying vec3 vPosition;
+
+
+          void main(){
+
+
+            float plasma =
+
+              sin(
+
+                vPosition.x * 12.0 +
+
+                uTime * 4.0
+
+              ) * 0.5 + 0.5;
+
+
+            vec3 color =
+
+              mix(
+
+                vec3(0.1,0.8,1.0),
+
+                vec3(0.8,0.2,1.0),
+
+                plasma
+
+              );
+
+
+            gl_FragColor =
+
+              vec4(
+
+                color,
+
+                0.18
+
+              );
+
+
+          }
+
+        `}
+
+      />
+
+
+    </mesh>
 
   );
 

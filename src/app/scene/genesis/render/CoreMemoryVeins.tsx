@@ -3,7 +3,13 @@
  * LÉLUVERSE
  * CORE MEMORY VEINS
  *
- * Living memory structures around the Core.
+ * Living memory structures around the Blue Genesis Core.
+ *
+ * Connected to:
+ * - Genesis universe memory
+ * - learning
+ * - awareness
+ * - consciousness
  * ==========================================================
  */
 
@@ -32,14 +38,18 @@ import {
 
 
 
-export default function CoreMemoryVeins() {
+export default function CoreMemoryVeins(){
+
 
 
   const {
 
-    state,
+    universe,
 
   } = useGenesis();
+
+
+
 
 
   const group =
@@ -70,10 +80,12 @@ export default function CoreMemoryVeins() {
 
 
 
+
+
   useFrame((_,delta)=>{
 
 
-    if (!group.current)
+    if(!group.current)
 
       return;
 
@@ -81,9 +93,56 @@ export default function CoreMemoryVeins() {
 
 
 
+    const memoryEnergy =
+
+
+      (
+
+        universe.memory.shortTerm +
+
+        universe.memory.longTerm +
+
+        universe.memory.archived
+
+      )
+
+      *
+
+      0.33;
+
+
+
+
+
     group.current.rotation.y +=
 
-      delta * 0.03;
+
+      delta *
+
+      (
+
+        0.03 +
+
+        memoryEnergy *
+
+        0.08
+
+      );
+
+
+
+    group.current.scale.setScalar(
+
+
+      1 +
+
+      memoryEnergy *
+
+      0.1
+
+
+    );
+
 
 
   });
@@ -92,14 +151,41 @@ export default function CoreMemoryVeins() {
 
 
 
+
+
+  const opacity =
+
+
+    0.08 +
+
+    universe.memory.importance *
+
+    0.4;
+
+
+
+
+
+
+
   return (
 
-    <group ref={group}>
+
+
+    <group
+
+      ref={group}
+
+      name="CoreMemoryVeins"
+
+    >
+
 
 
       {
 
         veins.map((_,index)=>(
+
 
 
           <mesh
@@ -108,20 +194,30 @@ export default function CoreMemoryVeins() {
 
             rotation={[
 
-              index * 0.4,
 
-              index * 0.2,
+              index *
+
+              0.4,
+
+
+              index *
+
+              0.2,
+
 
               0,
+
 
             ]}
 
           >
 
 
+
             <torusGeometry
 
               args={[
+
 
                 0.75 +
 
@@ -129,15 +225,20 @@ export default function CoreMemoryVeins() {
 
                 0.015,
 
+
                 0.003,
+
 
                 8,
 
+
                 128,
+
 
               ]}
 
             />
+
 
 
             <meshBasicMaterial
@@ -146,20 +247,16 @@ export default function CoreMemoryVeins() {
 
               transparent
 
-              opacity={
+              opacity={opacity}
 
-                0.08 +
-
-                state.messages.length *
-
-                0.002
-
-              }
+              depthWrite={false}
 
             />
 
 
+
           </mesh>
+
 
 
         ))
@@ -167,7 +264,9 @@ export default function CoreMemoryVeins() {
       }
 
 
+
     </group>
+
 
   );
 

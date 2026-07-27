@@ -1,3 +1,22 @@
+/**
+ * ==========================================================
+ * LÉLUVERSE
+ * GENESIS CORE MATERIAL
+ *
+ * Magnetized living plasma shader.
+ *
+ * Features:
+ * - turbulent convection
+ * - plasma currents
+ * - magnetic ribbons
+ * - deep glow
+ * - surface distortion
+ * - energy breathing
+ *
+ * ==========================================================
+ */
+
+
 import {
   AdditiveBlending,
   Color,
@@ -5,106 +24,350 @@ import {
   ShaderMaterial,
 } from "three";
 
+
+
+
+
 export default class GenesisCoreMaterial extends ShaderMaterial {
 
-  constructor() {
+
+  constructor(){
+
 
     super({
 
-      transparent: true,
 
-      depthWrite: false,
+      transparent:true,
 
-      depthTest: true,
+      depthWrite:false,
 
-      blending: AdditiveBlending,
+      depthTest:true,
 
-      side: FrontSide,
+      blending:AdditiveBlending,
 
-      uniforms: {
+      side:FrontSide,
 
-        uTime: {
-          value: 0,
+
+
+
+
+      uniforms:{
+
+
+        uTime:{
+          value:0,
         },
 
-        uActivity: {
-          value: 0,
+
+        uActivity:{
+          value:0.25,
         },
 
-        uCoreColor: {
-          value: new Color("#38bfff"),
+
+        uEvolution:{
+          value:0,
         },
 
-        uGlowColor: {
-          value: new Color("#dffcff"),
+
+        uAwareness:{
+          value:0,
         },
+
+
+        uMutation:{
+          value:0,
+        },
+
+
+        uCoreColor:{
+          value:new Color("#009cff"),
+        },
+
+
+        uGlowColor:{
+          value:new Color("#ffffff"),
+        },
+
 
       },
 
-      vertexShader: `
+
+
+
+
+
+
+      vertexShader:`
+
 varying vec3 vNormal;
+varying vec3 vPosition;
 varying vec3 vWorldPosition;
+
 
 uniform float uTime;
 uniform float uActivity;
+uniform float uEvolution;
+uniform float uMutation;
+
+
+
+float turbulence(vec3 p){
+
+
+    float n = 0.0;
+
+
+    n += sin(
+        p.x * 9.0 +
+        uTime * 1.8
+    );
+
+
+    n += sin(
+        p.y * 13.0 -
+        uTime * 2.4
+    );
+
+
+    n += sin(
+        p.z * 11.0 +
+        uTime * 3.0
+    );
+
+
+    n += sin(
+        (p.x+p.y+p.z) * 20.0 +
+        uTime * 4.0
+    );
+
+
+    n += sin(
+        length(p) * 18.0 -
+        uTime * 2.0
+    );
+
+
+    return n / 5.0;
+
+}
+
+
+
+
 
 void main(){
 
-    vNormal = normalize(normalMatrix * normal);
 
-    float wave =
 
-        sin(position.y * 8.0 + uTime * 2.5) * 0.02 +
+    vNormal =
 
-        sin(position.x * 6.0 - uTime * 1.8) * 0.015 +
+        normalize(
 
-        sin(position.z * 10.0 + uTime * 4.0) * 0.008;
+            normalMatrix *
 
-    wave *=
+            normal
 
-        1.0 +
+        );
 
-        uActivity * 0.45;
+
+
+    vPosition = position;
+
+
+
+    float plasma =
+
+
+        turbulence(
+
+            position * 1.8
+
+        )
+
+        +
+
+        turbulence(
+
+            position * 4.0
+
+        )
+
+        *
+
+        0.35;
+
+
+
+
+
+    float distortion =
+
+
+        0.12 +
+
+        uActivity *
+
+        0.18 +
+
+        uMutation *
+
+        0.20 +
+
+        uEvolution *
+
+        0.08;
+
+
+
+
 
     vec3 displaced =
 
+
         position +
 
-        normal * wave;
+        normal *
 
-    vec4 worldPosition =
+        plasma *
+
+        distortion;
+
+
+
+
+
+    vec4 world =
+
 
         modelMatrix *
 
-        vec4(displaced,1.0);
+        vec4(
+
+            displaced,
+
+            1.0
+
+        );
+
+
+
+
 
     vWorldPosition =
 
-        worldPosition.xyz;
+        world.xyz;
+
+
+
+
 
     gl_Position =
+
 
         projectionMatrix *
 
         viewMatrix *
 
-        worldPosition;
+        world;
+
 
 }
+
 `,
 
-      fragmentShader: `
+
+
+
+
+
+
+      fragmentShader:`
+
 uniform vec3 uCoreColor;
+
 uniform vec3 uGlowColor;
+
+
 uniform float uTime;
+
 uniform float uActivity;
 
+uniform float uAwareness;
+
+uniform float uMutation;
+
+uniform float uEvolution;
+
+
 varying vec3 vNormal;
+
+varying vec3 vPosition;
+
 varying vec3 vWorldPosition;
+
+
+
+
+
+float plasmaNoise(vec3 p){
+
+
+    return
+
+        sin(
+
+            p.x * 16.0 +
+
+            uTime * 2.5
+
+        )
+
+        *
+
+        sin(
+
+            p.y * 20.0 -
+
+            uTime * 1.8
+
+        )
+
+        *
+
+        sin(
+
+            p.z * 14.0 +
+
+            uTime * 3.2
+
+        );
+
+
+}
+
+
+
+
+
+
 
 void main(){
 
-    vec3 viewDir =
+
+
+    vec3 normal =
+
+        normalize(
+
+            vNormal
+
+        );
+
+
+
+
+
+    vec3 viewDirection =
 
         normalize(
 
@@ -114,7 +377,12 @@ void main(){
 
         );
 
+
+
+
+
     float fresnel =
+
 
         pow(
 
@@ -124,9 +392,9 @@ void main(){
 
                 dot(
 
-                    normalize(vNormal),
+                    normal,
 
-                    viewDir
+                    viewDirection
 
                 ),
 
@@ -134,57 +402,163 @@ void main(){
 
             ),
 
-            3.5
+            3.0
 
         );
 
-    float energy =
 
-        0.6 +
 
-        0.4 *
+
+
+
+
+    float magneticBands =
+
 
         sin(
 
-            uTime * 3.5
+            vPosition.y *
+
+            28.0 +
+
+            sin(
+
+              vPosition.x *
+
+              8.0
+
+            )
+
+            +
+
+            uTime *
+
+            4.0
 
         );
 
-    float veins =
 
-        sin(
 
-            vWorldPosition.y * 18.0 +
 
-            uTime * 5.0
 
-        ) *
+    magneticBands =
+
+
+        magneticBands *
 
         0.5 +
 
         0.5;
 
-    veins +=
+
+
+
+
+
+
+    float cells =
+
+
+        plasmaNoise(
+
+            vPosition *
+
+            3.0
+
+        )
+
+        *
+
+        0.5 +
+
+        0.5;
+
+
+
+
+
+
+
+    float heat =
+
+
+        magneticBands *
+
+        0.55 +
+
+
+        cells *
+
+        0.45;
+
+
+
+
+
+
+
+    heat +=
+
+
+        uActivity *
+
+        0.45;
+
+
+    heat +=
+
+
+        uMutation *
+
+        0.35;
+
+
+    heat +=
+
+
+        uEvolution *
+
+        0.20;
+
+
+    heat +=
+
+
+        uAwareness *
+
+        0.15;
+
+
+
+
+
+
+
+    float pulse =
+
+
+        0.8 +
 
         sin(
 
-            vWorldPosition.x * 12.0 -
+            uTime *
 
-            uTime * 3.0
+            5.0
 
-        ) *
+        )
 
-        0.25;
+        *
 
-    energy +=
+        0.2;
 
-        veins * 0.25;
 
-    energy +=
 
-        uActivity * 0.35;
 
-    vec3 color =
+
+
+
+    vec3 plasma =
+
 
         mix(
 
@@ -192,37 +566,83 @@ void main(){
 
             uGlowColor,
 
-            fresnel
+            heat
 
         );
 
-    color *=
 
-        energy;
+
+
+
+
+
+    plasma *=
+
+
+        pulse +
+
+        0.35;
+
+
+
+
+
+
+
+    plasma +=
+
+
+        uGlowColor *
+
+        fresnel *
+
+        2.2;
+
+
+
+
+
+
 
     float alpha =
 
-        0.45 +
 
-        fresnel * 0.45 +
+        0.72 +
 
-        uActivity * 0.08;
+        fresnel *
+
+        0.28 +
+
+        heat *
+
+        0.12;
+
+
+
+
+
+
 
     gl_FragColor =
 
+
         vec4(
 
-            color,
+            plasma,
 
             alpha
 
         );
 
+
 }
+
 `
 
     });
 
+
   }
+
 
 }

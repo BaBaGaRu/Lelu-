@@ -18,202 +18,71 @@ import {
   useRef,
 } from "react";
 
+import {
+  OrbitControls,
+} from "@react-three/drei";
 
 import {
   useThree,
 } from "@react-three/fiber";
 
+import {
+  Vector3,
+} from "three";
 
 import type GenesisNavigator
   from "./GenesisNavigator";
 
-
-
-
-
 interface GenesisCameraControllerProps {
-
-
-  navigator:
-
-    GenesisNavigator;
-
+  navigator: GenesisNavigator;
 }
 
-
-
-
-
 export default function GenesisCameraController({
-
   navigator,
-
 }: GenesisCameraControllerProps) {
+  const { camera } = useThree();
+  const controlsRef = useRef<any>(null);
+  const followTarget = useRef(new Vector3(0, 0, 0));
 
+  useEffect(() => {
+    const unsubscribe = navigator.subscribe((state) => {
+      if (!state.target) {
+        return;
+      }
 
-  const {
+      followTarget.current.set(
+        state.target.position.x,
+        state.target.position.y,
+        state.target.position.z,
+      );
 
-    camera,
-
-  } = useThree();
-
-
-
-
-
-  const target =
-
-    useRef({
-
-      x: 0,
-
-      y: 0,
-
-      z: 8,
-
+      if (controlsRef.current) {
+        controlsRef.current.target.lerp(followTarget.current, 0.12);
+        controlsRef.current.update();
+      }
     });
 
-
-
-
-
-  useEffect(() => {
-
-
-    const unsubscribe =
-
-      navigator.subscribe(
-
-        state => {
-
-
-          if (!state.target) {
-
-            return;
-
-          }
-
-
-
-
-
-          target.current =
-
-          {
-
-            x:
-
-              state.target.position.x,
-
-
-            y:
-
-              state.target.position.y,
-
-
-            z:
-
-              state.target.position.z + 5,
-
-          };
-
-
-        },
-
-      );
-
-
-
-
-
     return unsubscribe;
-
-
-  }, [
-
-    navigator,
-
-  ]);
-
-
-
-
+  }, [navigator]);
 
   useEffect(() => {
-
-
-    function update() {
-
-
-      camera.position.x +=
-
-        (
-
-          target.current.x -
-
-          camera.position.x
-
-        ) * 0.05;
-
-
-
-      camera.position.y +=
-
-        (
-
-          target.current.y -
-
-          camera.position.y
-
-        ) * 0.05;
-
-
-
-      camera.position.z +=
-
-        (
-
-          target.current.z -
-
-          camera.position.z
-
-        ) * 0.05;
-
+    if (controlsRef.current) {
+      controlsRef.current.target.set(0, 0, 0);
+      controlsRef.current.update();
     }
+  }, [camera]);
 
-
-
-
-
-    const id =
-
-      setInterval(
-
-        update,
-
-        16,
-
-      );
-
-
-
-
-
-    return () =>
-
-      clearInterval(id);
-
-
-  }, [
-
-    camera,
-
-  ]);
-
-
-
-
-
-  return null;
-
+  return (
+    <OrbitControls
+      ref={controlsRef}
+      makeDefault
+      enableDamping
+      dampingFactor={0.08}
+      enablePan={false}
+      minDistance={4}
+      maxDistance={18}
+      maxPolarAngle={Math.PI / 2.1}
+      target={[0, 0, 0]}
+    />
+  );
 }

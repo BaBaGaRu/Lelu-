@@ -3,28 +3,19 @@
  * LÉLUVERSE
  * FOAM TRAILS
  *
- * Long flowing trails of foam left behind by
- * ocean currents and rotating water.
- *
- * Responsibilities
- * ----------------
- * • Foam streaks
- * • Current ribbons
- * • Spiral drift
- * • Tide animation
+ * Long flowing trails of foam that wrap around
+ * the Genesis Ocean instead of forming a halo.
  * ==========================================================
  */
 
 import { useFrame } from "@react-three/fiber";
-import {
-  useMemo,
-  useRef,
-} from "react";
+import { useMemo, useRef } from "react";
 
 import {
   Group,
   Mesh,
   DoubleSide,
+  Vector3,
 } from "three";
 
 import type { OceanState } from "../../Ocean";
@@ -53,6 +44,8 @@ interface Trail {
 
 }
 
+const SURFACE_RADIUS = 3.18;
+
 export default function FoamTrails({
   oceanState = {},
 }: Props) {
@@ -63,8 +56,20 @@ export default function FoamTrails({
   const time =
     useRef(0);
 
+  const directions =
+    useRef<Vector3[]>([]);
+
   const trails =
     useMemo<Trail[]>(() => {
+
+      directions.current =
+        Array.from({ length: 140 }, () =>
+          new Vector3(
+            Math.random() * 2 - 1,
+            Math.random() * 2 - 1,
+            Math.random() * 2 - 1,
+          ).normalize(),
+        );
 
       return Array.from({
 
@@ -73,16 +78,14 @@ export default function FoamTrails({
       }, (): Trail => ({
 
         radius:
-          0.45 +
-          Math.random() * 2,
+          SURFACE_RADIUS +
+          Math.random() * 0.03,
 
         angle:
           Math.random() *
           Math.PI * 2,
 
-        height:
-          2.20 +
-          Math.random() * 0.04,
+        height: 0,
 
         width:
           0.03 +
@@ -106,8 +109,7 @@ export default function FoamTrails({
       }));
 
     }, []);
-
-  useFrame((_, delta) => {
+      useFrame((_, delta) => {
 
     if (!group.current)
       return;
@@ -120,113 +122,94 @@ export default function FoamTrails({
     const current =
       oceanState.current ?? 0.5;
 
-    group.current.children.forEach(
-      (child, i) => {
+    group.current.children.forEach((child, i) => {
 
-        const mesh =
-          child as Mesh;
+      const mesh =
+        child as Mesh;
 
-        const trail =
-          trails[i];
+      const trail =
+        trails[i];
 
-        const angle =
+      const dir =
+        directions.current[i].clone();
 
-          trail.angle +
+      const t =
+        time.current *
+        trail.speed +
+        trail.offset;
 
-          time.current *
+      dir.x +=
+        Math.sin(t) *
+        0.04 *
+        current;
 
-          trail.speed *
+      dir.y +=
+        Math.cos(
+          t * 0.8
+        ) *
+        0.025 *
+        tide;
 
-          current;
+      dir.z +=
+        Math.cos(t) *
+        0.04 *
+        current;
 
-        mesh.position.x =
+      dir.normalize();
 
-          Math.cos(angle) *
+      const radius =
+        trail.radius +
 
-          trail.radius;
+        Math.sin(
+          t * 2
+        ) *
+        0.02 *
+        tide;
 
-        mesh.position.z =
+      mesh.position.copy(
+        dir.multiplyScalar(
+          radius
+        )
+      );
 
-          Math.sin(angle) *
+      mesh.quaternion.setFromUnitVectors(
+        new Vector3(0, 0, 1),
+        dir
+      );
 
-          trail.radius;
+      mesh.rotateZ(
+        t
+      );
 
-        mesh.position.y =
+      const stretch =
+        1 +
 
-          trail.height +
+        Math.sin(
+          t * 2 +
+          trail.offset
+        ) *
+        0.15;
 
-          Math.sin(
+      mesh.scale.set(
+        trail.length *
+        stretch,
+        trail.width,
+        1
+      );
 
-            time.current *
-
-            1.4 +
-
-            trail.offset,
-
-          ) *
-
-          0.02 *
-
-          tide;
-
-        mesh.lookAt(
-          0,
-          mesh.position.y,
-          0,
-        );
-
-        mesh.rotation.z +=
-          delta *
-          0.15;
-
-        mesh.scale.set(
-
-          trail.length *
-
-          (
-
-            1 +
-
-            Math.sin(
-
-              time.current *
-
-              2 +
-
-              trail.offset,
-
-            ) *
-
-            0.12
-
-          ),
-
-          trail.width,
-
-          1,
-
-        );
-
-      },
-
-    );
+    });
 
   });
-
-  return (
+    return (
 
     <group ref={group}>
 
-      {trails.map((
-
-        trail,
-
-        i,
-
-      ) => (
+      {trails.map((trail, i) => (
 
         <mesh
           key={i}
+          frustumCulled={false}
+          renderOrder={2}
         >
 
           <planeGeometry
@@ -251,6 +234,8 @@ export default function FoamTrails({
             }
 
             depthWrite={false}
+
+            depthTest={true}
 
           />
 

@@ -26,38 +26,36 @@ import {
 } from "react";
 
 
-import {
-  useGenesis,
-} from "./GenesisCore";
-
-
 import AIService
   from "../../../core/AIService";
 
 
-
+interface GenesisChatProps {
+  addMessage?: (message: { id: string; role: "user" | "assistant"; text: string; timestamp: number; source: "ai" | "local"; provider?: string; confidence?: number }) => void;
+  setThinking?: (value: boolean) => void;
+  notify?: (title: string, description?: string) => void;
+}
 
 
 const ai =
 
-  new AIService();
+  AIService.getInstance();
 
 
 
 
 
-export default function GenesisChat() {
+export default function GenesisChat({ addMessage: addMessageProp, setThinking: setThinkingProp, notify: notifyProp }: GenesisChatProps) {
 
 
-  const {
+  const addMessage =
+    addMessageProp ?? (() => undefined);
 
-    addMessage,
+  const setThinking =
+    setThinkingProp ?? (() => undefined);
 
-    setThinking,
-
-    notify,
-
-  } = useGenesis();
+  const notify =
+    notifyProp ?? (() => undefined);
 
 
 

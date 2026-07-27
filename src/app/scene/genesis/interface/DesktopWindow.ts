@@ -8,27 +8,17 @@
  */
 
 export interface DesktopWindowState {
-
   id: string;
-
   title: string;
-
   visible: boolean;
-
   focused: boolean;
-
   minimized: boolean;
-
   maximized: boolean;
-
   x: number;
-
   y: number;
-
   width: number;
-
   height: number;
-
+  updated?: number;
 }
 
 export default class DesktopWindow {
@@ -40,8 +30,10 @@ export default class DesktopWindow {
     state: DesktopWindowState,
   ) {
 
-    this.state =
-      state;
+    this.state = {
+      ...state,
+      updated: state.updated ?? Date.now(),
+    };
 
   }
 

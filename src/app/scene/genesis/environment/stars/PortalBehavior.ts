@@ -3,264 +3,141 @@
  * LÉLUVERSE
  * PORTAL BEHAVIOR
  *
- * Shared movement system.
+ * True 3D spherical portal movement.
  * ==========================================================
  */
 
+import { Vector3 } from "three";
+
 import type {
-
   LivingPortal,
-
   PortalParticle,
-
 } from "./PortalTypes";
 
 import {
-
   evolveParticle,
-
 } from "./ParticleEvolution";
 
 import {
-
   respawnParticle,
-
 } from "./ParticleSpawner";
 
+const tmp = new Vector3();
+
 export function updateParticle(
-
   particle: PortalParticle,
-
   portals: LivingPortal[],
-
   delta: number,
-
   time: number,
+) {
 
-){
+  if (!portals.length) return;
 
-  if(
+  evolveParticle(particle);
 
-    portals.length===0
-
-  ) return;
-
-  evolveParticle(
-
-    particle,
-
-  );
-
-  if(
-
-    particle.portalId>=
-
-    portals.length
-
-  ){
-
-    particle.portalId=0;
-
+  if (particle.portalId >= portals.length) {
+    particle.portalId = 0;
   }
 
-  const portal=
+  const portal = portals[particle.portalId];
 
-    portals[
+  switch (particle.evolution) {
 
-      particle.portalId
-
-    ];
-
-  switch(
-
-    particle.evolution
-
-  ){
-
-    case"birth":
-
-      particle.angle+=
-
-        particle.speed*
-
-        delta;
-
-      particle.orbit+=
-
-        delta*.15;
-
+    case "birth":
+      particle.rotation += particle.speed * delta;
+      particle.orbit += delta * .15;
       break;
 
-    case"warp":
-
-      particle.angle+=
-
-        particle.speed*
-
-        delta*6;
-
-      particle.orbit*=
-
-        .996;
-
+    case "warp":
+      particle.rotation += particle.speed * delta * 6;
+      particle.orbit *= .996;
       break;
 
-    case"portal":
-
-      particle.angle+=
-
-        delta*2;
-
+    case "portal":
+      particle.rotation += delta * 2;
       break;
 
-    case"galaxy":
-
-      particle.angle+=
-
-        delta*.6;
-
-      particle.orbit+=
-
+    case "galaxy":
+      particle.rotation += delta * .6;
+      particle.orbit +=
         Math.sin(
-
-          time+
-
-          particle.pulse,
-
-        )*
-
-        delta;
-
+          time +
+          particle.pulse
+        ) * delta;
       break;
 
-    case"bloom":
-
-      particle.orbit+=
-
+    case "bloom":
+      particle.orbit +=
         Math.sin(
-
-          time*4+
-
-          particle.pulse,
-
-        )*
-
-        delta*3;
-
+          time * 4 +
+          particle.pulse
+        ) * delta * 3;
       break;
 
-    case"crystal":
-
-      particle.angle=
-
+    case "crystal":
+      particle.rotation =
         Math.round(
-
-          particle.angle/
-
-          (Math.PI/4),
-
-        )*
-
-        (Math.PI/4);
-
+          particle.rotation /
+          (Math.PI / 4)
+        ) *
+        (Math.PI / 4);
       break;
 
-    case"morph":
-
-      particle.angle+=
-
-        delta*3;
-
-      particle.orbit+=
-
-        Math.cos(
-
-          time*2,
-
-        )*
-
+    case "morph":
+      particle.rotation += delta * 3;
+      particle.orbit +=
+        Math.cos(time * 2) *
         delta;
-
       break;
 
-    case"death":
+    case "death":
+      particle.orbit -= delta * 4;
 
-      particle.orbit-=
-
-        delta*4;
-
-      if(
-
-        particle.orbit<
-
-        .2
-
-      ){
-
-        particle.evolution=
-
-          "rebirth";
-
+      if (particle.orbit < .2) {
+        particle.evolution = "rebirth";
       }
 
       break;
 
-    case"rebirth":
-
+    case "rebirth":
       respawnParticle(
-
         particle,
-
         portals.length,
-
       );
-
-      break;
-
+      return;
   }
 
-  const orbit=
+  tmp.set(
+    particle.direction[0],
+    particle.direction[1],
+    particle.direction[2],
+  );
 
-    portal.radius*
+  tmp.applyAxisAngle(
+    new Vector3(
+      particle.axis[0],
+      particle.axis[1],
+      particle.axis[2],
+    ),
+    particle.rotation + portal.rotation,
+  );
 
+  tmp.normalize();
+
+  const radius =
+    portal.radius *
     particle.orbit;
 
-  particle.position=[
+  particle.position = [
 
-    portal.position[0]+
+    portal.position[0] +
+      tmp.x * radius,
 
-    Math.cos(
+    portal.position[1] +
+      tmp.y * radius,
 
-      particle.angle+
-
-      portal.rotation,
-
-    )*
-
-    orbit,
-
-    portal.position[1]+
-
-    Math.sin(
-
-      particle.angle+
-
-      portal.rotation,
-
-    )*
-
-    orbit,
-
-    portal.position[2]+
-
-    Math.sin(
-
-      time+
-
-      particle.pulse,
-
-    )*2,
+    portal.position[2] +
+      tmp.z * radius,
 
   ];
-
 }

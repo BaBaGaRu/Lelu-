@@ -98,11 +98,27 @@ export default function GenesisScene() {
 
       <ambientLight
 
-        intensity={0.2}
+        intensity={0.45}
 
       />
 
+      <directionalLight
 
+        position={[4, 6, 4]}
+
+        intensity={1.5}
+
+      />
+
+      <pointLight
+
+        position={[-4, 2, 3]}
+
+        intensity={1.2}
+
+        color="#38bdf8"
+
+      />
 
 
 

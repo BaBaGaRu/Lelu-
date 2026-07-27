@@ -13,7 +13,7 @@ async function conversationTest() {
 
 
   const ai =
-    new AIService();
+    AIService.getInstance();
 
 
 

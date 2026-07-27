@@ -10,7 +10,7 @@ import AIService from "./AIService";
 export default class AIController {
 
   readonly service =
-    new AIService();
+    AIService.getInstance();
 
   async initialize(): Promise<void> {
 

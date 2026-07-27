@@ -2,72 +2,99 @@
  * ==========================================================
  * LÉLUVERSE
  * ENGINE RUNTIME
+ *
+ * Living engine execution bridge.
+ *
+ * Connects:
+ * - EngineRegistry
+ * - EngineBootstrap
+ * - GenesisState
+ *
  * ==========================================================
  */
 
-import type { GenesisState } from "../state/GenesisState";
 
-import EngineRegistry from "./EngineRegistry";
-import EngineScheduler from "./EngineScheduler";
-import EngineBootstrap from "./EngineBootstrap";
+import EngineRegistry
+  from "./EngineRegistry";
+
+
+import EngineBootstrap
+  from "./EngineBootstrap";
+
+
+import type {
+  GenesisState,
+} from "../state/GenesisState";
+
+
+
+
 
 export default class EngineRuntime {
 
-  private readonly registry =
-    new EngineRegistry();
 
-  private readonly scheduler =
-    new EngineScheduler();
 
-  private initialized = false;
+  private readonly registry:
 
-  initialize(): void {
+    EngineRegistry;
 
-    if (this.initialized) return;
+
+
+
+
+  constructor(){
+
+
+    this.registry =
+
+      new EngineRegistry();
+
+
 
     EngineBootstrap.register(
+
       this.registry,
+
     );
 
-    for (
-
-      const engine of
-
-      this.registry.getAll()
-
-    ) {
-
-      this.scheduler.register(
-        engine,
-      );
-
-    }
-
-    this.initialized = true;
 
   }
 
+
+
+
+
+
+
   update(
 
-    state: GenesisState,
+    state:GenesisState,
 
-    delta: number,
+    delta:number,
 
-  ): void {
+  ):void {
 
-    if (!this.initialized) {
 
-      this.initialize();
-
-    }
-
-    this.scheduler.update(
+    this.registry.update(
 
       state,
 
       delta,
 
     );
+
+
+  }
+
+
+
+
+
+
+
+  getRegistry(){
+
+    return this.registry;
 
   }
 

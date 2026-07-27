@@ -2,10 +2,17 @@
  * ==========================================================
  * LÉLUVERSE
  * ENGINE BOOTSTRAP
+ *
+ * Registers all Genesis engines.
+ *
+ * Single instance engine lifecycle.
+ *
  * ==========================================================
  */
 
+
 import EngineRegistry from "./EngineRegistry";
+
 
 import GenesisSimulation from "./GenesisSimulation";
 import EvolutionEngine from "./EvolutionEngine";
@@ -47,102 +54,139 @@ import DreamEngine from "./DreamEngine";
 import CreationEngine from "./CreationEngine";
 import WisdomEngine from "./WisdomEngine";
 
+
+
+
+
 export default class EngineBootstrap {
+
+
 
   static register(
 
-    registry: EngineRegistry,
+    registry:EngineRegistry,
 
-  ): void {
+  ):void {
 
-    registry.register({
-      id: "void",
-      priority: 1,
-      enabled: true,
-      update: (state, delta) => new VoidEngine().update(state, delta),
-    });
 
-    registry.register({
-      id: "quantum",
-      priority: 2,
-      enabled: true,
-      update: (state, delta) => new QuantumEngine().update(state, delta),
-    });
 
-    registry.register(new ExpansionEngine());
+    const engines = [
 
-    registry.register(new EntropyEngine());
 
-    registry.register(new HarmonyEngine());
+      new VoidEngine(),
 
-    registry.register(new BalanceEngine());
+      new QuantumEngine(),
 
-    registry.register(new GenesisSimulation());
+      new ExpansionEngine(),
 
-    registry.register(new EvolutionEngine());
+      new EntropyEngine(),
 
-    registry.register(new GrowthEngine());
+      new HarmonyEngine(),
 
-    registry.register(new GravityEngine());
+      new BalanceEngine(),
 
-    registry.register(new MatterEngine());
 
-    registry.register(new ParticleEngine());
+      new GenesisSimulation(),
 
-    registry.register(new LightEngine());
+      new EvolutionEngine(),
 
-    registry.register(new PulseEngine());
+      new GrowthEngine(),
 
-    registry.register(new NebulaEngine());
 
-    registry.register(new StarEngine());
+      new GravityEngine(),
 
-    registry.register(new GalaxyEngine());
+      new MatterEngine(),
 
-    registry.register(new BlackHoleEngine());
+      new ParticleEngine(),
 
-    registry.register(new PlanetEngine());
+      new LightEngine(),
 
-    registry.register(new OceanEngine());
+      new PulseEngine(),
 
-    registry.register(new AtmosphereEngine());
 
-    registry.register(new DNAEngine());
+      new NebulaEngine(),
 
-    registry.register(new SpeciesEngine());
+      new StarEngine(),
 
-    registry.register(new ConsciousnessEngine());
+      new GalaxyEngine(),
 
-    registry.register(new AwarenessEngine());
+      new BlackHoleEngine(),
 
-    registry.register(new CuriosityEngine());
+      new PlanetEngine(),
 
-    registry.register(new LearningEngine());
 
-    registry.register(new KnowledgeEngine());
+      new OceanEngine(),
 
-    registry.register(new MemoryEngine());
+      new AtmosphereEngine(),
 
-    registry.register(new MemoryEvolutionEngine());
 
-    registry.register(new CivilizationEngine());
+      new DNAEngine(),
 
-    registry.register(new TechnologyEngine());
+      new SpeciesEngine(),
 
-    registry.register(new DreamEngine());
 
-    registry.register(new RealityEngine());
+      new ConsciousnessEngine(),
 
-    registry.register(new ExistenceEngine());
+      new AwarenessEngine(),
 
-    registry.register(new CreationEngine());
+      new CuriosityEngine(),
 
-    registry.register(new WisdomEngine());
+      new LearningEngine(),
 
-    registry.register(new TimelineEngine());
+      new KnowledgeEngine(),
 
-    registry.register(new SimulationEngine());
+
+      new MemoryEngine(),
+
+      new MemoryEvolutionEngine(),
+
+
+      new CivilizationEngine(),
+
+      new TechnologyEngine(),
+
+
+      new DreamEngine(),
+
+      new RealityEngine(),
+
+      new ExistenceEngine(),
+
+      new CreationEngine(),
+
+      new WisdomEngine(),
+
+      new TimelineEngine(),
+
+      new SimulationEngine(),
+
+
+    ];
+
+
+
+
+
+    for(
+
+      const engine
+
+      of engines
+
+    ){
+
+
+      registry.register(
+
+        engine,
+
+      );
+
+
+    }
+
 
   }
+
 
 }

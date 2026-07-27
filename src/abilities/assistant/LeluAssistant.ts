@@ -74,7 +74,7 @@ export default class LeluAssistant {
   constructor() {
 
     this.chat =
-      new AIService();
+      AIService.getInstance();
 
 
     this.engineer =

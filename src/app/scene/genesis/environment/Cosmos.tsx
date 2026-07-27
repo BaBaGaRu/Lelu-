@@ -3,97 +3,153 @@
  * LÉLUVERSE
  * COSMOS
  *
- * Master living universe.
- * Every environment layer is
- * assembled here.
+ * Master living universe environment.
+ *
+ * Contains:
+ * - aurora systems
+ * - cosmic atmosphere
+ *
+ * StarField is mounted by GenesisRenderer.
  * ==========================================================
  */
 
-import { useFrame } from "@react-three/fiber";
+
+import {
+  useFrame,
+} from "@react-three/fiber";
+
 
 import {
   useRef,
 } from "react";
 
+
 import {
   Group,
 } from "three";
 
-import AuroraCosmos from "./AuroraCosmos";
-import StarField from "./stars/StarField";
 
-export default function Cosmos() {
+import AuroraCosmos
+  from "./AuroraCosmos";
+
+
+
+
+
+export default function Cosmos(){
+
 
   const universe =
+
     useRef<Group>(null);
 
-  useFrame(({ clock }, delta) => {
 
-    if (!universe.current)
+
+
+
+  useFrame(({clock},delta)=>{
+
+
+    if(!universe.current)
+
       return;
 
+
+
     const t =
+
       clock.elapsedTime;
+
+
+
+
 
     universe.current.position.x =
 
+
       Math.sin(
-        t * 0.02,
-      ) * 1.4;
+
+        t *
+
+        0.02
+
+      )
+
+      *
+
+      0.4;
+
+
+
+
 
     universe.current.position.y =
 
+
       Math.cos(
-        t * 0.015,
-      ) * 0.9;
+
+        t *
+
+        0.015
+
+      )
+
+      *
+
+      0.25;
+
+
+
+
 
     universe.current.rotation.z =
 
+
       Math.sin(
-        t * 0.01,
-      ) * 0.015;
+
+        t *
+
+        0.01
+
+      )
+
+      *
+
+      0.01;
+
+
+
+
 
     universe.current.rotation.y +=
 
-      delta * 0.002;
+
+      delta *
+
+      0.002;
+
 
   });
 
+
+
+
+
+
+
   return (
 
-    <group ref={universe}>
+    <group
 
-      {/* ============================================
-          STAR SYSTEM
-      ============================================ */}
+      ref={universe}
 
-      <StarField />
+      name="CosmicEnvironment"
 
-      {/* ============================================
-          AURORA
-      ============================================ */}
+    >
+
 
       <AuroraCosmos />
 
-      {/*
-      ===============================================
-
-      Future Systems
-
-      <GalaxyField />
-
-      <NebulaField />
-
-      <DustField />
-
-      <PortalField />
-
-      <ConstellationField />
-
-      <WeatherField />
-
-      ===============================================
-      */}
 
     </group>
 

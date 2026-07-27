@@ -2,82 +2,141 @@
  * ==========================================================
  * LÉLUVERSE
  * PARTICLE SPAWNER
+ *
+ * Creates and respawns portal particles using
+ * true 3D spherical distribution.
  * ==========================================================
  */
 
-import type {
-
-  PortalParticle,
-
-} from "./PortalTypes";
+import type { PortalParticle } from "./PortalTypes";
 
 export const PARTICLE_COUNT = 600;
 
+const TAU = Math.PI * 2;
+
+function randomUnitVector(): [number, number, number] {
+
+  const z = Math.random() * 2 - 1;
+
+  const theta = Math.random() * TAU;
+
+  const r = Math.sqrt(1 - z * z);
+
+  return [
+
+    r * Math.cos(theta),
+
+    z,
+
+    r * Math.sin(theta),
+
+  ];
+
+}
+
+function randomRadius(): number {
+
+  return 4 + Math.random() * 12;
+
+}
+
 export function createParticles(): PortalParticle[] {
 
-  return Array.from({
+  return Array.from(
 
-    length: PARTICLE_COUNT,
+    {
 
-  }).map((_, id) => ({
+      length: PARTICLE_COUNT,
 
-    id,
+    },
 
-    portalId:
+    (_, id): PortalParticle => {
 
-      Math.floor(
+      const direction = randomUnitVector();
 
-        Math.random() * 4,
+      const axis = randomUnitVector();
 
-      ),
+      const radius = randomRadius();
 
-    position:[0,0,0],
+      return {
 
-    velocity:[0,0,0],
+        id,
 
-    angle:
+        portalId:
 
-      Math.random() *
+          Math.floor(
 
-      Math.PI * 2,
+            Math.random() * 4,
 
-    orbit:
+          ),
 
-      .5 +
+        position: [
 
-      Math.random() * 2,
+          direction[0] * radius,
 
-    speed:
+          direction[1] * radius,
 
-      .4 +
+          direction[2] * radius,
 
-      Math.random() * 2,
+        ],
 
-    size:
+        velocity: [
 
-      .01 +
+          0,
 
-      Math.random() * .04,
+          0,
 
-    pulse:
+          0,
 
-      Math.random() *
+        ],
 
-      Math.PI * 2,
+        direction,
 
-    age:0,
+        axis,
 
-    life:
+        rotation:
 
-      5 +
+          Math.random() * TAU,
 
-      Math.random() * 8,
+        orbit:
 
-    evolution:"birth",
+          radius,
 
-    alive:true,
+        speed:
 
-  }));
+          0.15 +
+
+          Math.random() * 0.6,
+
+        size:
+
+          0.006 +
+
+          Math.random() * 0.02,
+
+        pulse:
+
+          Math.random() * TAU,
+
+        age: 0,
+
+        life:
+
+          8 +
+
+          Math.random() * 12,
+
+        evolution:
+
+          "birth",
+
+        alive: true,
+
+      };
+
+    },
+
+  );
 
 }
 
@@ -87,7 +146,13 @@ export function respawnParticle(
 
   portalCount: number,
 
-){
+): void {
+
+  const direction = randomUnitVector();
+
+  const axis = randomUnitVector();
+
+  const radius = randomRadius();
 
   particle.portalId =
 
@@ -95,44 +160,70 @@ export function respawnParticle(
 
       Math.random() *
 
-      portalCount,
+      Math.max(portalCount, 1),
 
     );
 
-  particle.angle =
+  particle.position = [
 
-    Math.random() *
+    direction[0] * radius,
 
-    Math.PI * 2;
+    direction[1] * radius,
+
+    direction[2] * radius,
+
+  ];
+
+  particle.velocity = [
+
+    0,
+
+    0,
+
+    0,
+
+  ];
+
+  particle.direction = direction;
+
+  particle.axis = axis;
+
+  particle.rotation =
+
+    Math.random() * TAU;
 
   particle.orbit =
 
-    .5 +
-
-    Math.random() * 2;
+    radius;
 
   particle.speed =
 
-    .4 +
+    0.15 +
 
-    Math.random() * 2;
+    Math.random() * 0.6;
+
+  particle.size =
+
+    0.006 +
+
+    Math.random() * 0.02;
 
   particle.pulse =
 
-    Math.random() *
-
-    Math.PI * 2;
+    Math.random() * TAU;
 
   particle.age = 0;
 
   particle.life =
 
-    5 +
+    8 +
 
-    Math.random() * 8;
+    Math.random() * 12;
 
   particle.evolution =
 
     "birth";
+
+  particle.alive = true;
 
 }

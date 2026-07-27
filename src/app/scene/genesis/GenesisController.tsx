@@ -17,6 +17,11 @@
  */
 
 
+import {
+  useMemo,
+} from "react";
+
+
 import GenesisCore
   from "./GenesisCore";
 
@@ -37,10 +42,32 @@ import GenesisInterface
   from "./GenesisInterface";
 
 
+import GenesisCameraController
+  from "./GenesisCameraController";
+
+
+import GenesisPlayground
+  from "./GenesisPlayground";
+
+
+import GenesisWorkspace
+  from "./GenesisWorkspace";
+
+
+import GenesisNavigator
+  from "./GenesisNavigator";
+
 
 
 
 export default function GenesisController() {
+
+
+  const navigator =
+    useMemo(
+      () => new GenesisNavigator(),
+      [],
+    );
 
 
   return (
@@ -79,20 +106,14 @@ export default function GenesisController() {
 
 
       {/* ==========================================
-          WORKSPACES
+          NAVIGATION & PLAYGROUND
       ========================================== */}
 
+      <GenesisPlayground navigator={navigator} />
 
+      <GenesisWorkspace navigator={navigator} />
 
-
-
-
-      {/* ==========================================
-          ACTION CONTROL
-      ========================================== */}
-
-
-
+      <GenesisCameraController navigator={navigator} />
 
 
 

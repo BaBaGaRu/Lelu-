@@ -3,238 +3,209 @@
  * LÉLUVERSE
  * HORIZON LIGHT
  *
- * Soft horizon illumination surrounding
- * the Genesis Ocean.
+ * Integrated atmospheric horizon glow.
  * ==========================================================
  */
 
 import { useFrame } from "@react-three/fiber";
+
 import {
   useMemo,
   useRef,
 } from "react";
 
 import {
+  AdditiveBlending,
+  DoubleSide,
   Group,
   Mesh,
-  DoubleSide,
 } from "three";
 
 import type {
   OceanState,
 } from "../../Ocean";
 
+
 interface Props {
-
   oceanState?: OceanState;
+}
+
+
+interface HorizonGlow {
+
+  radius:number;
+
+  angle:number;
+
+  depth:number;
+
+  size:number;
+
+  speed:number;
+
+  offset:number;
 
 }
 
-interface HorizonBeam {
-
-  radius: number;
-
-  angle: number;
-
-  height: number;
-
-  width: number;
-
-  opacity: number;
-
-  speed: number;
-
-  offset: number;
-
-}
 
 export default function HorizonLight({
 
   oceanState = {},
 
-}: Props) {
+}:Props){
+
 
   const group =
     useRef<Group>(null);
 
-  const beams =
-    useMemo<HorizonBeam[]>(() => {
 
-      return Array.from({
+  const lights =
+    useMemo<HorizonGlow[]>(()=>{
 
-        length: 72,
+      return Array.from(
+        {
+          length:36,
+        },
 
-      }, (): HorizonBeam => ({
+        ():HorizonGlow=>({
 
-        radius:
-          2.9 +
-          Math.random() * 0.3,
+          radius:
+            2.2 +
+            Math.random()*0.8,
 
-        angle:
-          Math.random() *
-          Math.PI *
-          2,
+          angle:
+            Math.random() *
+            Math.PI *
+            2,
 
-        height:
-          2.35 +
-          Math.random() * 0.15,
+          depth:
+            -0.8 -
+            Math.random()*1.2,
 
-        width:
-          0.15 +
-          Math.random() * 0.20,
+          size:
+            0.08 +
+            Math.random()*0.16,
 
-        opacity:
-          0.025 +
-          Math.random() * 0.05,
+          speed:
+            0.01 +
+            Math.random()*0.03,
 
-        speed:
-          0.02 +
-          Math.random() * 0.04,
+          offset:
+            Math.random()*100,
 
-        offset:
-          Math.random() * 100,
+        })
 
-      }));
+      );
 
-    }, []);
+    },[]);
 
-  useFrame((state) => {
 
-    if (!group.current)
+
+  useFrame((state)=>{
+
+
+    if(!group.current)
       return;
+
 
     const time =
       state.clock.elapsedTime;
 
+
     const tide =
       oceanState.tide ?? 0.5;
 
+
     group.current.children.forEach(
 
-      (child, i) => {
+      (child,i)=>{
+
 
         const mesh =
           child as Mesh;
 
-        const beam =
-          beams[i];
+
+        const light =
+          lights[i];
+
 
         const angle =
-
-          beam.angle +
-
+          light.angle +
           time *
+          light.speed;
 
-          beam.speed;
 
         mesh.position.x =
-
           Math.cos(angle) *
+          light.radius;
 
-          beam.radius;
 
         mesh.position.z =
-
           Math.sin(angle) *
+          light.radius;
 
-          beam.radius;
 
         mesh.position.y =
-
-          beam.height +
-
+          light.depth +
           Math.sin(
-
             time +
-
-            beam.offset,
-
+            light.offset
           ) *
-
           0.05 *
-
           tide;
 
-        mesh.lookAt(
 
-          0,
+        mesh.rotation.y =
+          angle;
 
-          mesh.position.y,
 
-          0,
-
-        );
-
-        mesh.scale.set(
-
-          beam.width,
-
-          0.6 +
-
-          Math.sin(
-
-            time * 0.7 +
-
-            beam.offset,
-
-          ) *
-
-          0.12,
-
-          1,
-
-        );
-
-      },
+      }
 
     );
 
+
   });
+
+
 
   return (
 
     <group ref={group}>
 
-      {beams.map((
+      {
+        lights.map((light,i)=>(
 
-        beam,
+          <mesh key={i}>
 
-        i,
+            <planeGeometry
+              args={[
+                1,
+                1,
+              ]}
+            />
 
-      ) => (
+            <meshBasicMaterial
 
-        <mesh
-          key={i}
-        >
+              color="#bfeeff"
 
-          <planeGeometry
-            args={[
-              1,
-              1,
-            ]}
-          />
+              transparent
 
-          <meshBasicMaterial
+              opacity={0.025}
 
-            color="#bfeeff"
+              side={DoubleSide}
 
-            transparent
+              depthWrite={false}
 
-            opacity={
-              beam.opacity
-            }
+              depthTest={true}
 
-            side={
-              DoubleSide
-            }
+              blending={AdditiveBlending}
 
-            depthWrite={false}
+            />
 
-          />
+          </mesh>
 
-        </mesh>
-
-      ))}
+        ))
+      }
 
     </group>
 

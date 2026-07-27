@@ -3,7 +3,15 @@
  * LÉLUVERSE
  * CORE LAYER
  *
- * Living Genesis core visual layer.
+ * Living Genesis core controller.
+ *
+ * Controls:
+ * - core breathing
+ * - rotation
+ * - energy pulse
+ *
+ * Does not create visuals.
+ * Only controls the mounted core children.
  * ==========================================================
  */
 
@@ -31,12 +39,27 @@ import {
 
 
 
-export default function CoreLayer(){
+interface Props {
+
+  children?: React.ReactNode;
+
+}
+
+
+
+
+
+export default function CoreLayer({
+
+  children,
+
+}:Props){
+
 
 
   const {
 
-    state,
+    universe,
 
   } = useGenesis();
 
@@ -52,26 +75,12 @@ export default function CoreLayer(){
 
 
 
-  useFrame((_, delta)=>{
+  useFrame((_,delta)=>{
 
 
-    if(
-
-      !root.current
-
-    ){
+    if(!root.current)
 
       return;
-
-    }
-
-
-
-
-
-    const genesis =
-
-      state as any;
 
 
 
@@ -79,19 +88,13 @@ export default function CoreLayer(){
 
     const energy =
 
-      genesis.energy ??
-
-      0.5;
-
-
+      universe.energy ?? 0;
 
 
 
     const age =
 
-      genesis.age ??
-
-      0;
+      universe.age ?? 0;
 
 
 
@@ -99,23 +102,24 @@ export default function CoreLayer(){
 
     const pulse =
 
+
       1 +
 
       Math.sin(
 
-        Date.now() *
-
-        0.002
+        age * 0.8
 
       )
 
       *
 
-      0.04 +
+      (
 
-      energy *
+        0.02 +
 
-      0.05;
+        energy * 0.03
+
+      );
 
 
 
@@ -123,7 +127,7 @@ export default function CoreLayer(){
 
     root.current.scale.setScalar(
 
-      pulse
+      pulse,
 
     );
 
@@ -133,20 +137,24 @@ export default function CoreLayer(){
 
     root.current.rotation.y +=
 
+
       delta *
 
       (
 
-        0.05 +
+        0.04 +
 
-        age *
-
-        0.0001
+        energy * 0.02
 
       );
 
 
+
+
+
   });
+
+
 
 
 
@@ -158,93 +166,11 @@ export default function CoreLayer(){
 
       ref={root}
 
+      name="LivingCoreController"
+
     >
 
-
-      <mesh>
-
-
-        <icosahedronGeometry
-
-          args={[
-
-            0.8,
-
-            64,
-
-          ]}
-
-        />
-
-
-        <meshPhysicalMaterial
-
-          color="#66ddff"
-
-          emissive="#44ccff"
-
-          emissiveIntensity={3}
-
-          transmission={1}
-
-          thickness={2}
-
-          roughness={0}
-
-          metalness={0.2}
-
-          clearcoat={1}
-
-        />
-
-
-      </mesh>
-
-
-
-
-
-      <mesh>
-
-
-        <sphereGeometry
-
-          args={[
-
-            0.25,
-
-            48,
-
-            48,
-
-          ]}
-
-        />
-
-
-        <meshBasicMaterial
-
-          color="#ffffff"
-
-        />
-
-
-      </mesh>
-
-
-
-
-
-      <pointLight
-
-        intensity={20}
-
-        distance={60}
-
-        color="#66ddff"
-
-      />
-
+      {children}
 
     </group>
 

@@ -1,19 +1,3 @@
-/**
- * ==========================================================
- * LÉLUVERSE
- * CREST FOAM
- *
- * Foam generated along the tops of rolling waves.
- *
- * Responsibilities
- * ----------------
- * • Crest foam ribbons
- * • Wave peak motion
- * • Tide response
- * • Current drift
- * ==========================================================
- */
-
 import { useFrame } from "@react-three/fiber";
 import {
   useMemo,
@@ -24,6 +8,7 @@ import {
   Group,
   Mesh,
   DoubleSide,
+  Vector3,
 } from "three";
 
 import type { OceanState } from "../../Ocean";
@@ -34,21 +19,23 @@ interface Props {
 
 interface Crest {
 
+  direction: Vector3;
+
   radius: number;
-
-  angle: number;
-
-  height: number;
 
   size: number;
 
   speed: number;
+
+  drift: number;
 
   offset: number;
 
   opacity: number;
 
 }
+
+const SURFACE_RADIUS = 3.18;
 
 export default function CrestFoam({
   oceanState = {},
@@ -69,17 +56,16 @@ export default function CrestFoam({
 
       }, (): Crest => ({
 
+        direction:
+          new Vector3(
+            Math.random() * 2 - 1,
+            Math.random() * 2 - 1,
+            Math.random() * 2 - 1,
+          ).normalize(),
+
         radius:
-          2.05 +
-          Math.random() * 0.35,
-
-        angle:
-          Math.random() *
-          Math.PI * 2,
-
-        height:
-          2.18 +
-          Math.random() * 0.06,
+          SURFACE_RADIUS +
+          Math.random() * 0.025,
 
         size:
           0.04 +
@@ -88,6 +74,10 @@ export default function CrestFoam({
         speed:
           0.15 +
           Math.random() * 0.45,
+
+        drift:
+          0.02 +
+          Math.random() * 0.04,
 
         offset:
           Math.random() * 100,
@@ -99,8 +89,7 @@ export default function CrestFoam({
       }));
 
     }, []);
-
-  useFrame((_, delta) => {
+      useFrame((_, delta) => {
 
     if (!group.current)
       return;
@@ -113,100 +102,88 @@ export default function CrestFoam({
     const current =
       oceanState.current ?? 0.5;
 
-    group.current.children.forEach(
-      (child, i) => {
+    const up =
+      new Vector3(0, 0, 1);
 
-        const mesh =
-          child as Mesh;
+    group.current.children.forEach((child, i) => {
 
-        const crest =
-          crests[i];
+      const mesh =
+        child as Mesh;
 
-        const angle =
+      const crest =
+        crests[i];
 
-          crest.angle +
+      const dir =
+        crest.direction.clone();
 
-          time.current *
+      const t =
+        time.current *
+        crest.speed +
+        crest.offset;
 
-          crest.speed *
+      dir.x +=
+        Math.sin(t) *
+        crest.drift *
+        current;
 
-          current *
+      dir.y +=
+        Math.cos(
+          t * 0.75
+        ) *
+        crest.drift *
+        tide;
 
-          0.15;
+      dir.z +=
+        Math.cos(
+          t * 1.25
+        ) *
+        crest.drift *
+        current;
 
-        mesh.position.x =
+      dir.normalize();
 
-          Math.cos(angle) *
+      const radius =
+        crest.radius +
 
-          crest.radius;
+        Math.sin(
+          t * 3
+        ) *
+        0.02 *
+        tide;
 
-        mesh.position.z =
+      mesh.position.copy(
+        dir.multiplyScalar(
+          radius
+        )
+      );
 
-          Math.sin(angle) *
+      mesh.quaternion.setFromUnitVectors(
+        up,
+        dir,
+      );
 
-          crest.radius;
+      mesh.rotateZ(
+        t
+      );
 
-        mesh.position.y =
+      const pulse =
+        1 +
 
-          crest.height +
+        Math.sin(
+          t * 3 +
+          crest.offset
+        ) *
+        0.20;
 
-          Math.sin(
+      mesh.scale.setScalar(
+        crest.size *
+        pulse
+      );
 
-            time.current *
-
-            2 +
-
-            crest.offset,
-
-          ) *
-
-          0.03 *
-
-          tide;
-
-        mesh.lookAt(
-          0,
-          mesh.position.y,
-          0,
-        );
-
-        const pulse =
-
-          1 +
-
-          Math.sin(
-
-            time.current *
-
-            3 +
-
-            crest.offset,
-
-          ) *
-
-          0.2;
-
-        mesh.scale.setScalar(
-
-          crest.size *
-
-          pulse,
-
-        );
-
-        mesh.rotation.z +=
-
-          delta *
-
-          0.4;
-
-      },
-
-    );
+    });
 
   });
-
-  return (
+    return (
 
     <group ref={group}>
 
@@ -222,12 +199,16 @@ export default function CrestFoam({
 
           key={i}
 
+          frustumCulled={false}
+
+          renderOrder={3}
+
         >
 
           <circleGeometry
             args={[
               1,
-              16,
+              10,
             ]}
           />
 
@@ -246,6 +227,10 @@ export default function CrestFoam({
             }
 
             depthWrite={false}
+
+            depthTest
+
+            toneMapped={false}
 
           />
 
