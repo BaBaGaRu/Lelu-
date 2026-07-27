@@ -195,6 +195,12 @@ export default function LifeEvolutionVisualizer(){
 
       0.01
 
+      +
+
+      awarenessAmount *
+
+      0.005
+
 
     );
 

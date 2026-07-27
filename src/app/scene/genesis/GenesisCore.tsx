@@ -26,6 +26,8 @@ import {
 
   useContext,
 
+  useEffect,
+
   useMemo,
 
   useState,
@@ -36,6 +38,12 @@ import {
 
 } from "react";
 
+
+import EventBus from "../../../core/EventBus";
+
+import EngineRuntime from "./engines/EngineRuntime";
+
+import type { EngineStatus } from "./engines/EngineRegistry";
 
 import {
 
@@ -53,6 +61,8 @@ import type {
   GenesisActionStatus,
 
 } from "./GenesisActions";
+
+import type { GenesisTarget } from "./GenesisNavigator";
 
 
 
@@ -194,11 +204,17 @@ export interface GenesisUIState {
 
   activeWorkspace:string | null;
 
+  activeDestination:string | null;
+
   cognition:GenesisCognitionState | null;
 
   actions:GenesisAction[];
 
   ecosystem:GenesisEcosystemState;
+
+  engineStatuses:EngineStatus[];
+
+  runtimeReady:boolean;
 
 }
 
@@ -214,6 +230,19 @@ export interface GenesisContextValue {
 
   universe:UniverseState;
 
+  engineRuntime:EngineRuntime | null;
+
+  engineStatuses:EngineStatus[];
+
+  runtimeReady:boolean;
+
+  activeDestination:string | null;
+
+  eventBus:EventBus;
+
+  dispatch(event:string, payload?:unknown):void;
+
+  selectDestination(destination:GenesisTarget):void;
 
 
   updateUniverse(
@@ -439,6 +468,12 @@ export default function GenesisCore({
 
     activeWorkspace:null,
 
+    activeDestination:null,
+
+    engineStatuses:[],
+
+    runtimeReady:false,
+
 
     cognition:{
 
@@ -546,6 +581,10 @@ export default function GenesisCore({
 
     );
 
+  const eventBusRef = useRef(new EventBus());
+
+  const runtimeRef = useRef<EngineRuntime | null>(null);
+
 
 
 
@@ -557,6 +596,46 @@ export default function GenesisCore({
     setUniverseVersion,
 
   ] = useState(0);
+
+  useEffect(() => {
+
+    const runtime = new EngineRuntime();
+
+    runtimeRef.current = runtime;
+
+    void runtime.initialize().then(() => {
+
+      setState(current => ({
+
+        ...current,
+
+        runtimeReady: true,
+
+        engineStatuses: runtime.getRegistry().getStatus(),
+
+      }));
+
+      void runtime.dispatch("genesis:ready", { state: universeRef.current });
+
+    });
+
+    return () => {
+
+      runtimeRef.current = null;
+
+      setState(current => ({
+
+        ...current,
+
+        runtimeReady: false,
+
+        engineStatuses: [],
+
+      }));
+
+    };
+
+  }, []);
 
 
 
@@ -686,6 +765,46 @@ export default function GenesisCore({
 
 
 
+  const dispatch = (event:string, payload?:unknown) => {
+
+    void eventBusRef.current.emit(event, payload);
+
+    if (runtimeRef.current) {
+
+      void runtimeRef.current.dispatch(event, payload);
+
+    }
+
+  };
+
+
+  const selectDestination = (destination:GenesisTarget) => {
+
+    setState(current => ({
+
+      ...current,
+
+      activeDestination: destination.id,
+
+      activeWorkspace: destination.type === "workspace" ? destination.id : current.activeWorkspace,
+
+    }));
+
+    dispatch("genesis:destination-selected", destination);
+
+    dispatch("genesis:navigation-request", destination);
+
+    dispatch("genesis:interaction", {
+
+      kind: "destination",
+
+      target: destination,
+
+    });
+
+  };
+
+
   const value =
 
     useMemo<GenesisContextValue>(
@@ -697,6 +816,20 @@ export default function GenesisCore({
 
 
         universe,
+
+        engineRuntime: runtimeRef.current,
+
+        engineStatuses: state.engineStatuses,
+
+        runtimeReady: state.runtimeReady,
+
+        activeDestination: state.activeDestination,
+
+        eventBus: eventBusRef.current,
+
+        dispatch,
+
+        selectDestination,
 
 
         updateUniverse,
@@ -825,6 +958,7 @@ export default function GenesisCore({
 
         openPanel(panel){
 
+          dispatch("genesis:panel-open", { panel });
 
           setState(current=>({
 
@@ -885,6 +1019,7 @@ export default function GenesisCore({
 
         focusWorkspace(id){
 
+          dispatch("genesis:workspace-focused", { id });
 
           setState(current=>({
 

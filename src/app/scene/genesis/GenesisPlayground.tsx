@@ -12,8 +12,8 @@
  */
 
 
-import type GenesisNavigator
-  from "./GenesisNavigator";
+import { useGenesis } from "./GenesisCore";
+import type GenesisNavigator from "./GenesisNavigator";
 
 
 
@@ -38,9 +38,17 @@ export default function GenesisPlayground({
 
 }: GenesisPlaygroundProps) {
 
+  const { selectDestination } = useGenesis();
+
 
   function travelToCore() {
 
+    selectDestination({
+      id: "genesis-core",
+      type: "core",
+      name: "Genesis Core",
+      position: { x: 0, y: 0, z: 0 },
+    });
 
     navigator.navigate({
 

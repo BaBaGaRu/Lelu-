@@ -56,7 +56,9 @@ export default function PortalEffects() {
         ],
 
         velocity:[0,0,0],
-
+        direction:[0,0,1],
+        axis:[0,0,1],
+        rotation:0,
         angle:
 
           Math.random()*

@@ -7,16 +7,19 @@
  * ==========================================================
  */
 
-import type {
-  GenesisState,
-} from "./GenesisCore";
-
-
-
 export function getActiveMessages(
 
-  state:
-    GenesisState,
+  state: {
+    messages: Array<{
+      id: string;
+      role: "user" | "assistant";
+      text: string;
+      timestamp: number;
+      source: "ai" | "local";
+      provider?: string;
+      confidence?: number;
+    }>;
+  },
 
 ) {
 
@@ -35,8 +38,14 @@ export function getActiveMessages(
 
 export function getRecentNotifications(
 
-  state:
-    GenesisState,
+  state: {
+    notifications: Array<{
+      id: string;
+      title: string;
+      description?: string;
+      created: number;
+    }>;
+  },
 
 ) {
 
@@ -55,8 +64,9 @@ export function getRecentNotifications(
 
 export function hasActiveCognition(
 
-  state:
-    GenesisState,
+  state: {
+    cognition: unknown | null;
+  },
 
 ) {
 

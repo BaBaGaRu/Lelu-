@@ -123,6 +123,8 @@ export interface PortalParticle {
   /**
    * Current angular rotation.
    */
+  angle: number;
+
   rotation: number;
 
   /**

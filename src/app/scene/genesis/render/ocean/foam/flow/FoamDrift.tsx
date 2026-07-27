@@ -1,4 +1,3 @@
-import { useFrame } from "@react-three/fiber";
 import {
   useMemo,
   useRef,
@@ -6,7 +5,6 @@ import {
 
 import {
   Group,
-  Mesh,
   DoubleSide,
   Vector3,
 } from "three";
@@ -36,14 +34,11 @@ interface DriftParticle {
 const SURFACE_RADIUS = 3.18;
 
 export default function FoamDrift({
-  oceanState = {},
+  oceanState: _oceanState = {},
 }: Props) {
 
   const group =
     useRef<Group>(null);
-
-  const time =
-    useRef(0);
 
   const particles =
     useMemo<DriftParticle[]>(() => {

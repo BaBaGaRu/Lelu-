@@ -98,6 +98,10 @@ export function createParticles(): PortalParticle[] {
 
           Math.random() * TAU,
 
+        angle:
+
+          Math.random() * TAU,
+
         orbit:
 
           radius,

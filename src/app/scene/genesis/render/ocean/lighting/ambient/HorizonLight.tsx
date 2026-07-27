@@ -173,7 +173,7 @@ export default function HorizonLight({
     <group ref={group}>
 
       {
-        lights.map((light,i)=>(
+        lights.map((_,i)=>(
 
           <mesh key={i}>
 

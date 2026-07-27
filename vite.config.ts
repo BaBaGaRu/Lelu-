@@ -6,6 +6,8 @@ import glslIncludes from "./plugins/glslIncludes.js";
 
 export default defineConfig({
 
+  base: "/",
+
   plugins: [
 
     react(),
@@ -42,17 +44,31 @@ export default defineConfig({
 
   server: {
 
-    host: true,
+    host: "0.0.0.0",
 
     port: 5173,
+
+    strictPort: true,
+
+    hmr: {
+
+      host: "localhost",
+
+      clientPort: 5173,
+
+      protocol: "ws",
+
+    },
 
   },
 
   preview: {
 
-    host: true,
+    host: "0.0.0.0",
 
     port: 4173,
+
+    strictPort: true,
 
   },
 

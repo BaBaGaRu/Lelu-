@@ -22,10 +22,6 @@ import {
 } from "react";
 
 
-import GenesisCore
-  from "./GenesisCore";
-
-
 import GenesisTime
   from "./GenesisTime";
 
@@ -36,10 +32,6 @@ import GenesisBridge
 
 import GenesisRenderer
   from "./render/GenesisRenderer";
-
-
-import GenesisInterface
-  from "./GenesisInterface";
 
 
 import GenesisCameraController
@@ -71,19 +63,12 @@ export default function GenesisController() {
 
 
   return (
-
-    <GenesisCore>
-
-
+    <>
       {/* ==========================================
           TIME ENGINE
       ========================================== */}
 
       <GenesisTime />
-
-
-
-
 
       {/* ==========================================
           AI → GENESIS
@@ -91,42 +76,20 @@ export default function GenesisController() {
 
       <GenesisBridge />
 
-
-
-
-
       {/* ==========================================
           LIVING WORLD
       ========================================== */}
 
       <GenesisRenderer />
 
-
-
-
-
       {/* ==========================================
           NAVIGATION & PLAYGROUND
       ========================================== */}
 
       <GenesisPlayground navigator={navigator} />
-
       <GenesisWorkspace navigator={navigator} />
-
       <GenesisCameraController navigator={navigator} />
-
-
-
-      {/* ==========================================
-          HUD
-      ========================================== */}
-
-      <GenesisInterface />
-
-
-
-    </GenesisCore>
-
+    </>
   );
 
 }

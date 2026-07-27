@@ -36,6 +36,10 @@ export interface GenesisEngine {
   enabled?: boolean;
 
 
+  initialize?(): void | Promise<void>;
+
+  handleEvent?(event: string, payload?: unknown): void | Promise<void>;
+
 
   update(
 
@@ -271,6 +275,66 @@ export default class EngineRegistry {
 
 
 
+
+
+
+  async initialize(): Promise<void> {
+
+    for (const engine of this.getAll()) {
+
+      if (engine.enabled === false) {
+
+        continue;
+
+      }
+
+      try {
+
+        await engine.initialize?.();
+
+      }
+
+      catch (error) {
+
+        engine.enabled = false;
+
+        console.error(`Genesis engine initialization failed: ${engine.id}`, error);
+
+      }
+
+    }
+
+  }
+
+
+
+  async dispatch(event:string, payload?:unknown): Promise<void> {
+
+    for (const engine of this.getAll()) {
+
+      if (engine.enabled === false) {
+
+        continue;
+
+      }
+
+      try {
+
+        await engine.handleEvent?.(event, payload);
+
+      }
+
+      catch (error) {
+
+        engine.enabled = false;
+
+        console.error(`Genesis engine event failed: ${engine.id}`, error);
+
+      }
+
+    }
+
+  }
 
 
 

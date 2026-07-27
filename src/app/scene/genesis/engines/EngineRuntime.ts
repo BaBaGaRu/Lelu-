@@ -66,6 +66,22 @@ export default class EngineRuntime {
 
 
 
+  async initialize(): Promise<void> {
+
+    await this.registry.initialize();
+
+  }
+
+
+
+  async dispatch(event:string, payload?:unknown): Promise<void> {
+
+    await this.registry.dispatch(event, payload);
+
+  }
+
+
+
   update(
 
     state:GenesisState,

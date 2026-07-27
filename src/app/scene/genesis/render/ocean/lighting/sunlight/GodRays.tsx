@@ -183,7 +183,7 @@ export default function GodRays({
     <group ref={group}>
 
       {
-        rays.map((ray,i)=>(
+        rays.map((_,i)=>(
 
           <mesh key={i}>
 
