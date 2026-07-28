@@ -3,66 +3,75 @@
  * LÉLUVERSE
  * OCEAN ENGINE
  *
- * Planetary ocean evolution system.
+ * Living planetary ocean simulation.
  *
  * Controls:
- * - tides
- * - currents
- * - waves
- * - storms
- * - ocean stability
- * - life interaction
+ * • tides
+ * • currents
+ * • waves
+ * • storms
+ * • tsunami events
+ * • stability
+ * • life interaction
+ *
+ * Drives:
+ * GenesisState.ocean
+ *
  * ==========================================================
  */
+
+import type {
+  GenesisEngine,
+} from "./EngineRegistry";
 
 import type {
   GenesisState,
 } from "../state/GenesisState";
 
+export default class OceanEngine
+  implements GenesisEngine {
 
-export default class OceanEngine {
+  readonly id = "OceanEngine";
 
+  readonly priority = 40;
+
+  enabled = true;
 
   private time = 0;
 
-
-
   update(
-
     state: GenesisState,
+    delta: number,
+  ): void {
 
-    delta:number,
-
-  ):void {
-
-
-    if(state.paused)
-
+    if (state.paused) {
       return;
-
-
+    }
 
     this.time += delta;
-
-
 
     const ocean =
       state.ocean;
 
-
-
-    /*
-     * Ocean awakens with life
-     */
-
-    const lifeForce =
-
+    const life =
       state.life;
 
+    const energy =
+      state.energy;
 
+    const awareness =
+      state.awareness;
+
+    const evolution =
+      state.evolution;
+
+    const chaos =
+      state.chaos;
 
     /*
-     * Tidal rhythm
+     * ======================================================
+     * TIDES
+     * ======================================================
      */
 
     ocean.tide =
@@ -70,19 +79,15 @@ export default class OceanEngine {
       0.5 +
 
       Math.sin(
+        this.time * 0.05,
+      ) * 0.25 +
 
-        this.time *
-
-        0.05
-
-      ) *
-
-      0.5;
-
-
+      awareness * 0.15;
 
     /*
-     * Currents
+     * ======================================================
+     * CURRENTS
+     * ======================================================
      */
 
     ocean.current =
@@ -90,41 +95,49 @@ export default class OceanEngine {
       0.4 +
 
       Math.sin(
+        this.time * 0.12,
+      ) * 0.20 +
 
-        this.time *
+      awareness * 0.15 +
 
-        0.12
-
-      ) *
-
-      0.2;
-
-
+      energy * 0.10;
 
     /*
-     * Wave activity
+     * ======================================================
+     * WAVES
+     * ======================================================
      */
 
     ocean.wave =
 
-      Math.abs(
+      Math.min(
 
-        Math.sin(
+        1,
 
-          this.time *
+        Math.abs(
 
-          0.4
+          Math.sin(
+            this.time * 0.40,
+          )
 
-        )
+        ) *
 
-      ) *
+        (
 
-      lifeForce;
+          0.30 +
 
+          life * 0.50 +
 
+          energy * 0.20
+
+        ),
+
+      );
 
     /*
-     * Storm energy
+     * ======================================================
+     * STORM SURGE
+     * ======================================================
      */
 
     ocean.stormSurge =
@@ -133,20 +146,18 @@ export default class OceanEngine {
 
         1,
 
-        ocean.wave *
+        ocean.wave * 0.50 +
 
-        0.5 +
+        chaos * 0.25 +
 
-        state.chaos *
-
-        0.2,
+        energy * 0.20,
 
       );
 
-
-
     /*
-     * Tsunami events
+     * ======================================================
+     * TSUNAMI
+     * ======================================================
      */
 
     ocean.tsunami =
@@ -156,23 +167,23 @@ export default class OceanEngine {
         0,
 
         Math.sin(
-
-          this.time *
-
-          0.01
-
+          this.time * 0.01,
         ) *
 
-        state.chaos *
+        (
 
-        0.1,
+          chaos * 0.20 +
+
+          evolution * 0.15
+
+        ),
 
       );
 
-
-
     /*
-     * Stability
+     * ======================================================
+     * STABILITY
+     * ======================================================
      */
 
     ocean.stability =
@@ -181,51 +192,54 @@ export default class OceanEngine {
 
         0,
 
-        1 -
+        Math.min(
 
-        (
+          1,
 
-          ocean.tsunami *
+          1 -
 
-          0.5
+          (
+
+            ocean.stormSurge * 0.45 +
+
+            ocean.tsunami * 0.55
+
+          ),
 
         ),
 
       );
 
-
-
     /*
-     * Ocean supports life
+     * ======================================================
+     * OCEAN SUPPORTS LIFE
+     * ======================================================
      */
 
-    if(
+    if (
 
-      lifeForce >
+      life > 0.2
 
-      0.2
+    ) {
 
-    ){
+      state.life =
 
-      state.life = Math.min(
+        Math.min(
 
-        1,
+          1,
 
-        state.life +
+          state.life +
 
-        ocean.stability *
+          ocean.stability *
 
-        delta *
+          delta *
 
-        0.002,
+          0.002,
 
-      );
+        );
 
     }
 
-
-
   }
-
 
 }

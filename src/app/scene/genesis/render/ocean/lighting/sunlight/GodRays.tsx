@@ -3,8 +3,8 @@
  * LÉLUVERSE
  * GOD RAYS
  *
- * Soft underwater light shafts.
- * Integrated into the ocean volume.
+ * Soft underwater volumetric light shafts.
+ *
  * ==========================================================
  */
 
@@ -26,11 +26,9 @@ import type {
   OceanState,
 } from "../../Ocean";
 
-
 interface Props {
   oceanState?: OceanState;
 }
-
 
 interface Ray {
 
@@ -50,22 +48,20 @@ interface Ray {
 
 }
 
-
 export default function GodRays({
 
   oceanState = {},
 
 }:Props){
 
-
   const group =
     useRef<Group>(null);
-
 
   const rays =
     useMemo<Ray[]>(()=>{
 
       return Array.from(
+
         {
           length:24,
         },
@@ -86,12 +82,12 @@ export default function GodRays({
             Math.random()*2,
 
           width:
-            0.04 +
-            Math.random()*0.08,
+            0.03 +
+            Math.random()*0.05,
 
           length:
-            1 +
-            Math.random()*1.8,
+            1.2 +
+            Math.random()*2.5,
 
           speed:
             0.01 +
@@ -100,107 +96,106 @@ export default function GodRays({
           offset:
             Math.random()*100,
 
-        })
+        }),
 
       );
 
     },[]);
 
-
-
   useFrame((state)=>{
-
 
     if(!group.current)
       return;
 
-
     const time =
       state.clock.elapsedTime;
 
-
     const tide =
       oceanState.tide ?? 0.5;
-
 
     group.current.children.forEach(
 
       (child,i)=>{
 
-
         const mesh =
           child as Mesh;
 
-
         const ray =
           rays[i];
-
 
         const angle =
           ray.angle +
           time *
           ray.speed;
 
-
         mesh.position.x =
           Math.cos(angle) *
           ray.radius;
-
 
         mesh.position.z =
           Math.sin(angle) *
           ray.radius;
 
-
         mesh.position.y =
           ray.depth +
           Math.sin(
             time * 0.5 +
-            ray.offset
+            ray.offset,
           ) *
           0.05 *
           tide;
 
+        /*
+         * Fixed underwater shaft.
+         * Do NOT face the core.
+         */
 
-        mesh.lookAt(
-          0,
-          0,
-          0,
-        );
+        mesh.rotation.x =
+          Math.PI * 0.5;
 
+        mesh.rotation.y =
+          angle;
 
-      }
+      },
 
     );
 
-
   });
-
-
 
   return (
 
-    <group ref={group}>
+    <group
+      ref={group}
+      name="GodRays"
+    >
 
       {
-        rays.map((_,i)=>(
 
-          <mesh key={i}>
+        rays.map((ray,i)=>(
+
+          <mesh
+            key={i}
+          >
 
             <planeGeometry
+
               args={[
-                1,
-                1,
+
+                ray.width,
+
+                ray.length,
+
               ]}
+
             />
 
             <meshBasicMaterial
 
-              color="#fff6c9"
+              color="#c8f6ff"
 
               transparent
 
-              opacity={0.02}
+              opacity={0.025}
 
               side={DoubleSide}
 
@@ -215,6 +210,7 @@ export default function GodRays({
           </mesh>
 
         ))
+
       }
 
     </group>

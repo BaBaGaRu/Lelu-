@@ -35,11 +35,15 @@ export interface GenesisEngine {
 
   enabled?: boolean;
 
+  weight?: number;
+
+getWeight?(
+  state: GenesisState,
+): number;
 
   initialize?(): void | Promise<void>;
 
   handleEvent?(event: string, payload?: unknown): void | Promise<void>;
-
 
   update(
 

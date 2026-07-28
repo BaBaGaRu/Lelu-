@@ -7,7 +7,6 @@
  * ==========================================================
  */
 
-
 export const GenesisMode = {
 
   DORMANT: "DORMANT",
@@ -36,11 +35,8 @@ export const GenesisMode = {
 
 } as const;
 
-
 export type GenesisMode =
   typeof GenesisMode[keyof typeof GenesisMode];
-
-
 
 export const GenesisVisualMode = {
 
@@ -60,11 +56,8 @@ export const GenesisVisualMode = {
 
 } as const;
 
-
 export type GenesisVisualMode =
   typeof GenesisVisualMode[keyof typeof GenesisVisualMode];
-
-
 
 export interface AstrologyState {
 
@@ -80,8 +73,6 @@ export interface AstrologyState {
 
 }
 
-
-
 export interface CelestialState {
 
   stars: number;
@@ -93,8 +84,6 @@ export interface CelestialState {
   cosmicEnergy: number;
 
 }
-
-
 
 export interface OceanState {
 
@@ -112,8 +101,6 @@ export interface OceanState {
 
 }
 
-
-
 export interface EvolutionState {
 
   stage: number;
@@ -124,9 +111,17 @@ export interface EvolutionState {
 
   adaptation: number;
 
+  colorShift: number;
+
+  formChange: number;
+
+  plasma: number;
+
+  instability: number;
+
+  emergence: number;
+
 }
-
-
 
 export interface MemoryState {
 
@@ -140,8 +135,6 @@ export interface MemoryState {
 
 }
 
-
-
 export interface TimelineState {
 
   year: number;
@@ -151,8 +144,6 @@ export interface TimelineState {
   acceleration: number;
 
 }
-
-
 
 export interface PulseState {
 
@@ -164,187 +155,113 @@ export interface PulseState {
 
 }
 
-
-
 export interface GenesisState {
-
 
   age: number;
 
-
   evolution: number;
-
 
   chaos: number;
 
-
   stability: number;
-
-
 
   curiosity: number;
 
-
   intelligence: number;
-
 
   awareness: number;
 
-
-
   energy: number;
-
 
   matter: number;
 
-
   gravity: number;
-
 
   light: number;
 
-
-
   life: number;
-
 
   civilizations: number;
 
-
-
   simulation: number;
-
-
 
   teaching: number;
 
-
   learning: number;
-
-
 
   existence: number;
 
-
   reality: number;
-
 
   consciousness: number;
 
-
-
   astrology: AstrologyState;
-
 
   celestial: CelestialState;
 
-
   ocean: OceanState;
-
 
   evolutionSystem: EvolutionState;
 
-
   memory: MemoryState;
-
 
   timeline: TimelineState;
 
-
   pulse: PulseState;
-
-
 
   era?: string;
 
-
   dimension: 1 | 2 | 3 | 4 | 5;
-
-
 
   speed: number;
 
-
   paused: boolean;
 
-
-
   mode: GenesisMode;
-
 
   visualMode: GenesisVisualMode;
 
 }
 
-
-
-
 export const defaultGenesisState: GenesisState = {
-
 
   age: 0,
 
-
   evolution: 0,
-
 
   chaos: 1,
 
-
   stability: 0,
-
-
 
   curiosity: 0,
 
-
   intelligence: 0,
-
 
   awareness: 0,
 
-
-
   energy: 0,
-
 
   matter: 0,
 
-
   gravity: 0,
-
 
   light: 0,
 
-
-
   life: 0,
-
 
   civilizations: 0,
 
-
-
   simulation: 0,
-
-
 
   teaching: 0,
 
-
   learning: 0,
-
-
 
   existence: 0,
 
-
   reality: 0,
 
-
   consciousness: 0,
-
-
 
   astrology: {
 
@@ -360,8 +277,6 @@ export const defaultGenesisState: GenesisState = {
 
   },
 
-
-
   celestial: {
 
     stars: 0,
@@ -373,8 +288,6 @@ export const defaultGenesisState: GenesisState = {
     cosmicEnergy: 0,
 
   },
-
-
 
   ocean: {
 
@@ -391,10 +304,7 @@ export const defaultGenesisState: GenesisState = {
     stability: 0.8,
 
   },
-
-
-
-  evolutionSystem: {
+    evolutionSystem: {
 
     stage: 0,
 
@@ -404,9 +314,17 @@ export const defaultGenesisState: GenesisState = {
 
     adaptation: 0,
 
+    colorShift: 0,
+
+    formChange: 0,
+
+    plasma: 0.2,
+
+    instability: 0,
+
+    emergence: 0,
+
   },
-
-
 
   memory: {
 
@@ -420,8 +338,6 @@ export const defaultGenesisState: GenesisState = {
 
   },
 
-
-
   timeline: {
 
     year: 0,
@@ -431,8 +347,6 @@ export const defaultGenesisState: GenesisState = {
     acceleration: 1,
 
   },
-
-
 
   pulse: {
 
@@ -444,30 +358,16 @@ export const defaultGenesisState: GenesisState = {
 
   },
 
-
-
   era: "VOID",
-
-
 
   dimension: 1,
 
-
-
   speed: 120,
-
-
 
   paused: false,
 
-
-
   mode: GenesisMode.DORMANT,
 
-
-
-  visualMode:
-
-    GenesisVisualMode.GENESIS,
+  visualMode: GenesisVisualMode.GENESIS,
 
 };

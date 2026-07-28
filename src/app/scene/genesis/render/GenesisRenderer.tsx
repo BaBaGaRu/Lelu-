@@ -57,6 +57,14 @@ import CoreLayer
 import Ocean
   from "./ocean/Ocean";
 
+import CrystalShell
+  from "../materials/CrystalShell";
+
+import ElectricShell
+  from "../materials/ElectricShell";
+
+import HaloShell
+  from "../materials/HaloShell";
 
 import LifeEvolutionVisualizer
   from "./LifeEvolutionVisualizer";
@@ -77,7 +85,7 @@ import CoreAtmosphere
 import GenesisCore
   from "../materials/GenesisCore";
 
-
+import { useGenesis } from "../GenesisCore";
 
 
 
@@ -90,29 +98,42 @@ export default function GenesisRenderer(){
 
     useRef<Group>(null);
 
+    const {
+
+  engineRuntime,
+
+  updateUniverse,
+
+} = useGenesis();
+
+const weights =
+  engineRuntime
+    ?.getEngineBus()
+    .getWeights() ?? {
+      plasma: 1,
+      ocean: 0,
+      crystal: 1,
+      electric: 1,
+      halo: 1,
+    };
 
 
 
+  useFrame((_, delta) => {
 
+  if (root.current) {
+    root.current.rotation.y += delta * 0.002;
+  }
 
+  if (!engineRuntime) {
+    return;
+  }
 
-  useFrame((_,delta)=>{
-
-
-    if(!root.current)
-
-      return;
-
-
-
-    root.current.rotation.y +=
-
-      delta *
-
-      0.002;
-
-
+  updateUniverse((state) => {
+    engineRuntime.update(state, delta);
   });
+
+});
 
 
 
@@ -182,14 +203,25 @@ export default function GenesisRenderer(){
 
           <GenesisCore />
 
+          <CrystalShell
+  activity={weights.crystal}
+/>
+
+<ElectricShell
+  activity={weights.electric}
+/>
+
+<HaloShell
+  activity={weights.halo}
+/>
 
           <CoreMutationVisualizer />
 
 
         </CoreLayer>
 
-
-
+      
+        <Ocean />
 
 
 
@@ -199,11 +231,7 @@ export default function GenesisRenderer(){
 
         <CoreAtmosphere />
 
-
-
-        <Ocean />
-
-
+        
 
         <LifeEvolutionVisualizer />
 

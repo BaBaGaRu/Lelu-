@@ -26,7 +26,8 @@ import type {
   GenesisState,
 } from "../state/GenesisState";
 
-
+import EngineBus
+  from "./EngineBus";
 
 
 
@@ -38,7 +39,9 @@ export default class EngineRuntime {
 
     EngineRegistry;
 
+private readonly engineBus:
 
+  EngineBus;
 
 
 
@@ -49,7 +52,13 @@ export default class EngineRuntime {
 
       new EngineRegistry();
 
+this.engineBus =
 
+  new EngineBus(
+
+    this.registry,
+
+  );
 
     EngineBootstrap.register(
 
@@ -82,25 +91,37 @@ export default class EngineRuntime {
 
 
 
-  update(
 
-    state:GenesisState,
+update(
+  state: GenesisState,
+  delta: number,
+): void {
 
-    delta:number,
+  this.registry.update(
+    state,
+    delta,
+  );
 
-  ):void {
+  this.engineBus.update(
+    state,
+    delta,
+  );
+
+}
+
+getEngineBus(): EngineBus {
+
+  return this.engineBus;
+
+}
 
 
-    this.registry.update(
-
-      state,
-
-      delta,
-
-    );
 
 
-  }
+
+
+
+  
 
 
 

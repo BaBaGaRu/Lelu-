@@ -39,14 +39,6 @@ import {
 
 
 
-import DeepOcean
-  from "./DeepOcean";
-
-
-import SurfaceOcean
-  from "./SurfaceOcean";
-
-
 import Caustics
   from "./caustics/Caustics";
 
@@ -356,31 +348,18 @@ export default function Ocean(){
 
 
 
-      {/* WATER BODY */}
+    {/* OCEAN CONTROLLERS */}
+
+
+{/* VISUAL EFFECTS */}
+
+<Caustics
+  oceanState={universe.ocean}
+/>  
 
 
 
-      <DeepOcean
-
-        oceanState={universe.ocean}
-
-      />
-
-
-
-      <SurfaceOcean
-
-        oceanState={universe.ocean}
-
-      />
-
-
-
-      <Caustics
-
-        oceanState={universe.ocean}
-
-      />
+    
 
 
 

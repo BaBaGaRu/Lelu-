@@ -57,7 +57,6 @@ import WisdomEngine from "./WisdomEngine";
 
 
 
-
 export default class EngineBootstrap {
 
 
@@ -73,6 +72,7 @@ export default class EngineBootstrap {
     const engines = [
 
 
+      
       new VoidEngine(),
 
       new QuantumEngine(),
@@ -167,23 +167,16 @@ export default class EngineBootstrap {
 
 
 
-    for(
+    for (const engine of engines) {
 
-      const engine
+  registry.register(
 
-      of engines
+    engine,
 
-    ){
+  );
 
+}
 
-      registry.register(
-
-        engine,
-
-      );
-
-
-    }
 
 
   }

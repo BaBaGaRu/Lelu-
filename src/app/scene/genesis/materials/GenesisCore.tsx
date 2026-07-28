@@ -83,7 +83,7 @@ export default function GenesisCore(){
 
 
 
-  useFrame((_, delta)=>{
+  useFrame((_, delta)=> { 
 
 
     if(!mesh.current)
@@ -311,6 +311,70 @@ export default function GenesisCore(){
 
     }
 
+if (uniforms.uGrowth) {
+  uniforms.uGrowth.value =
+    Math.min(
+      1,
+      evolution * 0.7 +
+      activity * 0.3
+    );
+  }
+
+   /*
+ * Ocean driven uniforms
+ */
+
+const ocean = universe.ocean;
+
+const tide = ocean.tide;
+const current = ocean.current;
+const wave = ocean.wave;
+const stability = ocean.stability;
+const tsunami = ocean.tsunami;
+
+if (uniforms.uPlasma) {
+  uniforms.uPlasma.value =
+    Math.max(
+      0.2,
+      stability,
+    );
+}
+
+if (uniforms.uOceanBlend) {
+  uniforms.uOceanBlend.value =
+    tide;
+}
+
+if (uniforms.uOceanFlow) {
+  uniforms.uOceanFlow.value =
+    current;
+}
+
+if (uniforms.uOceanDepth) {
+  uniforms.uOceanDepth.value =
+    wave;
+}
+
+if (uniforms.uOceanFoam) {
+  uniforms.uOceanFoam.value =
+    Math.max(
+      wave,
+      tsunami * 0.5,
+    );
+}
+
+if (uniforms.uOceanCurrent) {
+  uniforms.uOceanCurrent.value =
+    current;
+}
+
+if (uniforms.uColorShift) {
+  uniforms.uColorShift.value =
+    mutation * 0.2 +
+    tide * 0.1;
+}
+
+
 
 
 
@@ -398,19 +462,15 @@ export default function GenesisCore(){
 
     );
 
-
-
   });
 
-
-
-
-
-
-
-  return (
+  
+return (
 
     <mesh
+
+
+
 
       ref={mesh}
 
@@ -437,7 +497,6 @@ export default function GenesisCore(){
 
 
     </mesh>
+    );
 
-  );
-
-}
+  }

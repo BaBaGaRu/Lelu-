@@ -3,314 +3,161 @@
  * LÉLUVERSE
  * CORE ATMOSPHERE SYSTEM
  *
- * Living shell around Genesis Core.
+ * Thin living atmospheric shell surrounding
+ * the Genesis Core.
  *
- * Visual layer only.
+ * Enhanced luminous atmosphere.
+ *
  * ==========================================================
  */
 
-
+import { useFrame } from "@react-three/fiber";
+import { useRef } from "react";
 import {
-  useFrame,
-} from "@react-three/fiber";
-
-
-import {
-  useRef,
-} from "react";
-
-
-import {
+  AdditiveBlending,
   Group,
   Mesh,
 } from "three";
 
+export default function CoreAtmosphere() {
 
+  const field = useRef<Group>(null);
 
+  const aura = useRef<Mesh>(null);
 
+  const aurora = useRef<Mesh>(null);
 
-export default function CoreAtmosphere(){
+  const resonance = useRef<Mesh>(null);
 
+  const time = useRef(0);
 
-  const field =
-    useRef<Group>(null);
+  useFrame((_, delta) => {
 
-
-  const aura =
-    useRef<Mesh>(null);
-
-
-  const aurora =
-    useRef<Mesh>(null);
-
-
-  const resonance =
-    useRef<Mesh>(null);
-
-
-  const time =
-    useRef(0);
-
-
-
-
-
-  useFrame((_,delta)=>{
-
-
-    if(
+    if (
       !field.current ||
       !aura.current ||
       !aurora.current ||
       !resonance.current
-    ){
-
+    ) {
       return;
-
     }
-
-
-
-
 
     time.current += delta;
 
-
-
-
-
     field.current.rotation.y +=
+      delta * 0.012;
 
-      delta *
-
-      0.04;
-
-
-
-
-
-    const pulse =
-
-      1 +
-
-      Math.sin(
-
-        time.current *
-
-        0.7
-
-      )
-
-      *
-
-      0.04;
-
-
-
-
+    const breathe =
+      Math.sin(time.current * 0.55);
 
     aura.current.scale.setScalar(
-
-      pulse
-
+      1 +
+      breathe * 0.008
     );
-
-
-
-
 
     aurora.current.scale.setScalar(
-
-      1.05 +
-
-      Math.sin(
-
-        time.current *
-
-        0.4
-
-      )
-
-      *
-
-      0.03
-
+      1.018 +
+      Math.sin(time.current * 0.42) * 0.006
     );
-
-
-
-
 
     resonance.current.scale.setScalar(
-
-      1.12 +
-
-      Math.sin(
-
-        time.current *
-
-        1.6
-
-      )
-
-      *
-
-      0.05
-
+      1.034 +
+      Math.sin(time.current * 0.70) * 0.004
     );
 
-
   });
-
-
-
-
-
-
 
   return (
 
     <group
-
       ref={field}
-
       name="CoreAtmosphere"
-
+      renderOrder={6}
     >
 
-
+      {/* Inner Aura */}
 
       <mesh
-
         ref={aura}
-
-        renderOrder={100}
-
+        renderOrder={6}
       >
 
         <sphereGeometry
-
           args={[
-
-            0.72,
-
-            64,
-
-            64,
-
+            0.780,
+            96,
+            96,
           ]}
-
         />
 
         <meshBasicMaterial
-
-          color="#55ddff"
-
+          color="#7cecff"
           transparent
-
-          opacity={0.035}
-
+          opacity={0.08}
+          blending={AdditiveBlending}
           depthWrite={false}
-
+          toneMapped={false}
         />
 
       </mesh>
 
-
-
-
+      {/* Aurora */}
 
       <mesh
-
         ref={aurora}
-
-        renderOrder={101}
-
+        renderOrder={7}
       >
 
         <sphereGeometry
-
           args={[
-
-            0.9,
-
-            64,
-
-            64,
-
+            0.792,
+            96,
+            96,
           ]}
-
         />
 
         <meshBasicMaterial
-
-          color="#8fffff"
-
+          color="#9ef8ff"
           transparent
-
-          opacity={0.025}
-
+          opacity={0.05}
+          blending={AdditiveBlending}
           depthWrite={false}
-
+          toneMapped={false}
         />
 
       </mesh>
 
-
-
-
+      {/* Resonance */}
 
       <mesh
-
         ref={resonance}
-
-        renderOrder={102}
-
+        renderOrder={8}
       >
 
         <sphereGeometry
-
           args={[
-
-            1.1,
-
-            64,
-
-            64,
-
+            0.806,
+            96,
+            96,
           ]}
-
         />
 
         <meshBasicMaterial
-
-          color="#dfffff"
-
+          color="#dffcff"
           transparent
-
-          opacity={0.012}
-
+          opacity={0.03}
+          blending={AdditiveBlending}
           depthWrite={false}
-
+          toneMapped={false}
         />
 
       </mesh>
-
-
-
-
 
       <pointLight
-
-        intensity={2}
-
-        distance={8}
-
-        color="#7eeeff"
-
+        color="#79e8ff"
+        intensity={1.5}
+        distance={4.5}
       />
-
-
 
     </group>
 

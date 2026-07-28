@@ -4,6 +4,7 @@
  * HORIZON LIGHT
  *
  * Integrated atmospheric horizon glow.
+ *
  * ==========================================================
  */
 
@@ -25,11 +26,9 @@ import type {
   OceanState,
 } from "../../Ocean";
 
-
 interface Props {
   oceanState?: OceanState;
 }
-
 
 interface HorizonGlow {
 
@@ -47,22 +46,20 @@ interface HorizonGlow {
 
 }
 
-
 export default function HorizonLight({
 
   oceanState = {},
 
 }:Props){
 
-
   const group =
     useRef<Group>(null);
-
 
   const lights =
     useMemo<HorizonGlow[]>(()=>{
 
       return Array.from(
+
         {
           length:36,
         },
@@ -93,95 +90,92 @@ export default function HorizonLight({
           offset:
             Math.random()*100,
 
-        })
+        }),
 
       );
 
     },[]);
 
-
-
   useFrame((state)=>{
-
 
     if(!group.current)
       return;
 
-
     const time =
       state.clock.elapsedTime;
 
-
     const tide =
       oceanState.tide ?? 0.5;
-
 
     group.current.children.forEach(
 
       (child,i)=>{
 
-
         const mesh =
           child as Mesh;
 
-
         const light =
           lights[i];
-
 
         const angle =
           light.angle +
           time *
           light.speed;
 
-
         mesh.position.x =
           Math.cos(angle) *
           light.radius;
-
 
         mesh.position.z =
           Math.sin(angle) *
           light.radius;
 
-
         mesh.position.y =
           light.depth +
           Math.sin(
             time +
-            light.offset
+            light.offset,
           ) *
           0.05 *
           tide;
 
+        mesh.rotation.x =
+          Math.PI * 0.5;
 
         mesh.rotation.y =
           angle;
 
-
-      }
+      },
 
     );
 
-
   });
-
-
 
   return (
 
-    <group ref={group}>
+    <group
+      ref={group}
+      name="HorizonLight"
+    >
 
       {
-        lights.map((_,i)=>(
 
-          <mesh key={i}>
+        lights.map((light,i)=>(
+
+          <mesh
+            key={i}
+          >
 
             <planeGeometry
+
               args={[
-                1,
-                1,
+
+                light.size,
+
+                light.size,
+
               ]}
+
             />
 
             <meshBasicMaterial
@@ -190,7 +184,7 @@ export default function HorizonLight({
 
               transparent
 
-              opacity={0.025}
+              opacity={0.02}
 
               side={DoubleSide}
 
@@ -205,6 +199,7 @@ export default function HorizonLight({
           </mesh>
 
         ))
+
       }
 
     </group>
