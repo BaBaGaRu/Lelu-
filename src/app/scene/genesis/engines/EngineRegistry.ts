@@ -45,7 +45,7 @@ getWeight?(
 
   handleEvent?(event: string, payload?: unknown): void | Promise<void>;
 
-  update(
+  update?(
 
     state: GenesisState,
 
@@ -373,6 +373,8 @@ export default class EngineRegistry {
       if(
 
         engine.enabled === false
+
+        || typeof engine.update !== "function"
 
       ){
 

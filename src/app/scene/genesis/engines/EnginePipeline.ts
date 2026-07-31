@@ -71,7 +71,7 @@ export default class EnginePipeline {
 
       for (const engine of engines) {
 
-        if (!engine.enabled) continue;
+        if (!engine.enabled || typeof engine.update !== "function") continue;
 
         engine.update(
 

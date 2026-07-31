@@ -20,7 +20,7 @@
  */
 
 
-import {
+import React, {
 
   createContext,
 
@@ -462,7 +462,7 @@ export default function GenesisCore({
 
     notifications:[],
 
-    activePanel:"chat",
+    activePanel:"none",
 
     minimized:false,
 

@@ -51,6 +51,8 @@ export default function GenesisCore(){
 
     universe,
 
+    openPanel,
+
   } = useGenesis();
 
 
@@ -479,6 +481,22 @@ return (
       renderOrder={201}
 
       material={material}
+
+      onClick={() => openPanel("chat")}
+
+      onPointerOver={(event) => {
+
+        event.stopPropagation();
+
+        document.body.style.cursor = "pointer";
+
+      }}
+
+      onPointerOut={() => {
+
+        document.body.style.cursor = "default";
+
+      }}
 
     >
 

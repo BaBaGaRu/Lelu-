@@ -14,6 +14,9 @@ import OpenRouterProvider
 import GroqProvider
   from "../providers/GroqProvider";
 
+import GitHubModelsProvider
+  from "../providers/GitHubModelsProvider";
+
 
 export default function registerAIProviders() {
 
@@ -28,6 +31,10 @@ export default function registerAIProviders() {
 
   registry.register(
     new GroqProvider(),
+  );
+
+  registry.register(
+    new GitHubModelsProvider(),
   );
 
 
