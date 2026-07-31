@@ -3,6 +3,15 @@
  * LÉLU
  * PROVIDER RESOLVER
  * ==========================================================
+ *
+ * Responsibilities:
+ * - Obtain initialized/available AI providers
+ * - Try providers in registry priority order
+ * - Respect provider capability routing
+ * - Pass the complete AIRequest to the provider
+ * - Normalize AIProvider responses
+ * - Fall through to the next provider on failure
+ * - Return a deterministic offline response if all fail
  */
 
 import type AIProvider
@@ -23,9 +32,16 @@ import type {
 export default class ProviderResolver {
 
 
+  /**
+   * ========================================================
+   * Execute provider resolution
+   * ========================================================
+   */
   public async execute(
+
     context:
       RouterContext,
+
   ):
     Promise<ProviderResult> {
 
@@ -38,6 +54,15 @@ export default class ProviderResolver {
     if (
       providers.length === 0
     ) {
+
+      context.logger.error(
+
+        "ProviderResolver",
+
+        "No AI providers are available.",
+
+      );
+
 
       return {
 
@@ -66,6 +91,15 @@ export default class ProviderResolver {
         )
       ) {
 
+        context.logger.info(
+
+          "ProviderResolver",
+
+          `${provider.name} cannot handle request.`,
+
+        );
+
+
         continue;
 
       }
@@ -74,12 +108,24 @@ export default class ProviderResolver {
 
       try {
 
-
         context.logger.info(
 
           "ProviderResolver",
 
           `Trying ${provider.name}`,
+
+          {
+
+            promptLength:
+              context.request.prompt.length,
+
+            provider:
+              provider.name,
+
+            model:
+              context.request.model,
+
+          },
 
         );
 
@@ -97,8 +143,33 @@ export default class ProviderResolver {
 
 
         if (
-          response
+          response.text.trim().length > 0
         ) {
+
+          context.logger.info(
+
+            "ProviderResolver",
+
+            `${provider.name} generated response`,
+
+            {
+
+              provider:
+                response.provider,
+
+              model:
+                response.model,
+
+              processingTime:
+                response.processingTime,
+
+              responseLength:
+                response.text.length,
+
+            },
+
+          );
+
 
           return {
 
@@ -112,26 +183,40 @@ export default class ProviderResolver {
         }
 
 
+
+        throw new Error(
+
+          `${provider.name} returned an empty response.`,
+
+        );
+
       }
 
-      catch(error) {
+
+      catch (
+        error
+      ) {
+
+        const message =
+          error instanceof Error
+            ? error.message
+            : String(error);
+
 
 
         context.logger.error(
 
           "ProviderResolver",
 
-          `${provider.name} failed, trying next provider`,
+          `${provider.name} failed, trying next provider.`,
 
           {
 
+            provider:
+              provider.name,
+
             error:
-
-              error instanceof Error
-
-                ? error.message
-
-                : String(error),
+              message,
 
           },
 
@@ -144,6 +229,15 @@ export default class ProviderResolver {
 
     }
 
+
+
+    context.logger.error(
+
+      "ProviderResolver",
+
+      "All available AI providers failed.",
+
+    );
 
 
     return {
@@ -162,6 +256,11 @@ export default class ProviderResolver {
 
 
 
+  /**
+   * ========================================================
+   * Execute one provider
+   * ========================================================
+   */
   private async executeProvider(
 
     provider:
@@ -174,6 +273,11 @@ export default class ProviderResolver {
     Promise<AIResponse> {
 
 
+    const started =
+      Date.now();
+
+
+
     const response =
       await provider.generate(
 
@@ -183,30 +287,60 @@ export default class ProviderResolver {
 
 
 
+    if (
+      !response ||
+      typeof response.text !==
+        "string"
+    ) {
+
+      throw new Error(
+
+        `${provider.name} returned an invalid response.`,
+
+      );
+
+    }
+
+
+
+    const text =
+      response.text.trim();
+
+
+
+    if (
+      !text
+    ) {
+
+      throw new Error(
+
+        `${provider.name} returned empty response text.`,
+
+      );
+
+    }
+
+
+
     return {
 
       ...response,
 
+      text,
+
       provider:
-
         response.provider ||
-
         provider.name,
-
 
       model:
-
         response.model ||
-
-        provider.name,
-
+        "unknown",
 
       processingTime:
-
-        response.processingTime ||
-
-        Date.now() -
-        context.started,
+        response.processingTime > 0
+          ? response.processingTime
+          : Date.now() -
+            started,
 
     };
 
@@ -214,9 +348,16 @@ export default class ProviderResolver {
 
 
 
+  /**
+   * ========================================================
+   * Offline fallback
+   * ========================================================
+   */
   private offline(
+
     started:
       number,
+
   ):
     AIResponse {
 
@@ -235,6 +376,16 @@ export default class ProviderResolver {
       processingTime:
         Date.now() -
         started,
+
+      metadata: {
+
+        success:
+          false,
+
+        reason:
+          "all-ai-providers-failed",
+
+      },
 
     };
 

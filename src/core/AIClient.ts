@@ -8,8 +8,8 @@
 import AIProviderRouter
   from "./AIProviderRouter";
 
-import GroqAdapter
-  from "./adapters/GroqAdapter";
+import GroqProvider
+  from "./GroqProvider";
 
 import GeminiAdapter
   from "./adapters/GeminiAdapter";
@@ -25,7 +25,7 @@ export default class AIClient {
 
 
   private readonly groq =
-    new GroqAdapter();
+    new GroqProvider();
 
 
   private readonly gemini =
@@ -36,10 +36,37 @@ export default class AIClient {
     new OpenRouterAdapter();
 
 
+  private groqInitialized =
+    false;
+
+
+
+  private async initializeGroq():
+    Promise<void> {
+
+    if (
+      this.groqInitialized
+    ) {
+
+      return;
+
+    }
+
+
+    await this.groq.initialize();
+
+
+    this.groqInitialized =
+      true;
+
+  }
+
+
 
   async chat(
     prompt: string,
-  ): Promise<string> {
+  ):
+    Promise<string> {
 
 
     let provider =
@@ -61,12 +88,51 @@ export default class AIClient {
       !attempted.has(provider)
     ) {
 
-      attempted.add(provider);
+      attempted.add(
+        provider,
+      );
 
 
       try {
 
         switch (provider) {
+
+
+          case "groq": {
+
+            await this.initializeGroq();
+
+
+            const request = {
+
+              prompt,
+
+            };
+
+
+            const response =
+              await this.groq.generate(
+                request,
+              );
+
+
+            if (
+              !response ||
+              typeof response.text !==
+                "string"
+            ) {
+
+              throw new Error(
+                "Groq returned an invalid AI response.",
+              );
+
+            }
+
+
+            return response.text;
+
+          }
+
 
 
           case "openrouter":
@@ -76,18 +142,13 @@ export default class AIClient {
             );
 
 
-          case "groq":
-
-            return await this.groq.chat(
-              prompt,
-            );
-
 
           case "google":
 
             return await this.gemini.chat(
               prompt,
             );
+
 
 
           default:
@@ -104,14 +165,16 @@ export default class AIClient {
 
       } catch (error) {
 
-
         lastError =
           error;
 
 
         console.error(
+
           `[AIClient] ${provider} failed`,
+
           error,
+
         );
 
 
@@ -120,10 +183,10 @@ export default class AIClient {
             provider,
           );
 
-
       }
 
     }
+
 
 
     if (
@@ -131,10 +194,13 @@ export default class AIClient {
     ) {
 
       throw new Error(
+
         `All AI providers failed. Last error: ${lastError.message}`,
+
       );
 
     }
+
 
 
     throw new Error(

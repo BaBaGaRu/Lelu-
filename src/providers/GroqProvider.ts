@@ -1,185 +1,285 @@
-/**
- * ==========================================================
- * LÉLU
- * GROQ PROVIDER
- * ==========================================================
- */
+ /**
+   [oai_citation:0‡GroqCloud](https://console.groq.com/docs/api-reference?utm_source=chatgpt.com)==================
+  * LÉLU
+  * GROQ PROVIDER
+  * ==========================================================
+  *
+  * Responsibilities:
+  * - Load the Groq API key from Vite/runtime environments
+  * - Verify that Groq is actually available
+  * - Send OpenAI-compatible chat completion requests
+  * - Return a real AIResponse only on success
+  * - Throw on failure so ProviderResolver can try another provider
+  *
+  * Groq currently supports the OpenAI-compatible chat completions
+  * endpoint and the llama-3.3-70b-versatile model.
+  */
 
-import type AIProvider from "./AIProvider";
+ import type AIProvider from "./AIProvider";
 
-import type {
-  AIRequest,
-  AIResponse,
-  AIProviderHealth,
-} from "./AIProvider";
+ import type {
+   AIRequest,
+   AIResponse,
+   AIProviderHealth,
+ } from "./AIProvider";
 
 
-export default class GroqProvider
-  implements AIProvider {
+ export default class GroqProvider
+   implements AIProvider {
 
 
-  readonly name =
-    "Groq";
+   readonly name =
+     "Groq";
 
 
-  readonly priority =
-    1;
+   readonly priority =
+     1;
 
 
-  readonly enabled =
-    true;
+   readonly enabled =
+     true;
 
 
-  readonly timeout =
-    30000;
+   readonly timeout =
+     30000;
 
 
-  readonly requiresApiKey =
-    true;
+   readonly requiresApiKey =
+     true;
 
 
-  readonly capabilities =
-    [
-      "chat",
-      "reasoning",
-      "fast",
-      "memory",
-    ] as const;
+   readonly capabilities =
+     [
+       "chat",
+       "reasoning",
+       "fast",
+       "memory",
+     ] as const;
 
 
 
-  private apiKey =
-    "";
+   private apiKey =
+     "";
 
 
-  private initialized =
-    false;
+   private initialized =
+     false;
 
 
 
-  private readonly model =
-    "llama-3.3-70b-versatile";
+   private readonly model =
+     "llama-3.3-70b-versatile";
 
 
 
-  async initialize():
-    Promise<void> {
+   async initialize():
+     Promise<void> {
 
 
-    this.apiKey =
-      import.meta.env.VITE_GROQ_API_KEY ??
-      "";
+     const runtimeEnv =
+       globalThis as typeof globalThis & {
+         __LELU_GROQ_API_KEY__?: string;
+         __LELU_GROQ_MODEL__?: string;
+       };
 
 
-    this.initialized =
-      true;
+     const windowEnv =
+       typeof window !== "undefined"
+         ? (
+             window as Window & {
+               __LELU_GROQ_API_KEY__?: string;
+             }
+           )
+         : undefined;
 
 
-    console.info(
+     const processEnv =
+       typeof process !== "undefined"
+         ? process.env
+         : undefined;
 
-      "[GroqProvider] Initialized",
 
-      {
 
-        hasKey:
-          this.apiKey.length > 0,
+     this.apiKey =
 
+       import.meta.env.VITE_GROQ_API_KEY?.trim() ||
 
-        model:
-          this.model,
+       runtimeEnv
+         .__LELU_GROQ_API_KEY__
+         ?.trim() ||
 
-      },
+       windowEnv
+         ?.__LELU_GROQ_API_KEY__
+         ?.trim() ||
 
-    );
+       processEnv
+         ?.GROQ_API_KEY
+         ?.trim() ||
 
-  }
+       "";
 
 
+     this.initialized =
+       true;
 
 
 
-  async isAvailable():
-    Promise<boolean> {
+     console.info(
 
+       "[GroqProvider] Initialized",
 
-    return (
+       {
 
-      this.initialized &&
+         hasKey:
+           this.apiKey.length > 0,
 
-      this.apiKey.length > 0
 
-    );
+         keyLength:
+           this.apiKey.length,
 
-  }
 
+         model:
+           this.model,
 
+       },
 
+     );
 
+   }
 
-  async health():
-    Promise<AIProviderHealth> {
 
 
-    return {
 
-      available:
-        await this.isAvailable(),
 
+   async isAvailable():
+     Promise<boolean> {
 
-      initialized:
-        this.initialized,
 
+     return (
 
-      lastChecked:
-        Date.now(),
+       this.initialized &&
 
-    };
+       this.enabled &&
 
-  }
+       this.requiresApiKey &&
 
+       this.apiKey.length > 0
 
+     );
 
+   }
 
 
-  canHandle(
-    _input:
-      string,
-  ):
-    boolean {
 
 
-    return true;
 
-  }
+   async health():
+     Promise<AIProviderHealth> {
 
 
+     const available =
+       await this.isAvailable();
 
 
+     let lastError:
+       string | undefined;
 
-  async generate(
 
-    request:
-      AIRequest,
+     if (!this.initialized) {
 
-  ):
-    Promise<AIResponse> {
+       lastError =
+         "Groq provider not initialized.";
 
+     }
 
-    const started =
-      Date.now();
+     else if (!this.apiKey) {
 
+       lastError =
+         "Groq API key missing.";
 
+     }
 
-    const messages =
 
-    [
 
-      {
+     return {
 
-        role:
-          "system",
+       available,
 
-        content:
+       initialized:
+         this.initialized,
+
+       lastChecked:
+         Date.now(),
+
+       lastError,
+
+     };
+
+   }
+
+
+
+
+
+   canHandle(
+     _input:
+       string,
+   ):
+     boolean {
+
+
+     return true;
+
+   }
+
+
+
+
+
+   async generate(
+
+     request:
+       AIRequest,
+
+   ):
+     Promise<AIResponse> {
+
+
+     const started =
+       Date.now();
+
+
+
+     if (!this.initialized) {
+
+       throw new Error(
+         "Groq provider is not initialized.",
+       );
+
+     }
+
+
+
+     if (!this.apiKey) {
+
+       throw new Error(
+         "Groq API key is missing.",
+       );
+
+     }
+
+
+
+     const messages =
+
+       [
+
+         {
+
+           role:
+             "system",
+
+           content:
 `You are Lélu.
 
 Identity:
@@ -191,254 +291,375 @@ Identity:
 "My name is Lélu."
 
 Memory behavior:
-- The information provided in Memory context is your memory system.
+- Information provided in Memory context is your memory system.
 - Treat it as known information about the user.
 - Use it naturally when relevant.
-- Do not say you have no memory when relevant memory context exists.
 - Do not invent memories that are not provided.
 
 Conversation behavior:
 - Maintain continuity with the user.
 - Personalize responses using known information.
-- Be helpful, calm, creative, and engineering focused.
+- Be helpful, calm, creative, and engineering-focused.
 - You are not a generic assistant. You are Lélu.`,
 
-      },
+         },
 
 
 
-      ...(request.context
+         ...(request.context
+           ? [
 
-        ? [
+               {
 
-            {
+                 role:
+                   "system",
 
-              role:
-                "system",
-
-              content:
+                 content:
 `Memory context:
 
 ${request.context}`,
 
-            },
+               },
 
-          ]
+             ]
 
-        : []
+           : []),
 
-      ),
 
 
+         ...(request.messages ?? []),
 
-      ...(request.messages ?? []),
 
 
+         {
 
-      {
+           role:
+             "user",
 
-        role:
-          "user",
+           content:
+             request.prompt,
 
-        content:
-          request.prompt,
+         },
 
-      },
+       ];
 
-    ];
 
 
+     const payload = {
 
+       model:
+         this.model,
 
+       messages,
 
-    console.info(
+       temperature:
+         request.temperature ??
+         0.7,
 
-      "[GroqProvider] Sending request",
+     };
 
-      {
 
-        model:
-          this.model,
 
+     console.info(
 
-        hasMemory:
-          Boolean(
-            request.context,
-          ),
+       "[GroqProvider] Sending request",
 
+       {
 
-        messages:
-          messages.length,
+         model:
+           this.model,
 
-      },
+         hasKey:
+           this.apiKey.length > 0,
 
-    );
+         hasMemory:
+           Boolean(
+             request.context,
+           ),
 
+         messages:
+           messages.length,
 
+       },
 
+     );
 
 
-    const response =
-      await fetch(
 
-        "https://api.groq.com/openai/v1/chat/completions",
+     let response:
+       Response;
 
-        {
 
-          method:
-            "POST",
 
+     try {
 
-          headers:
-          {
+       response =
+         await fetch(
 
-            "Content-Type":
-              "application/json",
+           "https://api.groq.com/openai/v1/chat/completions",
 
+           {
 
-            Authorization:
-              `Bearer ${this.apiKey}`,
+             method:
+               "POST",
 
-          },
 
+             headers:
+             {
 
-          body:
+               "Content-Type":
+                 "application/json",
 
-            JSON.stringify(
+               Accept:
+                 "application/json",
 
-              {
+               Authorization:
+                 `Bearer ${this.apiKey}`,
 
-                model:
-                  this.model,
+             },
 
 
-                messages,
+             body:
+               JSON.stringify(
+                 payload,
+               ),
 
-              },
 
-            ),
+             signal:
+               AbortSignal.timeout(
+                 this.timeout,
+               ),
 
-        },
+           },
 
-      );
+         );
 
+     }
 
+     catch (error) {
 
+       const message =
+         error instanceof Error
+           ? error.message
+           : String(error);
 
 
-    const raw =
-      await response.text();
 
+       console.error(
 
+         "[GroqProvider] Network request failed",
 
-    let data:
-      any = null;
+         {
 
+           message,
 
+         },
 
-    try {
+       );
 
-      data =
-        JSON.parse(raw);
 
-    }
 
-    catch {
+       throw new Error(
 
-      data =
-        null;
+         `Groq network error: ${message}`,
 
-    }
+       );
 
+     }
 
 
 
+     const raw =
+       await response.text();
 
-    if (
-      !response.ok
-    ) {
 
 
-      console.error(
+     let data:
+       any = null;
 
-        "[GroqProvider] Failed",
 
-        {
 
-          status:
-            response.status,
+     if (
+       raw.trim()
+     ) {
 
+       try {
 
-          body:
-            raw,
+         data =
+           JSON.parse(raw);
 
-        },
+       }
 
-      );
+       catch {
 
+         data =
+           null;
 
+       }
 
-      throw new Error(
+     }
 
-        `Groq failed ${response.status}: ${
-          data?.error?.message ??
-          raw
-        }`,
 
-      );
 
-    }
+     if (
+       !response.ok
+     ) {
 
+       const apiMessage =
 
+         data?.error?.message ||
 
+         data?.message ||
 
+         raw ||
 
-    return {
+         `HTTP ${response.status}`;
 
-      text:
 
-        data.choices?.[0]
 
-          ?.message
+       console.error(
 
-          ?.content ??
+         "[GroqProvider] API request failed",
 
-        "",
+         {
 
+           status:
+             response.status,
 
+           statusText:
+             response.statusText,
 
-      provider:
-        this.name,
+           message:
+             apiMessage,
 
+           model:
+             this.model,
 
+         },
 
-      model:
-        this.model,
+       );
 
 
 
-      processingTime:
+       throw new Error(
 
-        Date.now() -
+         `Groq failed ${response.status}: ${apiMessage}`,
 
-        started,
+       );
 
-    };
+     }
 
-  }
 
 
+     const content =
 
+       data?.choices?.[0]
+         ?.message
+         ?.content ??
+       "";
 
 
-  async shutdown():
-    Promise<void> {
 
+     if (
 
-    this.initialized =
-      false;
+       typeof content !==
+         "string" ||
 
+       !content.trim()
 
-  }
+     ) {
 
-}
+       console.error(
+
+         "[GroqProvider] Groq returned no usable content",
+
+         {
+
+           model:
+             this.model,
+
+           response:
+             data,
+
+         },
+
+       );
+
+
+
+       throw new Error(
+
+         "Groq returned no usable content.",
+
+       );
+
+     }
+
+
+
+     const processingTime =
+       Date.now() -
+       started;
+
+
+
+     console.info(
+
+       "[GroqProvider] Request succeeded",
+
+       {
+
+         model:
+           this.model,
+
+         processingTime,
+
+         responseLength:
+           content.length,
+
+       },
+
+     );
+
+
+
+     return {
+
+       text:
+         content.trim(),
+
+       provider:
+         this.name,
+
+       model:
+         this.model,
+
+       processingTime,
+
+     };
+
+   }
+
+
+
+
+
+   async shutdown():
+     Promise<void> {
+
+
+     this.initialized =
+       false;
+
+
+     this.apiKey =
+       "";
+
+
+     console.info(
+       "[GroqProvider] Shutdown",
+     );
+
+   }
+
+ }
